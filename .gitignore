@@ -1,0 +1,33 @@
+
+# Gradle 관련
+.gradle/
+build/
+!gradle/wrapper/gradle-wrapper.jar
+
+# 로그 파일
+*.log
+
+# 임시 파일
+*.tmp
+*.bak
+*.swp
+
+# IntelliJ IDEA
+.idea/
+*.iml
+out/
+
+# 운영 체제 특화 파일
+.DS_Store
+Thumbs.db
+
+# 테스트 결과
+test-results/
+test-output/
+
+# 컴파일된 클래스 파일
+*.class
+
+# 기타 캐시성 폴더
+.vscode/
+GEMINI.md
