@@ -1,0 +1,90 @@
+/* header.css */
+
+.header-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 40px;
+    border-bottom: 1px solid #e0e0e0;
+    background-color: #ffffff;
+    font-family: Arial, sans-serif;
+}
+
+.logo a {
+    text-decoration: none;
+    color: #333;
+    font-size: 24px;
+    font-weight: bold;
+}
+
+.search-bar {
+    flex-grow: 1;
+    margin: 0 40px;
+}
+
+.search-bar form {
+    display: flex;
+    width: 100%;
+}
+
+.search-bar input[type="text"] {
+    width: 100%;
+    padding: 8px 12px;
+    border: 1px solid #ccc;
+    border-radius: 20px 0 0 20px;
+    outline: none;
+}
+
+.search-bar button {
+    padding: 8px 12px;
+    border: 1px solid #ccc;
+    border-left: none;
+    background-color: #f8f8f8;
+    cursor: pointer;
+    border-radius: 0 20px 20px 0;
+}
+
+.right-menu {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.right-menu a, .user-info {
+    text-decoration: none;
+    color: #555;
+    font-size: 14px;
+}
+
+.right-menu a:hover {
+    color: #000;
+}
+
+.separator {
+    color: #e0e0e0;
+}
+
+.user-auth-links .auth-block {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.user-auth-links form {
+    margin: 0;
+}
+
+.user-auth-links button {
+    background: none;
+    border: none;
+    padding: 0;
+    margin: 0;
+    cursor: pointer;
+    color: #555;
+    font-size: 14px;
+    font-family: Arial, sans-serif;
+}
+
+.user-auth-links button:hover {
+    color: #000;
+}

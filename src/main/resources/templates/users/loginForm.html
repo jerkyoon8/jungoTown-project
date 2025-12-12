@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>로그인</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Malgun Gothic", "맑은 고딕", helvetica, "Apple SD Gothic Neo", sans-serif;
+            background-color: #f5f6f7;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .container {
+            width: 460px;
+            padding: 20px 28px 30px;
+            background-color: white;
+            border: 1px solid #dadada;
+            border-radius: 8px;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .logo {
+            font-size: 40px;
+            font-weight: 900;
+            color: #03c75a;
+            text-decoration: none;
+            letter-spacing: -2px;
+        }
+        .form-group {
+            margin-bottom: 12px;
+        }
+        input[type="text"],
+        input[type="password"] {
+            width: 100%;
+            height: 50px;
+            padding: 0 15px;
+            font-size: 15px;
+            border: 1px solid #dadada;
+            border-radius: 6px;
+            box-sizing: border-box;
+        }
+        input::placeholder {
+            color: #aaa;
+        }
+        .submit-btn {
+            width: 100%;
+            height: 52px;
+            background-color: #03c75a;
+            color: white;
+            font-size: 18px;
+            font-weight: bold;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            margin-top: 20px;
+        }
+        .error-message {
+            color: #ff0000;
+            font-size: 13px;
+            text-align: center;
+            margin-bottom: 15px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="header">
+        <a href="/" class="logo">미진</a>
+    </div>
+
+    <!-- 로그인 실패 시 에러 메시지 표시 -->
+    <div th:if="${param.error}" class="error-message">
+        <p>아이디 또는 비밀번호가 올바르지 않습니다.</p>
+    </div>
+
+    <form th:action="@{/users/login}" method="post">
+        <div class="form-group">
+            <input type="text" id="username" name="username" placeholder="아이디" required autofocus>
+        </div>
+        <div class="form-group">
+            <input type="password" id="password" name="password" placeholder="비밀번호" required>
+        </div>
+        <div>
+            <button type="submit" class="submit-btn">로그인</button>
+        </div>
+    </form>
+</div>
+
+</body>
+</html>

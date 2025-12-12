@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>회원가입</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Malgun Gothic", "맑은 고딕", helvetica, "Apple SD Gothic Neo", sans-serif;
+            background-color: #f5f6f7;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .container {
+            width: 460px;
+            padding: 20px 28px;
+            background-color: white;
+            border: 1px solid #dadada;
+            border-radius: 8px;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .logo {
+            font-size: 40px;
+            font-weight: 900;
+            color: #03c75a;
+            text-decoration: none;
+            letter-spacing: -2px;
+        }
+        .form-group {
+            margin-bottom: 12px;
+            position: relative;
+        }
+        input[type="text"],
+        input[type="email"],
+        input[type="password"] {
+            width: 100%;
+            height: 50px;
+            padding: 0 15px;
+            font-size: 15px;
+            border: 1px solid #dadada;
+            border-radius: 6px;
+            box-sizing: border-box;
+        }
+        input::placeholder {
+            color: #aaa;
+        }
+        .input-group {
+            display: flex;
+        }
+        .input-group input {
+            border-top-right-radius: 0;
+            border-bottom-right-radius: 0;
+            border-right: 0;
+        }
+        .input-group button {
+            width: 90px;
+            height: 50px;
+            border: 1px solid #dadada;
+            background-color: #f5f6f7;
+            color: #555;
+            border-top-right-radius: 6px;
+            border-bottom-right-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        .message {
+            font-size: 12px;
+            margin-top: 5px;
+            position: absolute;
+            left: 0;
+            top: 52px;
+        }
+        .message.success {
+            color: #03c75a;
+        }
+        .message.error {
+            color: #ff0000;
+        }
+        .submit-btn {
+            width: 100%;
+            height: 52px;
+            background-color: #03c75a;
+            color: white;
+            font-size: 18px;
+            font-weight: bold;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="header">
+        <a href="/" class="logo">미진</a>
+    </div>
+    <form th:action="@{/users}" th:object="${userCreateRequestDto}" method="post">
+        <div class="form-group">
+            <div class="input-group">
+                <input type="text" id="username" th:field="*{username}" placeholder="아이디" required>
+                <button type="button" id="check-username-btn">중복 확인</button>
+            </div>
+            <div id="username-message" class="message"></div>
+            <div th:if="${#fields.hasErrors('username')}" th:errors="*{username}" class="message error"></div>
+        </div>
+        <div class="form-group">
+            <input type="email" id="email" th:field="*{email}" placeholder="이메일" required>
+            <div th:if="${#fields.hasErrors('email')}" th:errors="*{email}" class="message error"></div>
+        </div>
+        <div class="form-group">
+            <div class="input-group">
+                <input type="text" id="nickname" th:field="*{nickname}" placeholder="닉네임" required>
+                <button type="button" id="check-nickname-btn">중복 확인</button>
+            </div>
+            <div id="nickname-message" class="message"></div>
+            <div th:if="${#fields.hasErrors('nickname')}" th:errors="*{nickname}" class="message error"></div>
+        </div>
+        <div class="form-group">
+            <input type="password" id="password" th:field="*{password}" placeholder="비밀번호" required>
+            <div th:if="${#fields.hasErrors('password')}" th:errors="*{password}" class="message error"></div>
+        </div>
+        <div class="form-group">
+            <input type="password" id="passwordConfirm" name="passwordConfirm" placeholder="비밀번호 확인" required>
+            <div th:if="${#fields.hasErrors('passwordConfirm')}" th:errors="*{passwordConfirm}" class="message error"></div>
+        </div>
+        <button type="submit" class="submit-btn">가입하기</button>
+    </form>
+</div>
+
+<script>
+    function setupCheck(inputId, buttonId, messageId, url) {
+        const input = document.getElementById(inputId);
+        const button = document.getElementById(buttonId);
+        const message = document.getElementById(messageId);
+
+        button.addEventListener('click', function() {
+            const value = input.value;
+            const name = inputId === 'username' ? '아이디' : '닉네임';
+
+            if (!value) {
+                message.textContent = name + '을(를) 입력해주세요.';
+                message.className = 'message error';
+                return;
+            }
+
+            fetch(`${url}?${inputId}=${value}`)
+                .then(response => {
+                    if (!response.ok) throw new Error('네트워크 응답 오류');
+                    return response.json();
+                })
+                .then(data => {
+                    if (data.isDuplicate) {
+                        message.textContent = '이미 사용 중인 ' + name + '입니다.';
+                        message.className = 'message error';
+                    } else {
+                        message.textContent = '사용 가능한 ' + name + '입니다.';
+                        message.className = 'message success';
+                    }
+                })
+                .catch(error => {
+                    console.error('Fetch Error:', error);
+                    message.textContent = '오류가 발생했습니다. 다시 시도해주세요.';
+                    message.className = 'message error';
+                });
+        });
+    }
+
+    setupCheck('username', 'check-username-btn', 'username-message', '/users/check-username');
+    setupCheck('nickname', 'check-nickname-btn', 'nickname-message', '/users/check-nickname');
+</script>
+
+</body>
+</html>

@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/default_layout}">
+<head>
+    <title>메인 페이지</title>
+    <th:block layout:fragment="css">
+        <style>
+            .welcome-message {
+                text-align: center;
+                margin-bottom: 20px;
+                font-size: 1.2em;
+                color: #555;
+            }
+            .welcome-message strong {
+                color: #007bff;
+            }
+            h1 {
+                color: #0056b3;
+                text-align: center;
+            }
+            p {
+                line-height: 1.6;
+                text-align: center;
+            }
+            .button-container {
+                text-align: center;
+                margin-top: 30px;
+            }
+            .button {
+                display: inline-block;
+                background-color: #007bff;
+                color: white;
+                padding: 10px 20px;
+                text-decoration: none;
+                border-radius: 5px;
+                margin: 0 10px;
+                transition: background-color 0.3s ease;
+            }
+            .button:hover {
+                background-color: #0056b3;
+            }
+        </style>
+    </th:block>
+</head>
+    <main layout:fragment="content">
+        <div class="welcome-message">
+            <span sec:authorize="isAuthenticated()">
+                환영합니다, <strong sec:authentication="name"></strong>님!
+            </span>
+            <span sec:authorize="!isAuthenticated()">
+                환영합니다!
+            </span>
+        </div>
+        <h1>메인 페이지</h1>
+        <p>이곳은 스프링 커뮤니티 웹사이트의 메인 페이지입니다. 다양한 정보를 찾아보고 다른 사용자들과 소통해보세요.</p>
+        <p>궁금한 점이 있다면 언제든지 문의해주세요.</p>
+
+        <div class="button-container">
+            <a th:href="@{/products}" class="button">게시글 목록</a>
+            <a th:href="@{/users}" class="button">사용자 목록</a>
+            <a th:href="@{/products/new}" class="button" sec:authorize="isAuthenticated()">게시글 작성</a>
+            <a th:href="@{/users/new}" class="button" sec:authorize="!isAuthenticated()">회원가입</a>
+            <a th:href="@{/login}" class="button" sec:authorize="!isAuthenticated()">로그인</a>
+            <a th:href="@{/logout}" class="button" sec:authorize="isAuthenticated()">로그아웃</a>
+        </div>
+    </main>
+</html>

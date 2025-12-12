@@ -1,0 +1,39 @@
+
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+<head>
+    <meta charset="UTF-8">
+    <title>Mijin Company</title>
+
+    <link rel="stylesheet" th:href="@{/css/header.css}">
+
+    <!-- Toastify CSS -->
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
+
+    <th:block layout:fragment="css"></th:block>
+</head>
+<body>
+    <!-- 공통 헤더 -->
+    <header th:replace="~{fragments/header :: headerFragment}"></header>
+
+    <!-- 메인 컨텐츠 (개별로 적용. 비어있음) -->
+    <main layout:fragment="content" class="container">
+    </main>
+
+    <!-- 공통 푸터 -->
+    <footer th:replace="~{fragments/footer :: footerFragment}"></footer>
+
+    <!-- Toastify JS -->
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+
+    <!-- SockJS와 STOMP 클라이언트 라이브러리 -->
+    <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/stompjs@2.3.3/lib/stomp.min.js"></script>
+
+    <!-- 전역 웹소켓 연결 및 알림 로직 (로그인한 사용자에게만 적용) -->
+    <div th:if="${#authorization.expression('isAuthenticated()')}" th:replace="~{fragments/notifications :: notificationLogicFragment}"></div>
+
+    <th:block layout:fragment="script"></th:block>
+</body>
+</html>

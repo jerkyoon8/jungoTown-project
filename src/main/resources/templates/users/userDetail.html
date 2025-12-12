@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/default_layout}">
+<head>
+    <title>사용자 상세</title>
+    <th:block layout:fragment="css">
+        <style>
+            h1 {
+                color: #0056b3;
+                text-align: center;
+                margin-bottom: 20px;
+            }
+            .user-detail-table {
+                width: 100%;
+                border-collapse: collapse;
+                margin-top: 20px;
+            }
+            .user-detail-table th, .user-detail-table td {
+                border: 1px solid #ddd;
+                padding: 10px;
+                text-align: left;
+            }
+            .user-detail-table th {
+                background-color: #f2f2f2;
+                width: 30%;
+            }
+            .button-container {
+                text-align: center;
+                margin-top: 30px;
+            }
+            .button {
+                display: inline-block;
+                background-color: #007bff;
+                color: white;
+                padding: 10px 20px;
+                text-decoration: none;
+                border-radius: 5px;
+                margin: 0 10px;
+                transition: background-color 0.3s ease;
+            }
+            .button:hover {
+                background-color: #0056b3;
+            }
+            .delete-button {
+                background-color: #dc3545;
+            }
+            .delete-button:hover {
+                background-color: #c82333;
+            }
+        </style>
+    </th:block>
+</head>
+    <main layout:fragment="content">
+        <h1>사용자 상세 정보</h1>
+        <table class="user-detail-table">
+            <tr>
+                <th>ID</th>
+                <td th:text="${user.id}"></td>
+            </tr>
+            <tr>
+                <th>사용자 이름</th>
+                <td th:text="${user.username}"></td>
+            </tr>
+            <tr>
+                <th>이메일</th>
+                <td th:text="${user.email}"></td>
+            </tr>
+            <tr>
+                <th>역할</th>
+                <td th:text="${user.role}"></td>
+            </tr>
+            
+        </table>
+
+        <div class="button-container">
+            <a th:href="@{/users}" class="button">목록으로</a>
+            <a th:href="@{/users/{id}/edit(id=${user.id})}" class="button" th:if="${isAuthorized}">수정</a>
+            <form th:action="@{/users/{id}/delete(id=${user.id})}" th:method="product" style="display: inline;" th:if="${isAuthorized}">
+                <button type="submit" class="button delete-button" onclick="return confirm('정말로 이 사용자를 삭제하시겠습니까?');">삭제</button>
+            </form>
+        </div>
+    </main>
+</html>
