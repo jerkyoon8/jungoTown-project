@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.juwon.springcommunity.repository.ProductRepository">
+
+    <resultMap id="productResultMap" type="com.juwon.springcommunity.domain.Product">
+        <id property="id" column="id"/>
+        <result column="wishlist_count" property="wishlistCount"/>
+    </resultMap>
+
+<!-- 상품 저장 -->
+<insert id="save" useGeneratedKeys="true" keyProperty="id">
+    INSERT INTO product (title, content, user_id, category, price, deal_region, views, wishlist_count)
+    VALUES (#{title}, #{content}, #{userId}, #{category}, #{price}, #{dealRegion}, 0, 0)
+</insert>
+
+<!-- ID로 상품 조회 -->
+<select id="findById">
+    SELECT id, title, content, user_id, category, price, deal_region, views, wishlist_count, created_at, updated_at
+    FROM product
+    WHERE id = #{id}
+</select>
+
+<!-- 모든 상품 조회 -->
+<select id="findAll">
+    SELECT id, title, content, user_id, category, price, deal_region, views, wishlist_count, created_at, updated_at
+    FROM product
+    <where>
+        <if test="keyword != null and keyword != ''">
+            title LIKE CONCAT('%', #{keyword}, '%')
+        </if>
+    </where>
+    ORDER BY id DESC
+</select>
+
+<!-- 상품 수정 -->
+<update id="update">
+    UPDATE product
+    SET
+        title = #{title},
+        content = #{content},
+        price = #{price},
+        deal_region = #{dealRegion},
+        category = #{category}
+    WHERE
+        id = #{id}
+</update>
+
+<!-- 상품 삭제 -->
+<delete id="deleteById">
+    DELETE FROM product WHERE id = #{id}
+</delete>
+
+<!-- 조회수 증가 -->
+<update id="increaseViews">
+    UPDATE product
+    SET views = views + 1
+    WHERE id = #{id}
+</update>
+
+<!-- 찜하기 증가 -->
+<update id="increaseWishlistCount">
+    UPDATE product
+    SET wishlist_count = wishlist_count + 1
+    WHERE id = #{id}
+</update>
+
+<!-- 모든 상품 수 조회 -->
+<select id="countAll" resultType="long">
+    SELECT count(*)
+    FROM product
+    <if test="keyword != null and keyword != ''">
+        WHERE title LIKE CONCAT('%', #{keyword}, '%')
+    </if>
+</select>
+
+<!-- 페이징 처리 상품 조회 -->
+<select id="findWithPaging" parameterType="map">
+    SELECT id, title, content, user_id, category, price, deal_region, views, wishlist_count, created_at, updated_at
+    FROM product
+    <where>
+        <if test="keyword != null and keyword != ''">
+            title LIKE CONCAT('%', #{keyword}, '%')
+        </if>
+    </where>
+    <choose>
+        <when test="sort == 'views'">
+            ORDER BY views DESC, id DESC
+        </when>
+        <when test="sort == 'wishlistCount'">
+            ORDER BY wishlist_count DESC, id DESC
+        </when>
+        <otherwise>
+            ORDER BY created_at DESC, id DESC
+        </otherwise>
+    </choose>
+    LIMIT #{size} OFFSET #{offset}
+</select>
+
+</mapper>
