@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>상품 등록/수정</title>
+    <style>
+        body { font-family: sans-serif; margin: 40px; }
+        form { max-width: 600px; margin: auto; padding: 20px; border: 1px solid #ddd; border-radius: 5px; }
+        .form-group { margin-bottom: 15px; }
+        label { display: block; margin-bottom: 5px; }
+        input[type="text"], textarea, select { width: 100%; padding: 8px; box-sizing: border-box; }
+        textarea { height: 200px; }
+        .btn-group { margin-top: 20px; text-align: right; }
+        button { padding: 10px 15px; border: none; border-radius: 5px; cursor: pointer; }
+        .btn-submit { background-color: #007bff; color: white; }
+        .btn-cancel { background-color: #6c757d; color: white; margin-right: 10px; text-decoration: none; display: inline-block; padding: 10px 15px; }
+    </style>
+</head>
+<body>
+
+<h1 th:if="${!isEdit}">새 상품 등록</h1>
+<h1 th:if="${isEdit}">상품 수정</h1>
+
+
+<form th:action="${isEdit} ? @{|/products/${product.id}/edit|} : @{/products/new}" th:object="${product}" method="post" enctype="multipart/form-data">
+
+    <div class="form-group">
+        <label for="title">제목</label>
+        <input type="text" id="title" th:field="*{title}" required>
+    </div>
+
+    <div class="form-group">
+        <label for="category">카테고리</label>
+        <select id="category" th:field="*{category}">
+            <option th:each="cat : ${categories}"
+                    th:value="${cat}"
+                    th:text="${cat.description}"
+                    th:selected="${cat == product.category}">일반</option>
+        </select>
+    </div>
+
+    <div class="form-group">
+        <label for="price">가격</label>
+        <input type="number" id="price" th:field="*{price}" required>
+    </div>
+
+    <div class="form-group">
+        <label for="dealRegion">거래 희망 지역</label>
+        <input type="text" id="dealRegion" th:field="*{dealRegion}" required>
+    </div>
+
+    <div class="form-group">
+        <label for="content">내용</label>
+        <textarea id="content" th:field="*{content}" required></textarea>
+    </div>
+
+    <div class="form-group">
+        <label for="imageFiles">이미지 파일</label>
+        <input type="file" id="imageFiles" name="imageFiles" class="form-control" multiple="multiple">
+    </div>
+
+    <div class="btn-group">
+        <a href="/products" th:href="@{/products}" class="btn-cancel">취소</a>
+        <button type="submit" class="btn-submit">저장</button>
+    </div>
+
+</form>
+
+</body>
+</html>

@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/default_layout}">
+<head>
+    <title>상품 상세</title>
+    <th:block layout:fragment="css">
+        <style>
+            h1 {
+                color: #0056b3;
+                text-align: center;
+                margin-bottom: 20px;
+            }
+            .product-detail {
+                background-color: #fff;
+                padding: 20px;
+                border-radius: 8px;
+                box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            }
+            .product-detail h2 {
+                color: #0056b3;
+                margin-top: 0;
+            }
+            .product-detail p {
+                margin-bottom: 5px;
+            }
+            .product-detail hr {
+                border: 0;
+                border-top: 1px solid #eee;
+                margin: 20px 0;
+            }
+            .product-content {
+                line-height: 1.8;
+                margin-bottom: 20px;
+            }
+            .product-images {
+                margin-top: 20px;
+                border-top: 1px solid #eee;
+                padding-top: 20px;
+            }
+            .product-images h3 {
+                color: #0056b3;
+                margin-top: 0;
+            }
+            .image-item {
+                margin-bottom: 15px;
+            }
+            .button-container {
+                text-align: center;
+                margin-top: 30px;
+            }
+            .button {
+                display: inline-block;
+                background-color: #007bff;
+                color: white;
+                padding: 10px 20px;
+                text-decoration: none;
+                border-radius: 5px;
+                margin: 0 10px;
+                transition: background-color: 0.3s ease;
+            }
+            .button:hover {
+                background-color: #0056b3;
+            }
+            .delete-button {
+                background-color: #dc3545;
+            }
+            .delete-button:hover {
+                background-color: #c82333;
+            }
+        </style>
+    </th:block>
+    <main layout:fragment="content">
+        <h1>상품 상세</h1>
+        <div class="product-detail">
+            <h2 th:text="${product.title}"></h2>
+            <p><strong>작성자:</strong> <span th:text="${product.author}"></span></p>
+            <p><strong>카테고리:</strong> <span th:text="${product.category.description}"></span></p>
+            <p><strong>작성일:</strong> <span th:text="${#temporals.format(product.createdAt, 'yyyy-MM-dd HH:mm')}"></span></p>
+            <p th:if="${product.updatedAt != null}"><strong>수정일:</strong> <span th:text="${#temporals.format(product.updatedAt, 'yyyy-MM-dd HH:mm')}"></span></p>
+            <hr>
+            <div class="product-info-extra">
+                <p><strong>가격:</strong> <span th:text="${#numbers.formatInteger(product.price, 0, 'COMMA')} + '원'"></span></p>
+                <p><strong>거래 희망 지역:</strong> <span th:text="${product.dealRegion}"></span></p>
+                <p><strong>조회수:</strong> <span th:text="${product.views}"></span></p>
+                <p><strong>찜하기:</strong> <span id="wishlist-count" th:text="${product.wishlistCount}"></span></p>
+            </div>
+            <hr>
+            <div class="product-content" th:utext="${product.content}"></div>
+
+            <div th:if="${!#lists.isEmpty(product.storedFileNames)}" class="product-images">
+                <h3>첨부 이미지</h3>
+                <div th:each="filename : ${product.storedFileNames}" class="image-item">
+                    <img th:src="@{/images/{filename}(filename=${filename})}" alt="상품 이미지" style="max-width: 100%; height: auto; display: block; margin-bottom: 10px;">
+                </div>
+            </div>
+        </div>
+
+        <div class="button-container">
+            <a th:href="@{/products}" class="button">목록으로</a>
+            <form id="wishlistForm" th:action="@{/wishlist/{id}(id=${product.id})}" method="post" style="display: inline;">
+                <button type="button" class="button like-button">찜하기❤️</button>
+            </form>
+            <a th:if="${!isOwner}" th:href="@{/chat/room/{id}(id=${product.id})}" class="button">문의하기</a>
+            <div th:if="${isOwner}" style="display: inline-block;">
+                <a th:href="@{/products/{id}/edit(id=${product.id})}" class="button">수정</a>
+                <form th:action="@{/products/{id}/delete(id=${product.id})}" method="post" style="display: inline;">
+                    <button type="submit" class="button delete-button" onclick="return confirm('정말로 삭제하시겠습니까?');">삭제</button>
+                </form>
+            </div>
+        </div>
+    </main>
+    <th:block layout:fragment="script">
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                const wishlistButton = document.querySelector('.like-button');
+                const wishlistForm = document.getElementById('wishlistForm');
+
+                if (wishlistButton && wishlistForm) {
+                    wishlistButton.addEventListener('click', function(event) {
+                        event.preventDefault(); // 기본 동작 방지
+
+                        const url = wishlistForm.action;
+
+                        fetch(url, {
+                            method: 'POST',
+                            headers: {
+                                // CSRF 토큰이 필요한 경우 헤더에 추가
+                            }
+                        })
+                        .then(response => {
+                            if (response.ok) {
+                                return response.json();
+                            }
+                            // 서버에서 4xx, 5xx 응답을 받았을 때
+                            return response.json().then(err => Promise.reject(err));
+                        })
+                        .then(data => {
+                            // 성공 처리
+                            alert(data.message);
+                            const countElement = document.getElementById('wishlist-count');
+                            if (countElement) {
+                                const currentCount = parseInt(countElement.textContent, 10);
+                                countElement.textContent = currentCount + 1;
+                            }
+                        })
+                        .catch(error => {
+                            // 실패 처리
+                            console.error('Error:', error);
+                            alert(error.message || '오류가 발생했습니다.');
+                        });
+                    });
+                }
+            });
+        </script>
+    </th:block>
+</html>
