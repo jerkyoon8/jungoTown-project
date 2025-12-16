@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.juwon.springcommunity.repository.ChatRoomRepository">
+
+    <resultMap id="chatRoomResultMap" type="com.juwon.springcommunity.domain.ChatRoom">
+        <id property="id" column="id"/>
+
+        <result property="createdAt" column="created_at"/>
+
+        <association property="product" javaType="com.juwon.springcommunity.domain.Product">
+            <id property="id" column="product_id"/>
+            <result property="title" column="product_title"/>
+        </association>
+
+        <association property="buyer" javaType="com.juwon.springcommunity.domain.User">
+            <id property="id" column="buyer_id"/>
+            <result property="username" column="buyer_username"/>
+            <result property="nickname" column="buyer_nickname"/>
+        </association>
+
+        <association property="seller" javaType="com.juwon.springcommunity.domain.User">
+            <id property="id" column="seller_id"/>
+            <result property="username" column="seller_username"/>
+            <result property="nickname" column="seller_nickname"/>
+        </association>
+
+    </resultMap>
+
+    <insert id="save" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO chat_room (product_id, buyer_id, seller_id, created_at)
+        VALUES (#{product.id}, #{buyer.id}, #{seller.id}, #{createdAt})
+    </insert>
+
+    <select id="findByProductIdAndBuyerId" resultMap="chatRoomResultMap">
+        SELECT
+            cr.id,
+            cr.created_at,
+            p.id as product_id,
+            p.title as product_title,
+            buyer.id as buyer_id,
+            buyer.username as buyer_username,
+            buyer.nickname as buyer_nickname,
+            seller.id as seller_id,
+            seller.username as seller_username,
+            seller.nickname as seller_nickname
+        FROM chat_room cr
+        JOIN product p ON cr.product_id = p.id
+        JOIN user buyer ON cr.buyer_id = buyer.id
+        JOIN user seller ON cr.seller_id = seller.id
+        WHERE cr.product_id = #{productId} AND cr.buyer_id = #{buyerId}
+    </select>
+
+    <select id="findById" resultMap="chatRoomResultMap">
+        SELECT
+            cr.id,
+            cr.created_at,
+            p.id as product_id,
+            p.title as product_title,
+            buyer.id as buyer_id,
+            buyer.username as buyer_username,
+            buyer.nickname as buyer_nickname,
+            seller.id as seller_id,
+            seller.username as seller_username,
+            seller.nickname as seller_nickname
+        FROM chat_room cr
+        JOIN product p ON cr.product_id = p.id
+        JOIN user buyer ON cr.buyer_id = buyer.id
+        JOIN user seller ON cr.seller_id = seller.id
+        WHERE cr.id = #{id}
+    </select>
+
+    <select id="findAllByUserId" resultMap="chatRoomResultMap">
+        SELECT
+            cr.id,
+            cr.created_at,
+            p.id as product_id,
+            p.title as product_title,
+            buyer.id as buyer_id,
+            buyer.username as buyer_username,
+            buyer.nickname as buyer_nickname,
+            seller.id as seller_id,
+            seller.username as seller_username,
+            seller.nickname as seller_nickname
+        FROM chat_room cr
+        JOIN product p ON cr.product_id = p.id
+        JOIN user buyer ON cr.buyer_id = buyer.id
+        JOIN user seller ON cr.seller_id = seller.id
+        WHERE cr.buyer_id = #{userId} OR cr.seller_id = #{userId}
+    </select>
+
+</mapper>

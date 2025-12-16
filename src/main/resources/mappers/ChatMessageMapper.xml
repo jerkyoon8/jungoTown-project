@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.juwon.springcommunity.repository.ChatMessageRepository">
+
+    <insert id="save" parameterType="com.juwon.springcommunity.domain.ChatMessage" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO chat_message (room_id, sender, message)
+        VALUES (#{roomId}, #{sender}, #{message})
+    </insert>
+
+    <!-- 채팅방 진입시. 초기 메세지 불러오는 쿼리문 -->
+    <select id="findInitialMessages" resultType="com.juwon.springcommunity.domain.ChatMessage">
+        SELECT id, room_id, sender, message, created_at
+        FROM (
+            SELECT *
+            FROM chat_message
+            WHERE room_id = #{roomId}
+            ORDER BY id DESC
+            LIMIT #{limit}
+        ) AS T
+        ORDER BY id ASC
+    </select>
+
+    <select id="findMessagesWithPaging" resultType="com.juwon.springcommunity.domain.ChatMessage">
+        SELECT id, room_id, sender, message, created_at
+        FROM (
+            SELECT *
+            FROM chat_message
+            WHERE room_id = #{roomId}
+            AND id <![CDATA[<]]> #{lastMessageId}
+            ORDER BY id DESC
+            LIMIT #{limit}
+        ) AS T
+        ORDER BY id ASC
+    </select>
+
+</mapper>

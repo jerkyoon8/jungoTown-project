@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/default_layout}">
+<head>
+    <title>채팅 목록</title>
+</head>
+<body>
+<div layout:fragment="content">
+    <h1>채팅 목록</h1>
+    <div th:if="${#lists.isEmpty(chatRooms)}">
+        <p>채팅방이 없습니다.</p>
+    </div>
+    <ul th:unless="${#lists.isEmpty(chatRooms)}">
+        <li th:each="chatRoom : ${chatRooms}">
+            <a th:href="@{/chat/{roomId}(roomId=${chatRoom.id})}">
+                <span th:text="${chatRoom.product.title}">상품 제목</span> -
+                <span th:if="${#authentication.principal.username == chatRoom.buyer.username}" th:text="${chatRoom.seller.username}">상대방</span>
+                <span th:unless="${#authentication.principal.username == chatRoom.buyer.username}" th:text="${chatRoom.buyer.username}">상대방</span>
+            </a>
+        </li>
+    </ul>
+</div>
+</body>
+</html>

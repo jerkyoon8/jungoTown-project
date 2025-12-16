@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/default_layout}">
+<head>
+    <title>채팅</title>
+    <th:block layout:fragment="css">
+        <style>
+            #chat-container {
+                display: flex;
+                flex-direction: column;
+                height: 70vh;
+                border: 1px solid #ccc;
+                border-radius: 8px;
+                overflow: hidden;
+            }
+            #messages {
+                flex-grow: 1;
+                padding: 20px;
+                overflow-y: auto;
+                background-color: #f9f9f9;
+            }
+            .message {
+                margin-bottom: 15px;
+                line-height: 1.6;
+            }
+            .message .sender {
+                font-weight: bold;
+                color: #0056b3;
+            }
+            .message .content {
+                background-color: #fff;
+                padding: 10px 15px;
+                border-radius: 15px;
+                display: inline-block;
+                max-width: 80%;
+            }
+            /* 내가 보낸 메시지 스타일 */
+            .message.sent {
+                display: flex;
+                flex-direction: column;
+                align-items: flex-end;
+            }
+            .message.sent .content {
+                background-color: #dcf8c6;
+            }
+
+            /* 받은 메시지 스타일 */
+            .message.received {
+                display: flex;
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            #form {
+                display: flex;
+                padding: 10px;
+                border-top: 1px solid #ccc;
+                background-color: #fff;
+            }
+            #form input {
+                flex-grow: 1;
+                border: 1px solid #ccc;
+                border-radius: 20px;
+                padding: 10px 15px;
+                margin-right: 10px;
+            }
+            #form button {
+                background-color: #007bff;
+                color: white;
+                border: none;
+                padding: 10px 20px;
+                border-radius: 20px;
+                cursor: pointer;
+                transition: background-color 0.3s ease;
+            }
+            #form button:hover {
+                background-color: #0056b3;
+            }
+        </style>
+    </th:block>
+</head>
+<body>
+<main layout:fragment="content">
+    <h1>대화방</h1>
+    <div id="chat-container">
+        <div id="messages">
+            <!-- 서버에서 받은 초기 메시지들을 여기서 렌더링 -->
+            <th:block th:each="message : ${messages}">
+                <div class="message" th:classappend="${message.sender == #authentication.principal.username} ? 'sent' : 'received'" th:attr="data-message-id=${message.id}">
+                    <div class="sender" th:text="${message.sender}"></div>
+                    <div class="content" th:text="${message.message}"></div>
+                </div>
+            </th:block>
+        </div>
+        <form id="form" action="">
+            <input type="text" id="message-input" placeholder="메시지를 입력하세요..." autocomplete="off"/>
+            <button type="submit">전송</button>
+        </form>
+    </div>
+</main>
+
+<th:block layout:fragment="script">
+    <script th:inline="javascript">
+    /*<![CDATA[*/
+    console.log("LOG: chat.html 스크립트 시작");
+
+    // --- (1) 서버에서 전달받은 데이터 ---
+    const chatRoom = /*[[${chatRoom}]]*/ null;
+    const initialMessages = /*[[${messages}]]*/ [];
+    const currentUsername = /*[[${#authentication.principal.username}]]*/ 'user';
+
+    // --- (2) 채팅에 필요한 주요 변수 ---
+    const chatRoomId = chatRoom ? chatRoom.id : 'default';
+    const messagesContainer = document.getElementById('messages');
+    const form = document.getElementById('form');
+    const input = document.getElementById('message-input');
+
+    // 가장 오래된 메시지의 ID를 추적하기 위한 변수
+    let oldestMessageId = initialMessages.length > 0 ? initialMessages[0].id : null;
+    let isLoading = false; // 이전 메시지를 로딩 중인지 여부를 확인하는 플래그
+
+    /**
+     * (3) 채팅방 구독 작업 정의
+     */
+    function subscribeToChatRoom() {
+        console.log("LOG: 채팅방 구독 작업 실행 시도");
+        if (window.stompClient && window.stompClient.connected) {
+            console.log('LOG: 채팅방 토픽 구독 시작: ' + chatRoomId);
+            window.stompClient.subscribe('/topic/chat/room/' + chatRoomId, function (message) {
+                console.log('--- 채팅 메시지 수신 ---', message.body);
+                try {
+                    showMessage(JSON.parse(message.body), true); // 실시간 메시지는 아래에 추가
+                } catch (e) {
+                    console.error("채팅 body 파싱 에러: ", e);
+                }
+            });
+            console.log(">>> 구독 완료: /topic/chat/room/" + chatRoomId);
+        } else {
+            console.error('채팅방 구독 실패: STOMP 연결 안됨. 현재 상태: ' + window.stompConnectionState);
+        }
+    }
+
+    /**
+     * (4) 폼 제출 시 메시지 전송
+     */
+    function sendMessage(event) {
+        event.preventDefault();
+        const messageContent = input.value.trim();
+
+        if (messageContent && window.stompClient && window.stompClient.connected) {
+            const chatMessage = {
+                roomId: chatRoomId,
+                sender: currentUsername,
+                message: messageContent
+            };
+            window.stompClient.send("/app/chat/message", {}, JSON.stringify(chatMessage));
+            input.value = '';
+        } else {
+            console.error('메시지 전송 실패: stompClient가 연결되지 않았거나 메시지가 비어있음.');
+        }
+    }
+
+    /**
+     * (5) 메시지를 화면에 표시
+     * @param message 메시지 객체
+     * @param appendToEnd true이면 맨 아래에, false이면 맨 위에 메시지를 추가
+     */
+    function showMessage(message, appendToEnd) {
+        const messageElement = document.createElement('div');
+        messageElement.classList.add('message');
+        messageElement.dataset.messageId = message.id; // 메시지 ID를 속성으로 저장
+
+        const contentElement = document.createElement('div');
+        contentElement.classList.add('content');
+
+        if (message.sender === currentUsername) {
+            messageElement.classList.add('sent');
+        } else {
+            messageElement.classList.add('received');
+        }
+
+        const senderElement = document.createElement('div');
+        senderElement.classList.add('sender');
+        senderElement.textContent = message.sender;
+
+        contentElement.textContent = message.message;
+
+        messageElement.appendChild(senderElement);
+        messageElement.appendChild(contentElement);
+
+        if (appendToEnd) {
+            messagesContainer.appendChild(messageElement);
+            messagesContainer.scrollTop = messagesContainer.scrollHeight; // 새 메시지 수신 시 스크롤 맨 아래로
+        } else {
+            messagesContainer.insertBefore(messageElement, messagesContainer.firstChild);
+        }
+    }
+
+    /**
+     * (6) 이전 대화 기록을 가져오는 API 호출 함수
+     */
+    async function fetchOldMessages() {
+        if (!oldestMessageId) {
+            console.log("가장 오래된 메시지 ID가 없어 로딩하지 않습니다. 모든 메시지를 로드했습니다.");
+            return;
+        }
+
+        isLoading = true;
+        const loadingIndicator = document.createElement('div');
+        loadingIndicator.textContent = "이전 대화 로딩 중...";
+        loadingIndicator.style.textAlign = 'center';
+        loadingIndicator.style.padding = '10px';
+        messagesContainer.prepend(loadingIndicator);
+
+        const oldScrollHeight = messagesContainer.scrollHeight;
+
+        try {
+            const response = await fetch(`/api/chat/${chatRoomId}/messages?lastMessageId=${oldestMessageId}`);
+            if (!response.ok) {
+                throw new Error('서버에서 이전 메시지를 가져오는 데 실패했습니다.');
+            }
+            const oldMessages = await response.json();
+
+            if (oldMessages.length > 0) {
+                oldestMessageId = oldMessages[0].id; // 다음 요청을 위해 가장 오래된 ID 업데이트
+                oldMessages.forEach(message => {
+                    showMessage(message, false); // 화면 상단에 메시지 추가
+                });
+                // 새 메시지 추가 후 스크롤 위치 조정
+                messagesContainer.scrollTop = messagesContainer.scrollHeight - oldScrollHeight;
+            } else {
+                console.log("더 이상 가져올 이전 메시지가 없습니다.");
+                oldestMessageId = null; // 더 이상 요청하지 않도록 null로 설정
+            }
+
+        } catch (error) {
+            console.error(error);
+        } finally {
+            isLoading = false;
+            loadingIndicator.remove();
+        }
+    }
+
+
+    /**
+     * (7) 스크롤 이벤트 핸들러
+     */
+    function handleScroll() {
+        // 스크롤이 맨 위에 거의 도달했을 때, 그리고 로딩 중이 아닐 때
+        if (messagesContainer.scrollTop === 0 && !isLoading) {
+            console.log("스크롤이 맨 위에 도달했습니다! 이전 대화 기록을 로드합니다. oldestMessageId:", oldestMessageId);
+            fetchOldMessages();
+        }
+    }
+
+
+    // --- (8) 이벤트 리스너 및 초기화 ---
+    document.addEventListener('DOMContentLoaded', function() {
+        console.log("LOG: chat.html의 DOMContentLoaded 이벤트 발생");
+
+        // 초기 스크롤을 맨 아래로 이동
+        messagesContainer.scrollTop = messagesContainer.scrollHeight;
+
+        // STOMP 연결 후 실행할 작업으로 채팅방 구독을 추가
+        if (!window.onStompConnectedTasks) {
+            window.onStompConnectedTasks = [];
+        }
+        window.onStompConnectedTasks.push(subscribeToChatRoom);
+
+        if (window.stompConnectionState === 'CONNECTED') {
+            subscribeToChatRoom();
+        }
+    });
+
+    form.addEventListener('submit', sendMessage);
+    messagesContainer.addEventListener('scroll', handleScroll);
+
+    /*]]>*/
+    </script>
+</th:block></body>
+</html>
