@@ -1,0 +1,109 @@
+<div th:fragment="notificationLogicFragment">
+  <script th:inline="javascript">
+    /*<![CDATA[*/
+    console.log("LOG: notifications.html 스크립트 시작");
+
+    // 연결 상태를 관리하는 전역 변수
+    window.stompConnectionState = 'DISCONNECTED'; // 'DISCONNECTED', 'CONNECTING', 'CONNECTED'
+    window.stompClient = null;
+
+    // onStompConnectedTasks 배열이 없으면 생성 (스크립트 로딩 순서 문제 방지)
+    if (!window.onStompConnectedTasks) {
+        console.log("LOG: onStompConnectedTasks 배열이 없어 새로 생성합니다.");
+        window.onStompConnectedTasks = [];
+    }
+
+    // 알림 구독 작업을 미리 정의하여 배열에 추가
+    window.onStompConnectedTasks.push(function() {
+
+        console.log("LOG: 알림 구독 작업 실행 시도");
+
+        if (window.stompConnectionState === 'CONNECTED') {
+            window.stompClient.subscribe('/user/queue/notifications', function (notification) {
+                console.log('--- 알림 수신 ---', notification.body);
+                try {
+                    showNotification(JSON.parse(notification.body));
+                } catch (e) {
+                    console.error("알림 body 파싱 에러: ", e);
+                }
+            });
+            console.log(">>> 구독 완료: /user/queue/notifications");
+        } else {
+            console.error("알림 구독 실패: STOMP 연결 안됨.");
+        }
+    });/m/
+    console.log("LOG: 알림 구독 작업이 대기 목록에 추가됨");
+
+    function connectStomp() {
+        if (window.stompConnectionState !== 'DISCONNECTED') {
+            console.log(`LOG: connectStomp 호출되었으나, 현재 상태가 ${window.stompConnectionState} 이므로 연결을 시도하지 않음`);
+            return;
+        }
+
+        console.log("LOG: STOMP 연결 시도 중...");
+        window.stompConnectionState = 'CONNECTING';
+
+        var socket = new SockJS('/ws-stomp');
+        window.stompClient = Stomp.over(socket);
+        window.stompClient.debug = null;
+
+        window.stompClient.connect({}, function (frame) {
+            console.log('--- STOMP 연결 성공 ---', frame);
+            window.stompConnectionState = 'CONNECTED';
+
+            console.log(`LOG: 대기중인 ${window.onStompConnectedTasks.length}개의 STOMP 작업을 실행합니다.`);
+            window.onStompConnectedTasks.forEach((task, index) => {
+                console.log(`LOG: 작업 #${index + 1} 실행`);
+                task();
+            });
+
+        }, function (error) {
+            console.error('--- STOMP 연결 에러 ---', error);
+            window.stompConnectionState = 'DISCONNECTED';
+            window.stompClient = null;
+            setTimeout(connectStomp, 5000);
+        });
+    }
+
+    function disconnectStomp() {
+        if (window.stompClient !== null && window.stompClient.connected) {
+            window.stompClient.disconnect(function() {
+                console.log("LOG: STOMP 연결 해제됨");
+            });
+        }
+        window.stompClient = null;
+        window.stompConnectionState = 'DISCONNECTED';
+    }
+
+    function showNotification(notification) {
+        Toastify({
+            text: notification.sender + "님으로부터 새 메시지가 도착했습니다. ",
+            duration: 5000,
+            destination: notification.url,
+            newWindow: false,
+            close: true,
+            gravity: "bottom",
+            position: "right",
+            backgroundColor: "linear-gradient(to right, #00b09b, #96c93d)",
+            stopOnFocus: true,
+            onClick: function() {
+                window.location.href = notification.url;
+            }
+        }).showToast();
+    }
+
+    document.addEventListener("DOMContentLoaded", function() {
+        console.log("LOG: notifications.html의 DOMContentLoaded 이벤트 발생");
+        if (typeof SockJS !== 'undefined' && typeof Stomp !== 'undefined') {
+            connectStomp();
+        } else {
+            console.error("SockJS 또는 STOMP.js가 로드되지 않았습니다.");
+        }
+    });
+
+    window.addEventListener('beforeunload', function (e) {
+        disconnectStomp();
+    });
+    /*]]>*/
+  </script>
+</div>

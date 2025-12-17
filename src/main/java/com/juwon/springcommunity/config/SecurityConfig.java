@@ -1,5 +1,7 @@
 package com.juwon.springcommunity.config;
 
+import com.juwon.springcommunity.service.CustomOAuth2UserService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -10,7 +12,10 @@ import org.springframework.security.web.SecurityFilterChain;
 
 @Configuration
 @EnableWebSecurity
+@RequiredArgsConstructor
 public class SecurityConfig {
+
+    private final CustomOAuth2UserService customOAuth2UserService;
 
     @Bean
     public PasswordEncoder passwordEncoder() {
@@ -35,6 +40,11 @@ public class SecurityConfig {
                         .defaultSuccessUrl("/") // 성공시
                         .failureUrl("/users/login?error=true") // 실패시
                         .permitAll()
+                )
+                .oauth2Login(oauth2 -> oauth2
+                        .loginPage("/users/login")
+                        .userInfoEndpoint(userInfo -> userInfo
+                                .userService(customOAuth2UserService))
                 )
                 .logout((logout) -> logout
                         .logoutUrl("/users/logout")

@@ -1,58 +1,58 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
-<head>
-    <meta charset="UTF-8">
-    <!-- SockJS -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/sockjs-client/1.6.1/sockjs.min.js"></script>
-    <!-- STOMP.js -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
-    <!-- Toastify.js CSS -->
-    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
-    <!-- Toastify.js JS -->
-    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
-</head>
 <body>
-<header th:fragment="headerFragment" class="header-container">
-
-    <!-- LOGO -->
-    <div class="logo">
-        <a th:href="@{/}">미진컴퍼니</a>
-    </div>
-
-    <!-- SEARCH BAR -->
-    <div class="search-bar">
-        <form th:action="@{/products}" method="get">
-            <input type="text" name="keyword" placeholder="관심있는 내용을 검색해보세요!">
-            <button type="submit">🔍</button>
-        </form>
-    </div>
-
-    <!-- RIGHT MENU: ACTIONS & USER-AUTH -->
-    <div class="right-menu">
-        <a sec:authorize="isAuthenticated()" th:href="@{/products/new}">글쓰기</a>
-        <a sec:authorize="isAuthenticated()" th:href="@{/users}">마이페이지</a>
-
-        <span class="separator">|</span>
-
-        <div class="user-auth-links">
-            <!-- For anonymous users -->
-            <div sec:authorize="isAnonymous()" class="auth-block">
-                <a th:href="@{/users/login}">로그인</a>
-                <a th:href="@{/users/new}">회원가입</a>
+<header th:fragment="headerFragment" class="main-header">
+    <div class="header-wrapper">
+        <div class="header-top">
+            <!-- LOGO -->
+            <div class="logo">
+                <a th:href="@{/}">미진컴퍼니</a>
             </div>
 
-            <!-- For authenticated users -->
-            <div sec:authorize="isAuthenticated()" class="auth-block">
-                <span class="user-info" sec:authentication="name"></span><span class="user-info">님</span>
-                <a th:href="@{/users/{id}(id=${#authentication.principal.id})}">내 정보</a>
-                <a th:href="@{/chat/rooms}">채팅</a>
-                <form th:action="@{/users/logout}" method="post">
-                    <button type="submit">로그아웃</button>
+            <!-- SEARCH BAR -->
+            <div class="search-bar">
+                <form th:action="@{/products}" method="get">
+                    <input type="text" name="keyword" placeholder="관심있는 내용을 검색해보세요!">
+                    <button type="submit">🔍</button>
                 </form>
             </div>
-        </div>
-    </div>
 
+            <!-- RIGHT MENU: ACTIONS & USER-AUTH -->
+            <div class="right-menu">
+                <a sec:authorize="isAuthenticated()" th:href="@{/products/new}">글쓰기</a>
+                <a sec:authorize="isAuthenticated()" th:href="@{/mypage}">마이페이지</a>
+
+                <span class="separator">|</span>
+
+                <div class="user-auth-links">
+                    <!-- For anonymous users -->
+                    <div sec:authorize="isAnonymous()" class="auth-block">
+                        <a th:href="@{/users/login}">로그인</a>
+                        <a th:href="@{/users/new}">회원가입</a>
+                    </div>
+
+                    <!-- For authenticated users -->
+                    <div sec:authorize="isAuthenticated()" class="auth-block">
+                        <span class="user-info" sec:authentication="name"></span><span class="user-info">님</span>
+                        <a th:href="@{/users/{id}(id=${#authentication.principal.id})}">내 정보</a>
+                        <a th:href="@{/chat/rooms}">채팅</a>
+                        <form th:action="@{/users/logout}" method="post">
+                            <button type="submit">로그아웃</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <nav class="header-nav">
+            <ul>
+                <li><a href="#">카테고리</a></li>
+                <li><a th:href="@{/wishes}">찜한 상품</a></li>
+                <li><a href="#">임시메뉴</a></li>
+                <li><a href="#">추가메뉴</a></li>
+                <li><a href="#">테스트</a></li>
+            </ul>
+        </nav>
+    </div>
 </header>
 </body>
 </html>
