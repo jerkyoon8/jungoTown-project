@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/default_layout}">
+
+<head>
+    <title>페이지를 찾을 수 없음</title>
+    <th:block layout:fragment="css">
+        <style>
+            .error-container {
+                text-align: center;
+                margin-top: 50px;
+                margin-bottom: 50px;
+            }
+            .error-code {
+                font-size: 8rem;
+                font-weight: bold;
+                color: #ffc107;
+            }
+            .error-message {
+                font-size: 1.5rem;
+                margin-top: 20px;
+            }
+        </style>
+    </th:block>
+</head>
+
+<main layout:fragment="content">
+    <div class="error-container">
+        <div class="error-code">404</div>
+        <div class="error-message">요청하신 페이지를 찾을 수 없습니다.</div>
+        <p>주소가 잘못되었거나, 페이지가 삭제되었을 수 있습니다.</p>
+        <a th:href="@{/}" class="btn btn-primary mt-3">홈으로 돌아가기</a>
+    </div>
+</main>
+
+</html>

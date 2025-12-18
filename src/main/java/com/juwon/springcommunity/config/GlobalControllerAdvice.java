@@ -1,9 +1,13 @@
 package com.juwon.springcommunity.config;
 
 import jakarta.servlet.http.HttpServletRequest;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.ControllerAdvice;
+import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.servlet.ModelAndView;
 
+@Slf4j
 @ControllerAdvice
 public class GlobalControllerAdvice {
 
@@ -22,5 +26,23 @@ public class GlobalControllerAdvice {
         String path = request.getServletPath();
         boolean shouldHide = path.startsWith("/chat");
         return shouldHide;
+    }
+
+    /**
+     * 처리되지 않은 모든 예외를 처리하는 핸들러입니다.
+     * 예외 발생 시 로그를 남기고, 사용자에게는 500 에러 페이지를 보여줍니다.
+     * @param e 발생한 예외
+     * @param request 예외가 발생한 요청
+     * @return 에러 정보와 함께 보여줄 ModelAndView 객체
+     */
+    @ExceptionHandler(Exception.class)
+    public ModelAndView handleException(Exception e, HttpServletRequest request) {
+        log.error("Exception occurred: {} at {}", e.getMessage(), request.getRequestURI(), e);
+
+        ModelAndView mav = new ModelAndView();
+        mav.addObject("exception", e);
+        mav.addObject("url", request.getRequestURL());
+        mav.setViewName("error/500");
+        return mav;
     }
 }
