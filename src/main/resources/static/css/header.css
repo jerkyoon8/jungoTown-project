@@ -1,13 +1,27 @@
 /* header.css */
 
-.header-container {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 10px 40px;
+/* 전체 헤더 영역 */
+.main-header {
+    width: 100%;
     border-bottom: 1px solid #e0e0e0;
     background-color: #ffffff;
     font-family: Arial, sans-serif;
+    padding: 10px 0; /* 상하 패딩 */
+}
+
+/* 헤더 컨텐츠 너비 제한 및 중앙 정렬 */
+.header-wrapper {
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+/* 상단 영역 (로고, 검색, 유저메뉴) */
+.header-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 10px; /* 좌우 약간의 여백 */
+    margin-bottom: 10px;
 }
 
 .logo a {
@@ -48,6 +62,7 @@
     display: flex;
     align-items: center;
     gap: 15px;
+    white-space: nowrap; /* 메뉴들이 줄바꿈되지 않도록 */
 }
 
 .right-menu a, .user-info {
@@ -87,4 +102,32 @@
 
 .user-auth-links button:hover {
     color: #000;
+}
+
+
+/* 하단 네비게이션 메뉴 */
+.header-nav {
+    display: flex;
+    justify-content: flex-start; /* 왼쪽 정렬 */
+    padding: 0 10px; /* 좌우 약간의 여백 */
+}
+
+.header-nav ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    gap: 20px; /* 메뉴간 간격 */
+}
+
+.header-nav ul li a {
+    text-decoration: none;
+    color: #333;
+    font-size: 16px;
+    font-weight: 500;
+    padding: 8px 4px; /* 버튼 느낌을 위한 패딩 */
+}
+
+.header-nav ul li a:hover {
+    color: #007bff; /* 호버 시 색상 변경 */
 }

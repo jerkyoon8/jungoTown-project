@@ -31,3 +31,6 @@ test-output/
 # 기타 캐시성 폴더
 .vscode/
 GEMINI.md
+
+# Gemini 문서
+docs/

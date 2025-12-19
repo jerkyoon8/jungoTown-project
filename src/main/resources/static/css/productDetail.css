@@ -1,0 +1,147 @@
+
+/* productDetail.css */
+
+.product-detail-layout {
+    display: flex;
+    gap: 40px; /* 이미지와 정보 사이의 간격 */
+}
+
+/* 좌측: 이미지 영역 */
+.product-image-section {
+    flex: 1; /* flex-grow, flex-shrink, flex-basis를 한번에 설정 */
+    max-width: 50%;
+}
+
+.product-image-section img {
+    width: 100%;
+    height: auto;
+    border-radius: 8px;
+    border: 1px solid #eee;
+    object-fit: cover;
+}
+
+/* 우측: 정보 영역 */
+.product-details-section {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.product-details-section .product-title {
+    font-size: 24px;
+    font-weight: bold;
+    margin-bottom: 10px;
+}
+
+.product-details-section .price {
+    font-size: 28px;
+    font-weight: bold;
+    margin-bottom: 20px;
+}
+
+.product-meta {
+    font-size: 14px;
+    color: #888;
+    margin-bottom: 20px;
+}
+
+.product-actions {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.product-actions .action-btn {
+    flex-grow: 1;
+    padding: 15px;
+    border-radius: 5px;
+    text-align: center;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+    text-decoration: none;
+    border: 1px solid #ccc;
+    background-color: #fff;
+    color: #333;
+}
+
+.product-actions .purchase-btn {
+    background-color: #333;
+    color: #fff;
+    border-color: #333;
+}
+
+.wish-btn {
+    max-width: 50px;
+    border: 1px solid #ccc;
+    background: #fff;
+    font-size: 20px;
+}
+
+.seller-info {
+    display: flex;
+    align-items: center;
+    padding: 15px;
+    border: 1px solid #f0f0f0;
+    border-radius: 8px;
+    margin-bottom: 20px;
+}
+
+.seller-info .avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background-color: #eee;
+    margin-right: 15px;
+}
+
+.seller-info .nickname {
+    font-weight: bold;
+}
+
+.product-extra-details {
+    list-style: none;
+    padding: 0;
+    margin: 0 0 20px 0;
+    border-top: 1px solid #f0f0f0;
+}
+
+.product-extra-details li {
+    display: flex;
+    padding: 15px 5px;
+    border-bottom: 1px solid #f0f0f0;
+    font-size: 14px;
+}
+
+.product-extra-details .detail-label {
+    width: 100px;
+    color: #888;
+}
+
+.product-extra-details .detail-value {
+    color: #333;
+}
+
+.product-content {
+    border-top: 1px solid #f0f0f0;
+    padding-top: 20px;
+    line-height: 1.7;
+    flex-grow: 1;
+}
+
+.owner-actions {
+    margin-top: 20px;
+    display: flex;
+    gap: 10px;
+    justify-content: flex-end;
+}
+.owner-actions .button {
+    background-color: #6c757d;
+    color: white;
+    padding: 8px 15px;
+    text-decoration: none;
+    border-radius: 5px;
+}
+.owner-actions .delete-button {
+    background-color: #dc3545;
+}

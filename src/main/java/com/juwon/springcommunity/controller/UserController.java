@@ -17,9 +17,9 @@ import java.security.Principal;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import com.juwon.springcommunity.security.oauth.SessionUser;
 
 @Controller
-@RequestMapping("/users")
 public class UserController {
 
     private final UserService userService;
@@ -29,7 +29,7 @@ public class UserController {
     }
 
     // 사용자 ID 중복 확인
-    @GetMapping("/check-username")
+    @GetMapping("/users/check-username")
     @ResponseBody
     public ResponseEntity<Map<String, Boolean>> checkUsernameDuplicate(@RequestParam String username) {
 
@@ -41,7 +41,7 @@ public class UserController {
     }
 
     // 닉네임 중복 확인
-    @GetMapping("/check-nickname")
+    @GetMapping("/users/check-nickname")
     @ResponseBody
     public ResponseEntity<Map<String, Boolean>> checkNicknameDuplicate(@RequestParam String nickname) {
         boolean isDuplicate = userService.isNicknameDuplicate(nickname);
@@ -51,14 +51,14 @@ public class UserController {
     }
 
     // 사용자 생성 폼을 보여준다
-    @GetMapping("/new")
+    @GetMapping("/users/new")
     public String createUserForm(Model model) {
         model.addAttribute("userCreateRequestDto", new UserCreateRequestDto());
         return "users/createUserForm";
     }
 
     // 사용자 생성을 처리한다
-    @PostMapping
+    @PostMapping("/users")
     public String createUser(@Validated @ModelAttribute("userCreateRequestDto") UserCreateRequestDto dto, BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {
             return "users/createUserForm";
@@ -77,7 +77,7 @@ public class UserController {
     }
 
     // 전체 사용자 목록을 보여준다
-    @GetMapping
+    @GetMapping("/users")
     public String getAllUsers(Model model) {
         List<UserResponseDto> users = userService.findAllUsers();
         model.addAttribute("users", users);
@@ -85,7 +85,7 @@ public class UserController {
     }
 
     // 특정 사용자 상세 정보를 보여준다
-    @GetMapping("/{userId}")
+    @GetMapping("/users/{userId}")
     public String getUserById(@PathVariable Long userId, Model model,
                               @AuthenticationPrincipal UserDetails currentUser) {
         UserResponseDto user = userService.findUserById(userId);
@@ -98,7 +98,7 @@ public class UserController {
     }
 
     // 사용자 정보 수정 폼을 보여준다
-    @GetMapping("/{userId}/edit")
+    @GetMapping("/users/{userId}/edit")
     public String updateUserForm(@PathVariable Long userId, Model model) {
         UserResponseDto userResponseDto = userService.findUserById(userId);
         
@@ -113,7 +113,7 @@ public class UserController {
     }
 
     // 사용자 정보 수정을 처리한다
-    @PostMapping("/{userId}/update")
+    @PostMapping("/users/{userId}/update")
     public String updateUser(@PathVariable Long userId, 
                              @Validated @ModelAttribute("userUpdateRequestDto") UserUpdateRequestDto dto,
                              BindingResult bindingResult) {
@@ -125,15 +125,28 @@ public class UserController {
     }
 
     // 사용자를 삭제한다
-    @PostMapping("/{userId}/delete")
+    @PostMapping("/users/{userId}/delete")
     public String deleteUser(@PathVariable Long userId) {
         userService.deleteUser(userId);
         return "redirect:/users";
     }
 
     // 로그인 Form
-    @GetMapping("/login")
+    @GetMapping("/users/login")
     public String loginForm(){
         return "users/loginForm";
+    }
+
+    // 마이페이지
+    @GetMapping("/mypage")
+    public String myPage(Principal principal, Model model) {
+        if (principal == null) {
+            return "redirect:/users/login";
+        }
+        String username = principal.getName();
+        UserResponseDto user = userService.findUserDtoByUsername(username);
+        model.addAttribute("user", user);
+
+        return "users/myPage";
     }
 }
