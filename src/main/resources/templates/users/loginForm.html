@@ -47,6 +47,9 @@
         input::placeholder {
             color: #aaa;
         }
+        .button-wrapper {
+            margin-top: 20px;
+        }
         .submit-btn {
             width: 100%;
             height: 52px;
@@ -57,7 +60,22 @@
             border: none;
             border-radius: 6px;
             cursor: pointer;
-            margin-top: 20px;
+        }
+        .google-btn {
+            display: block;
+            margin-top: 10px;
+            width: 100%;
+            height: 52px;
+            background-color: #dc3545;
+            color: white;
+            font-size: 18px;
+            font-weight: bold;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            text-align: center;
+            line-height: 52px;
+            text-decoration: none;
         }
         .error-message {
             color: #ff0000;
@@ -86,8 +104,9 @@
         <div class="form-group">
             <input type="password" id="password" name="password" placeholder="비밀번호" required>
         </div>
-        <div>
+        <div class="button-wrapper">
             <button type="submit" class="submit-btn">로그인</button>
+            <a href="/oauth2/authorization/google" class="google-btn">Google로 로그인</a>
         </div>
     </form>
 </div>

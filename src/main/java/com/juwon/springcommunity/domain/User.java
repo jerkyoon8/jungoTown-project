@@ -3,6 +3,7 @@ package com.juwon.springcommunity.domain;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
@@ -16,6 +17,7 @@ import java.util.Collections;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 public class User implements UserDetails {
 
     private Long id;
@@ -24,8 +26,6 @@ public class User implements UserDetails {
     @Size(min = 3, max = 50, message = "사용자 이름은 3자 이상 50자 이하이어야 합니다.")
     private String username;
 
-    @NotBlank(message = "비밀번호는 필수입니다.")
-    @Size(min = 8, message = "비밀번호는 8자 이상이어야 합니다.")
     private String password;
 
     @NotBlank(message = "이메일은 필수입니다.")
@@ -37,6 +37,9 @@ public class User implements UserDetails {
     private String nickname;
 
     private Role role; // 역할 필드 추가
+
+    private String provider;
+    private String providerId;
 
     // 권한 확인 메서드
     @Override
