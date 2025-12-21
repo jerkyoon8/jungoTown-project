@@ -7,63 +7,63 @@
     <title>메인 페이지</title>
     <th:block layout:fragment="css">
         <style>
-            .welcome-message {
-                text-align: center;
-                margin-bottom: 20px;
-                font-size: 1.2em;
-                color: #555;
+            .carousel-item img {
+                max-height: 400px;
+                object-fit: cover;
+                width: 100%;
             }
-            .welcome-message strong {
-                color: #007bff;
+            .carousel-caption {
+                background-color: rgba(0, 0, 0, 0.5);
+                border-radius: .5rem;
+                padding: 1rem;
             }
-            h1 {
-                color: #0056b3;
-                text-align: center;
-            }
-            p {
-                line-height: 1.6;
-                text-align: center;
-            }
-            .button-container {
-                text-align: center;
-                margin-top: 30px;
-            }
-            .button {
-                display: inline-block;
-                background-color: #007bff;
-                color: white;
-                padding: 10px 20px;
-                text-decoration: none;
-                border-radius: 5px;
-                margin: 0 10px;
-                transition: background-color 0.3s ease;
-            }
-            .button:hover {
-                background-color: #0056b3;
+            .section-divider {
+                margin-top: 2rem;
+                margin-bottom: 2rem;
             }
         </style>
     </th:block>
 </head>
-    <main layout:fragment="content">
-        <div class="welcome-message">
-            <span sec:authorize="isAuthenticated()">
-                환영합니다, <strong sec:authentication="name"></strong>님!
-            </span>
-            <span sec:authorize="!isAuthenticated()">
-                환영합니다!
-            </span>
+<main layout:fragment="content">
+    <!-- 캐러셀 시작 -->
+    <div id="homeCarousel" class="carousel slide carousel-fade" data-bs-ride="carousel">
+        <div class="carousel-indicators">
+            <button th:each="item, stat : ${carouselItems}"
+                    type="button"
+                    data-bs-target="#homeCarousel"
+                    th:data-bs-slide-to="${stat.index}"
+                    th:classappend="${stat.first} ? 'active'"
+                    th:aria-current="${stat.first} ? 'true'"
+                    th:aria-label="'Slide ' + ${stat.count}">
+            </button>
         </div>
-        <h1>메인 페이지</h1>
-        <p>이곳은 스프링 커뮤니티 웹사이트의 메인 페이지입니다. 다양한 정보를 찾아보고 다른 사용자들과 소통해보세요.</p>
-        <p>궁금한 점이 있다면 언제든지 문의해주세요.</p>
+        <div class="carousel-inner">
+            <div th:each="item, stat : ${carouselItems}"
+                 class="carousel-item"
+                 th:classappend="${stat.first} ? 'active'"
+                 data-bs-interval="5000">
+                <img th:src="@{${item.image}}" class="d-block w-100" alt="Carousel Image">
+                <div class="carousel-caption d-none d-md-block">
+                    <h5 th:text="${item.title}"></h5>
+                    <p th:text="${item.description}"></p>
+                </div>
+            </div>
+        </div>
+        <button class="carousel-control-prev" type="button" data-bs-target="#homeCarousel" data-bs-slide="prev">
+            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+            <span class="visually-hidden">Previous</span>
+        </button>
+        <button class="carousel-control-next" type="button" data-bs-target="#homeCarousel" data-bs-slide="next">
+            <span class="carousel-control-next-icon" aria-hidden="true"></span>
+            <span class="visually-hidden">Next</span>
+        </button>
+    </div>
+    <!-- 캐러셀 끝 -->
 
-        <div class="button-container">
-            <a th:href="@{/products}" class="button">게시글 목록</a>
-            <a th:href="@{/users}" class="button">사용자 목록</a>
-            <a th:href="@{/products/new}" class="button" sec:authorize="isAuthenticated()">게시글 작성</a>
-            <a th:href="@{/users/new}" class="button" sec:authorize="!isAuthenticated()">회원가입</a>
-            <a th:href="@{/login}" class="button" sec:authorize="!isAuthenticated()">로그인</a>
-            <a th:href="@{/logout}" class="button" sec:authorize="isAuthenticated()">로그아웃</a>
-        </div>
-    </main>
+    <!-- 구분선 -->
+    <hr class="section-divider"/>
+
+    <!-- 최근 본 상품 목록 프래그먼트 삽입 -->
+    <div th:replace="~{fragments/recent_products :: recentProductsFragment}"></div>
+</main>
 </html>
