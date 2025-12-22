@@ -39,5 +39,8 @@ public interface ProductRepository {
     // 페이징 처리하여 상품 조회
     List<Product> findWithPaging(Map<String, Object> params);
 
+    // ID 목록으로 상품 목록 조회
+    List<Product> findByIdIn(@Param("ids") List<Long> ids);
+
 
 }

@@ -2,6 +2,7 @@ package com.juwon.springcommunity.repository;
 
 import com.juwon.springcommunity.domain.ProductImage;
 import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
 
@@ -19,5 +20,7 @@ public interface ProductImageRepository {
 
     // 이미지 ID로 이미지 정보 삭제
     void save(ProductImage productImage);
+
+    List<ProductImage> findFirstImagesByProductIds(@Param("productIds") List<Long> productIds);
 
 }

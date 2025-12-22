@@ -30,7 +30,7 @@ public class HomeController {
         // === (유지) 최근 본 상품 목록 조회 로직 추가 시작 ===
         String userIdentifier;
         if (principal != null) {
-            User user = userService.findUserByUsername(principal.getName());
+            User user = userService.findUserByEmail(principal.getName());
             userIdentifier = "user:" + user.getId();
         } else {
             userIdentifier = "session:" + session.getId();

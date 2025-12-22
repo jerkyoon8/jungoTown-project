@@ -15,8 +15,8 @@
         <li th:each="chatRoom : ${chatRooms}">
             <a th:href="@{/chat/{roomId}(roomId=${chatRoom.id})}">
                 <span th:text="${chatRoom.product.title}">상품 제목</span> -
-                <span th:if="${#authentication.principal.username == chatRoom.buyer.username}" th:text="${chatRoom.seller.username}">상대방</span>
-                <span th:unless="${#authentication.principal.username == chatRoom.buyer.username}" th:text="${chatRoom.buyer.username}">상대방</span>
+                <span th:if="${session.user.name == chatRoom.buyer.username}" th:text="${chatRoom.seller.username}">상대방</span>
+                <span th:unless="${session.user.name == chatRoom.buyer.username}" th:text="${chatRoom.buyer.username}">상대방</span>
             </a>
         </li>
     </ul>

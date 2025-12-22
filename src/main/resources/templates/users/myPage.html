@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/default_layout}">
+
+<th:block layout:fragment="css">
+    <link rel="stylesheet" th:href="@{/css/mypage.css}">
+</th:block>
+
+<div layout:fragment="content">
+    <div class="my-page-layout">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-section">
+                <h3>거래 정보</h3>
+                <ul class="sidebar-menu">
+                    <li><a href="#">판매내역</a></li>
+                    <li><a href="#">구매내역</a></li>
+                    <li><a href="#">택배</a></li>
+                    <li><a th:href="@{/wishes}">찜한 상품</a></li>
+                    <li><a href="#">안심결제 정산내역</a></li>
+                </ul>
+            </div>
+            <div class="sidebar-section">
+                <h3>내 정보</h3>
+                <ul class="sidebar-menu">
+                    <li><a href="#">계좌 관리</a></li>
+                    <li><a href="#">배송지 관리</a></li>
+                    <li><a href="#">거래 후기</a></li>
+                    <li><a href="#">탈퇴하기</a></li>
+                </ul>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <section class="main-content">
+            <!-- Profile Section -->
+            <div class="profile-section">
+                <div class="profile-icon"></div>
+                <div class="profile-info">
+                    <!-- th:text를 사용하여 실제 사용자 이름으로 교체 필요 -->
+                    <span class="nickname" th:text="${session.user != null ? session.user.name : '방문자'}">자유로운작은꽃새</span>
+                </div>
+            </div>
+
+            <!-- Product Section -->
+            <div class="product-section">
+                <ul class="tabs">
+                    <li class="tab-item active">전체</li>
+                    <li class="tab-item">판매중</li>
+                    <li class="tab-item">예약중</li>
+                    <li class="tab-item">판매완료</li>
+                </ul>
+                <div class="product-content">
+                    <div class="product-content-header">
+                        <span class="product-count">총 0개</span>
+                        <div class="sort-options">
+                            <a href="#" class="active">최신순</a> |
+                            <a href="#">낮은가격순</a> |
+                            <a href="#">높은가격순</a>
+                        </div>
+                    </div>
+                    <div class="product-list-empty">
+                        선택된 조건에 해당하는 상품이 없습니다.
+                    </div>
+                    <!-- 상품 목록이 있을 경우 여기에 렌더링 -->
+                </div>
+            </div>
+        </section>
+    </div>
+</div>
+</html>

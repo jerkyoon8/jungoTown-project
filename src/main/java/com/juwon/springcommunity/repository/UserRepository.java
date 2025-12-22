@@ -17,18 +17,12 @@ public interface UserRepository {
 
     Optional<User> findById(Long id);
 
-    Optional<User> findByUsername(String username);
-
-    List<User> findByIds(@Param("ids") Set<Long> ids);
-
-    void update(User user);
+    List<User> findByIds(Set<Long> ids);
 
     void delete(Long id);
-
-    boolean existsByUsername(String username);
-
+    
     boolean existsByNickname(String nickname);
-
-    String findUsernameById(Long id);
+    
+    Optional<User> findByEmail(String email);
 }
 

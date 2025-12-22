@@ -23,7 +23,7 @@ public class ProductWishListController {
     // 상품의 찜하기를 추가한다.
     @PostMapping("/wishlist/{productId}")
     public ResponseEntity<Map<String, String>> addWishlist(@PathVariable Long productId, Principal principal) {
-        User user = userService.findUserByUsername(principal.getName());
+        User user = userService.findUserByEmail(principal.getName());
         Long userId = user.getId();
 
         try {

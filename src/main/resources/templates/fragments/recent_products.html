@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<!-- 최근 본 상품 목록 섹션 -->
+<div th:fragment="recentProductsFragment" th:if="${recentProducts != null and not #lists.isEmpty(recentProducts)}" class="container my-5">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h4 class="mb-0">최근 본 상품</h4>
+        <a href="/products/recent" class="text-decoration-none">더보기 &gt;</a>
+    </div>
+    <div class="recent-products-container" style="display: flex; overflow-x: auto; gap: 1rem; padding-bottom: 1rem;">
+        <!-- 각 상품을 순회하며 카드로 표시 -->
+        <div th:each="product : ${recentProducts}" class="card" style="min-width: 200px; flex-shrink: 0;">
+            <a th:href="@{/products/{id}(id=${product.id})}">
+                <!-- 대표 이미지 -->
+                <img th:src="${product.representativeImageUrl != null} ? @{'/images/' + ${product.representativeImageUrl}} : @{/image/placeholder.png}"
+                     class="card-img-top" alt="상품 이미지" style="height: 150px; object-fit: cover;">
+            </a>
+            <div class="card-body p-2">
+                <!-- 상품 제목 -->
+                <h6 class="card-title" th:text="${product.title}" style="font-size: 0.9rem; margin-bottom: 0.25rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">상품 제목</h6>
+                <!-- 상품 가격 -->
+                <p class="card-text fw-bold" th:text="${#numbers.formatInteger(product.price, 3, 'COMMA')} + '원'" style="font-size: 0.8rem; margin-bottom: 0;">가격</p>
+            </div>
+        </div>
+    </div>
+    <!-- 스크롤바 스타일 -->
+    <style>
+        .recent-products-container::-webkit-scrollbar {
+            height: 8px;
+        }
+        .recent-products-container::-webkit-scrollbar-thumb {
+            background: #ddd;
+            border-radius: 4px;
+        }
+        .recent-products-container::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+    </style>
+</div>
+
+</html>

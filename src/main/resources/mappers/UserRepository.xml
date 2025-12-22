@@ -5,25 +5,24 @@
 <mapper namespace="com.juwon.springcommunity.repository.UserRepository">
 
     <insert id="save" parameterType="com.juwon.springcommunity.domain.User" useGeneratedKeys="true" keyProperty="id">
-        INSERT INTO user (username, password, email, nickname, role)
-        VALUES (#{username}, #{password}, #{email}, #{nickname}, #{role})
+        INSERT INTO user (password, email, nickname, role)
+        VALUES (#{password}, #{email}, #{nickname}, #{role})
     </insert>
 
     <select id="findById" parameterType="long" resultType="com.juwon.springcommunity.domain.User">
-        SELECT id, username, password, email, nickname, role
+        SELECT id, password, email, nickname, role
         FROM user
         WHERE id = #{id}
     </select>
 
     <select id="findAll" resultType="com.juwon.springcommunity.domain.User">
-        SELECT id, username, password, email, nickname, role
+        SELECT id, password, email, nickname, role
         FROM user
     </select>
 
     <select id="findByIds" resultType="com.juwon.springcommunity.domain.User">
         SELECT
             id,
-            username,
             password,
             email,
             nickname,
@@ -41,36 +40,20 @@
         </if>
     </select>
 
-
-    <select id="findByUsername" parameterType="String" resultType="com.juwon.springcommunity.domain.User">
-        SELECT id, username, password, email, nickname, role FROM user WHERE username = #{username}
-    </select>
-
-    <update id="update" parameterType="com.juwon.springcommunity.domain.User">
-        UPDATE user
-        SET username = #{username}, email = #{email}
-    </update>
-
     <delete id="delete" parameterType="long">
         DELETE FROM user WHERE id = #{id}
     </delete>
-
-    <select id="existsByUsername" parameterType="string" resultType="boolean">
-        SELECT COUNT(*) > 0
-        FROM user
-        WHERE username = #{username}
-    </select>
 
     <select id="existsByNickname" parameterType="string" resultType="boolean">
         SELECT COUNT(*) > 0
         FROM user
         WHERE nickname = #{nickname}
     </select>
-
-    <select id="findUsernameById" parameterType="long" resultType="string">
-        SELECT username
+    
+    <select id="findByEmail" parameterType="String" resultType="com.juwon.springcommunity.domain.User">
+        SELECT id, password, email, nickname, role
         FROM user
-        WHERE id = #{id}
+        WHERE email = #{email}
     </select>
 
 </mapper>

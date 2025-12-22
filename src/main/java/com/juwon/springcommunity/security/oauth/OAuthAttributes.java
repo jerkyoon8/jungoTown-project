@@ -6,6 +6,7 @@ import lombok.Builder;
 import lombok.Getter;
 
 import java.util.Map;
+import java.util.UUID;
 
 @Getter
 public class OAuthAttributes {
@@ -49,6 +50,7 @@ public class OAuthAttributes {
         return User.builder()
                 .username(name) // 소셜 로그인 사용자는 보통 이름을 username으로 사용
                 .email(email)
+                .password(UUID.randomUUID().toString()) // 임의의 비밀번호 설정
                 .nickname(name) // 닉네임도 일단 이름으로 설정
                 .role(Role.USER) // 기본 권한은 USER
                 .provider("google")

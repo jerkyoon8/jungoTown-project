@@ -50,7 +50,7 @@ public class ChatController {
     @GetMapping("/chat/room/{productId}")
     // 방을 생성함.
     public String createChatRoom(@PathVariable Long productId, @AuthenticationPrincipal UserDetails currentUser) {
-        User buyer = userRepository.findByUsername(currentUser.getUsername())
+        User buyer = userRepository.findByEmail(currentUser.getUsername())
                 .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
 
         Long chatRoomId = chatRoomService.getOrCreateChatRoom(productId, buyer.getId());
@@ -69,7 +69,7 @@ public class ChatController {
 
     @GetMapping("/chat/rooms")
     public String chatRoomList(@AuthenticationPrincipal UserDetails currentUser, Model model) {
-        User user = userRepository.findByUsername(currentUser.getUsername())
+        User user = userRepository.findByEmail(currentUser.getUsername())
                 .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
         List<ChatRoom> chatRooms = chatRoomService.findAllRoomsByUserId(user.getId());
         model.addAttribute("chatRooms", chatRooms);

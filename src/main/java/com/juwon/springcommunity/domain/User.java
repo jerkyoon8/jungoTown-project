@@ -22,9 +22,7 @@ public class User implements UserDetails {
 
     private Long id;
 
-    @NotBlank(message = "사용자 이름은 필수입니다.")
-    @Size(min = 3, max = 50, message = "사용자 이름은 3자 이상 50자 이하이어야 합니다.")
-    private String username;
+    private String username; // 임시 필드. 리팩토링 과정에서 제거 예정
 
     private String password;
 
@@ -40,6 +38,11 @@ public class User implements UserDetails {
 
     private String provider;
     private String providerId;
+
+    @Override
+    public String getUsername() {
+        return this.email; // Spring Security에서 사용자의 고유 ID로 email을 사용하도록 설정
+    }
 
     // 권한 확인 메서드
     @Override

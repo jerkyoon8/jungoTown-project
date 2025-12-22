@@ -94,12 +94,12 @@
 
     <!-- 로그인 실패 시 에러 메시지 표시 -->
     <div th:if="${param.error}" class="error-message">
-        <p>아이디 또는 비밀번호가 올바르지 않습니다.</p>
+        <p>이메일 또는 비밀번호가 올바르지 않습니다.</p>
     </div>
 
     <form th:action="@{/users/login}" method="post">
         <div class="form-group">
-            <input type="text" id="username" name="username" placeholder="아이디" required autofocus>
+            <input type="email" id="email" name="email" placeholder="이메일" required autofocus>
         </div>
         <div class="form-group">
             <input type="password" id="password" name="password" placeholder="비밀번호" required>

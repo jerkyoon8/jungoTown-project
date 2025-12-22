@@ -22,6 +22,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 
+import com.juwon.springcommunity.service.RecentProductService;
+
 @Controller
 @RequestMapping("/products")
 @Slf4j
@@ -29,10 +31,12 @@ public class ProductController {
 
     private final ProductService productService;
     private final UserService userService;
+    private final RecentProductService recentProductService;
 
-    public ProductController(ProductService productService, UserService userService) {
+    public ProductController(ProductService productService, UserService userService, RecentProductService recentProductService) {
         this.productService = productService;
         this.userService = userService;
+        this.recentProductService = recentProductService;
     }
 
     // 전체 상품 목록을 보여줌.
@@ -77,7 +81,7 @@ public class ProductController {
         }
 
         String username = principal.getName();
-        User user = userService.findUserByUsername(username);
+        User user = userService.findUserByEmail(username);
 
         productService.createProduct(productCreateRequestDto, user.getId());
 
@@ -91,12 +95,25 @@ public class ProductController {
         productService.checkIncreaseView(id, session); // 조회수 증가
         ProductResponseDto product = productService.findProductById(id);
         model.addAttribute("product", product);
-        
+
+        // === 최근 본 상품 기록 로직 추가 시작 ===
+        String userIdentifier;
+        if (principal != null) {
+            // 로그인 사용자: User ID 사용
+            User user = userService.findUserByEmail(principal.getName());
+            userIdentifier = "user:" + user.getId();
+        } else {
+            // 비로그인 사용자: Session ID 사용
+            userIdentifier = "session:" + session.getId();
+        }
+        recentProductService.addRecentProduct(userIdentifier, id);
+        // === 최근 본 상품 기록 로직 추가 끝 ===
+
         // 조회 상품이 자신이 작성한 상품인가 검사하는 로직
         boolean isOwner = false;
         if (principal != null) {
-            String username = userService.findUsernameById(product.getUserId());
-            isOwner = username.equals(principal.getName());
+            String ownerEmail = userService.findEmailById(product.getUserId());
+            isOwner = ownerEmail != null && ownerEmail.equals(principal.getName());
         }
         model.addAttribute("isOwner", isOwner);
 

@@ -97,4 +97,14 @@
     LIMIT #{size} OFFSET #{offset}
 </select>
 
+    <!-- ID 목록으로 상품 목록 조회 -->
+    <select id="findByIdIn" resultType="com.juwon.springcommunity.domain.Product">
+        SELECT id, title, content, user_id, category, price, deal_region, views, wishlist_count, created_at, updated_at
+        FROM product
+        WHERE id IN
+        <foreach item="id" collection="ids" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </select>
+
 </mapper>

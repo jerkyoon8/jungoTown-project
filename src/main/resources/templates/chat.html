@@ -86,7 +86,7 @@
         <div id="messages">
             <!-- 서버에서 받은 초기 메시지들을 여기서 렌더링 -->
             <th:block th:each="message : ${messages}">
-                <div class="message" th:classappend="${message.sender == #authentication.principal.username} ? 'sent' : 'received'" th:attr="data-message-id=${message.id}">
+                <div class="message" th:classappend="${message.sender == session.user.name} ? 'sent' : 'received'" th:attr="data-message-id=${message.id}">
                     <div class="sender" th:text="${message.sender}"></div>
                     <div class="content" th:text="${message.message}"></div>
                 </div>
@@ -107,7 +107,7 @@
     // --- (1) 서버에서 전달받은 데이터 ---
     const chatRoom = /*[[${chatRoom}]]*/ null;
     const initialMessages = /*[[${messages}]]*/ [];
-    const currentUsername = /*[[${#authentication.principal.username}]]*/ 'user';
+    const currentUsername = /*[[${session.user.name}]]*/ 'user';
 
     // --- (2) 채팅에 필요한 주요 변수 ---
     const chatRoomId = chatRoom ? chatRoom.id : 'default';

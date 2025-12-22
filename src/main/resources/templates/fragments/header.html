@@ -34,7 +34,7 @@
                     <!-- For authenticated users -->
                     <div sec:authorize="isAuthenticated()" class="auth-block">
                         <span class="user-info" sec:authentication="name"></span><span class="user-info">님</span>
-                        <a th:href="@{/users/{id}(id=${#authentication.principal.id})}">내 정보</a>
+                        <a th:href="@{/users/{id}(id=${session.user.id})}">내 정보</a>
                         <a th:href="@{/chat/rooms}">채팅</a>
                         <form th:action="@{/users/logout}" method="post">
                             <button type="submit">로그아웃</button>

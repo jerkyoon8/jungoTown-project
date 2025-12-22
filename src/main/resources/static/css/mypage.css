@@ -1,0 +1,108 @@
+.my-page-layout {
+    display: flex;
+    gap: 2rem;
+}
+
+/* Sidebar */
+.sidebar {
+    width: 200px;
+    flex-shrink: 0;
+}
+.sidebar-section h3 {
+    font-size: 1.2rem;
+    margin-bottom: 1rem;
+    border-bottom: 2px solid #333;
+    padding-bottom: 0.5rem;
+}
+.sidebar-menu {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+.sidebar-menu li a {
+    display: block;
+    padding: 0.6rem 0.2rem;
+    color: #555;
+    text-decoration: none;
+    font-size: 0.95rem;
+}
+.sidebar-menu li a:hover {
+    color: #000;
+    font-weight: 500;
+}
+.sidebar-section + .sidebar-section {
+    margin-top: 2.5rem;
+}
+
+/* Main Content */
+.main-content {
+    flex-grow: 1;
+}
+
+/* Profile Section */
+.profile-section {
+    display: flex;
+    align-items: center;
+    padding: 1rem;
+    margin-bottom: 2rem;
+}
+.profile-icon {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    background-color: #eee;
+    margin-right: 1.5rem;
+    background-size: cover;
+    background-position: center;
+}
+.profile-info .nickname {
+    font-size: 1.5rem;
+    font-weight: bold;
+}
+
+/* Product Section */
+.product-section .tabs {
+    display: flex;
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    border-bottom: 1px solid #ddd;
+}
+.product-section .tabs .tab-item {
+    padding: 0.8rem 1.2rem;
+    cursor: pointer;
+    color: #888;
+    font-weight: 500;
+}
+.product-section .tabs .tab-item.active {
+    color: #333;
+    border-bottom: 3px solid #333;
+    margin-bottom: -1px;
+}
+.product-content-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 0;
+}
+.product-count {
+    font-size: 0.9rem;
+    color: #666;
+}
+.sort-options a {
+    font-size: 0.9rem;
+    color: #888;
+    text-decoration: none;
+    margin-left: 1rem;
+}
+.sort-options a.active {
+    color: #333;
+    font-weight: 500;
+}
+.product-list-empty {
+    text-align: center;
+    padding: 5rem 0;
+    color: #aaa;
+    border: 1px solid #f0f0f0;
+    border-top: none;
+}

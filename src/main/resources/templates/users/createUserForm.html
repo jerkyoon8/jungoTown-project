@@ -102,14 +102,6 @@
     </div>
     <form th:action="@{/users}" th:object="${userCreateRequestDto}" method="post">
         <div class="form-group">
-            <div class="input-group">
-                <input type="text" id="username" th:field="*{username}" placeholder="아이디" required>
-                <button type="button" id="check-username-btn">중복 확인</button>
-            </div>
-            <div id="username-message" class="message"></div>
-            <div th:if="${#fields.hasErrors('username')}" th:errors="*{username}" class="message error"></div>
-        </div>
-        <div class="form-group">
             <input type="email" id="email" th:field="*{email}" placeholder="이메일" required>
             <div th:if="${#fields.hasErrors('email')}" th:errors="*{email}" class="message error"></div>
         </div>
@@ -141,7 +133,7 @@
 
         button.addEventListener('click', function() {
             const value = input.value;
-            const name = inputId === 'username' ? '아이디' : '닉네임';
+            const name = '닉네임';
 
             if (!value) {
                 message.textContent = name + '을(를) 입력해주세요.';
@@ -171,7 +163,6 @@
         });
     }
 
-    setupCheck('username', 'check-username-btn', 'username-message', '/users/check-username');
     setupCheck('nickname', 'check-nickname-btn', 'nickname-message', '/users/check-nickname');
 </script>
 

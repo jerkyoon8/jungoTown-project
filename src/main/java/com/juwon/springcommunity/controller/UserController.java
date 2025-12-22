@@ -17,7 +17,6 @@ import java.security.Principal;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import com.juwon.springcommunity.security.oauth.SessionUser;
 
 @Controller
 public class UserController {
@@ -26,18 +25,6 @@ public class UserController {
 
     public UserController(UserService userService) {
         this.userService = userService;
-    }
-
-    // 사용자 ID 중복 확인
-    @GetMapping("/users/check-username")
-    @ResponseBody
-    public ResponseEntity<Map<String, Boolean>> checkUsernameDuplicate(@RequestParam String username) {
-
-        boolean isDuplicate = userService.isUsernameDuplicate(username);
-        Map<String, Boolean> response = new HashMap<>();
-        response.put("isDuplicate", isDuplicate);
-
-        return ResponseEntity.ok(response);
     }
 
     // 닉네임 중복 확인
@@ -64,16 +51,15 @@ public class UserController {
             return "users/createUserForm";
         }
 
-
-        // 비밀번호와 비밀번호 확인이 일치하는지 검사
         try {
             userService.createUser(dto);
         } catch (IllegalArgumentException e) {
-            bindingResult.rejectValue("passwordConfirm", "password.mismatch", e.getMessage());
+            // 이메일 중복 또는 비밀번호 불일치 등 에러 처리
+            bindingResult.reject("signupFailed", e.getMessage());
             return "users/createUserForm";
         }
 
-        return "redirect:/users";
+        return "redirect:/";
     }
 
     // 전체 사용자 목록을 보여준다
@@ -91,11 +77,13 @@ public class UserController {
         UserResponseDto user = userService.findUserById(userId);
         model.addAttribute("user", user);
 
-        boolean isAuthorized = userService.isAuthorized(user.getUsername(), currentUser);
+        boolean isAuthorized = userService.isAuthorized(user.getEmail(), currentUser);
         model.addAttribute("isAuthorized", isAuthorized);
 
         return "users/userDetail";
     }
+
+
 
     // 사용자 정보 수정 폼을 보여준다
     @GetMapping("/users/{userId}/edit")
@@ -104,8 +92,7 @@ public class UserController {
         
         // 응답 DTO의 정보로 수정 DTO를 만들어 모델에 추가
         UserUpdateRequestDto userUpdateRequestDto = new UserUpdateRequestDto();
-        userUpdateRequestDto.setUsername(userResponseDto.getUsername());
-        userUpdateRequestDto.setEmail(userResponseDto.getEmail());
+        userUpdateRequestDto.setNickname(userResponseDto.getNickname());
 
         model.addAttribute("userUpdateRequestDto", userUpdateRequestDto);
         model.addAttribute("userId", userId);
@@ -143,8 +130,8 @@ public class UserController {
         if (principal == null) {
             return "redirect:/users/login";
         }
-        String username = principal.getName();
-        UserResponseDto user = userService.findUserDtoByUsername(username);
+        String email = principal.getName(); // 이제 principal.getName()은 email을 반환
+        UserResponseDto user = userService.findUserDtoByEmail(email);
         model.addAttribute("user", user);
 
         return "users/myPage";

@@ -12,7 +12,6 @@ import lombok.Data;
 public class UserResponseDto {
 
     private Long id;
-    private String username;
     private String email;
     private String nickname;
     private Role role;
@@ -20,7 +19,6 @@ public class UserResponseDto {
     // User 엔티티를 UserResponseDto로 변환하는 생성자
     public UserResponseDto(User user) {
         this.id = user.getId();
-        this.username = user.getUsername();
         this.email = user.getEmail();
         this.nickname = user.getNickname();
         this.role = user.getRole();
