@@ -6,6 +6,7 @@ import com.juwon.springcommunity.service.RecentProductService;
 import com.juwon.springcommunity.service.UserService;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -30,7 +31,12 @@ public class HomeController {
         // === (유지) 최근 본 상품 목록 조회 로직 추가 시작 ===
         String userIdentifier;
         if (principal != null) {
-            User user = userService.findUserByEmail(principal.getName());
+            String email = principal.getName();
+            if (principal instanceof OAuth2AuthenticationToken) {
+                // OAuth2 로그인인 경우 email 속성을 가져옴
+                email = ((OAuth2AuthenticationToken) principal).getPrincipal().getAttribute("email");
+            }
+            User user = userService.findUserByEmail(email);
             userIdentifier = "user:" + user.getId();
         } else {
             userIdentifier = "session:" + session.getId();

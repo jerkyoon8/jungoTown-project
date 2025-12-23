@@ -10,6 +10,7 @@ import com.juwon.springcommunity.service.UserService;
 import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -81,6 +82,9 @@ public class ProductController {
         }
 
         String username = principal.getName();
+        if (principal instanceof OAuth2AuthenticationToken) {
+            username = ((OAuth2AuthenticationToken) principal).getPrincipal().getAttribute("email");
+        }
         User user = userService.findUserByEmail(username);
 
         productService.createProduct(productCreateRequestDto, user.getId());
@@ -100,7 +104,11 @@ public class ProductController {
         String userIdentifier;
         if (principal != null) {
             // 로그인 사용자: User ID 사용
-            User user = userService.findUserByEmail(principal.getName());
+            String email = principal.getName();
+            if (principal instanceof OAuth2AuthenticationToken) {
+                email = ((OAuth2AuthenticationToken) principal).getPrincipal().getAttribute("email");
+            }
+            User user = userService.findUserByEmail(email);
             userIdentifier = "user:" + user.getId();
         } else {
             // 비로그인 사용자: Session ID 사용
@@ -113,7 +121,11 @@ public class ProductController {
         boolean isOwner = false;
         if (principal != null) {
             String ownerEmail = userService.findEmailById(product.getUserId());
-            isOwner = ownerEmail != null && ownerEmail.equals(principal.getName());
+            String currentUserEmail = principal.getName();
+            if (principal instanceof OAuth2AuthenticationToken) {
+                currentUserEmail = ((OAuth2AuthenticationToken) principal).getPrincipal().getAttribute("email");
+            }
+            isOwner = ownerEmail != null && ownerEmail.equals(currentUserEmail);
         }
         model.addAttribute("isOwner", isOwner);
 

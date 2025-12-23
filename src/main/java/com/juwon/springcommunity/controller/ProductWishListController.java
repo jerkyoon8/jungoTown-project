@@ -5,6 +5,7 @@ import com.juwon.springcommunity.service.ProductWishListService;
 import com.juwon.springcommunity.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -23,7 +24,11 @@ public class ProductWishListController {
     // 상품의 찜하기를 추가한다.
     @PostMapping("/wishlist/{productId}")
     public ResponseEntity<Map<String, String>> addWishlist(@PathVariable Long productId, Principal principal) {
-        User user = userService.findUserByEmail(principal.getName());
+        String username = principal.getName();
+        if (principal instanceof OAuth2AuthenticationToken) {
+            username = ((OAuth2AuthenticationToken) principal).getPrincipal().getAttribute("email");
+        }
+        User user = userService.findUserByEmail(username);
         Long userId = user.getId();
 
         try {

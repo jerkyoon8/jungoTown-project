@@ -7,6 +7,7 @@ import com.juwon.springcommunity.service.UserService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -130,7 +131,10 @@ public class UserController {
         if (principal == null) {
             return "redirect:/users/login";
         }
-        String email = principal.getName(); // 이제 principal.getName()은 email을 반환
+        String email = principal.getName();
+        if (principal instanceof OAuth2AuthenticationToken) {
+            email = ((OAuth2AuthenticationToken) principal).getPrincipal().getAttribute("email");
+        }
         UserResponseDto user = userService.findUserDtoByEmail(email);
         model.addAttribute("user", user);
 
