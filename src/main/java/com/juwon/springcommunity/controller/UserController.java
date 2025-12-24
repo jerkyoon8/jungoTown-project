@@ -3,6 +3,7 @@ package com.juwon.springcommunity.controller;
 import com.juwon.springcommunity.dto.UserCreateRequestDto;
 import com.juwon.springcommunity.dto.UserResponseDto;
 import com.juwon.springcommunity.dto.UserUpdateRequestDto;
+import com.juwon.springcommunity.security.oauth.SessionUser;
 import com.juwon.springcommunity.service.UserService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -74,11 +75,11 @@ public class UserController {
     // 특정 사용자 상세 정보를 보여준다
     @GetMapping("/users/{userId}")
     public String getUserById(@PathVariable Long userId, Model model,
-                              @AuthenticationPrincipal UserDetails currentUser) {
+                              @SessionAttribute(name = "user", required = false) SessionUser sessionUser) {
         UserResponseDto user = userService.findUserById(userId);
         model.addAttribute("user", user);
 
-        boolean isAuthorized = userService.isAuthorized(user.getEmail(), currentUser);
+        boolean isAuthorized = userService.isAuthorized(user.getEmail(), sessionUser);
         model.addAttribute("isAuthorized", isAuthorized);
 
         return "users/userDetail";

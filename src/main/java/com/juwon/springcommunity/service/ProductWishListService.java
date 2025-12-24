@@ -1,6 +1,8 @@
 package com.juwon.springcommunity.service;
 
 import com.juwon.springcommunity.domain.Product;
+import com.juwon.springcommunity.dto.WishListResponseDto;
+import com.juwon.springcommunity.repository.ProductImageRepository;
 import com.juwon.springcommunity.repository.ProductRepository;
 import com.juwon.springcommunity.repository.ProductWishListRepository;
 import lombok.RequiredArgsConstructor;
@@ -8,7 +10,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -17,6 +21,7 @@ public class ProductWishListService {
 
     private final ProductWishListRepository productWishListRepository;
     private final ProductRepository productRepository; // 상품 존재 여부 확인을 위해 추가
+    private final ProductImageRepository productImageRepository;
 
 
     // 찜하기를 추가한다.
@@ -51,5 +56,15 @@ public class ProductWishListService {
 
         // 3. 이미 존재하면 false 반환
         return false;
+    }
+
+    // 찜 목록 조회
+    public List<WishListResponseDto> getWishList(Long userId) {
+        List<Product> products = productWishListRepository.findWishListByUserId(userId);
+        return products.stream()
+                .map(product -> {
+                    return new WishListResponseDto(product, productImageRepository.findByProductId(product.getId()));
+                })
+                .collect(Collectors.toList());
     }
 }

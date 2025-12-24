@@ -34,3 +34,6 @@ GEMINI.md
 
 # Gemini 문서
 docs/
+
+# 마크다운 파일
+*.md

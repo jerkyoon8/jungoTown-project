@@ -2,22 +2,24 @@ package com.juwon.springcommunity.controller;
 
 import com.juwon.springcommunity.domain.ChatMessage;
 import com.juwon.springcommunity.domain.ChatRoom;
-import com.juwon.springcommunity.domain.Notification;
 import com.juwon.springcommunity.domain.User;
 import com.juwon.springcommunity.repository.UserRepository;
+import com.juwon.springcommunity.security.oauth.SessionUser;
 import com.juwon.springcommunity.service.ChatMessageService;
 import com.juwon.springcommunity.service.ChatRoomService;
 import com.juwon.springcommunity.service.NotificationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.simp.SimpMessageSendingOperations;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.SessionAttribute;
 
+import java.security.Principal;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -33,27 +35,40 @@ public class ChatController {
 
     // 메세지 전송
     @MessageMapping("/chat/message")
-    public void message(ChatMessage message) {
+    public void message(ChatMessage message, Principal principal) {
+        if (principal == null) {
+            // 로그인 안된 사용자 처리 (예외 혹은 무시)
+            return; 
+        }
+        
+        String email = principal.getName();
+        if (principal instanceof OAuth2AuthenticationToken) {
+            OAuth2AuthenticationToken oauthToken = (OAuth2AuthenticationToken) principal;
+            email = oauthToken.getPrincipal().getAttribute("email");
+        }
+        
+        User user = userRepository.findByEmail(email)
+                 .orElseThrow(() -> new IllegalArgumentException("사용자 없음"));
+
+        message.setSender(user.getNickname()); // DB 저장용 닉네임
+        message.setSenderId(user.getId());     // DB 저장용 ID
         message.setCreatedAt(LocalDateTime.now());
+        
         chatMessageService.saveMessage(message);
         messagingTemplate.convertAndSend("/topic/chat/room/" + message.getRoomId(), message);
 
 
-        String receiver = chatRoomService.findReceiver(message.getRoomId(), message.getSender());
+        String receiver = chatRoomService.findReceiver(message.getRoomId(), user.getNickname()); 
+        // findReceiver가 String(닉네임)을 반환한다고 가정. 
+        // 만약 email을 반환한다면 로직 확인 필요. -> 기존 코드가 sender(String)를 썼으므로 닉네임일 확률 높음.
+        
         notificationService.notifyChatRoomMessage(message, receiver);
-
-        // notificationService 를 호출해서 message 를 전송
-        // 로그인, 비로그인 구분 로직 + chatRoom URL 연결되어 있는가?
-        // 구분해서 메세지 type 에 따른 전송을 이루어지게 만들어야함.
     }
 
     @GetMapping("/chat/room/{productId}")
     // 방을 생성함.
-    public String createChatRoom(@PathVariable Long productId, @AuthenticationPrincipal UserDetails currentUser) {
-        User buyer = userRepository.findByEmail(currentUser.getUsername())
-                .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
-
-        Long chatRoomId = chatRoomService.getOrCreateChatRoom(productId, buyer.getId());
+    public String createChatRoom(@PathVariable Long productId, @SessionAttribute("user") SessionUser sessionUser) {
+        Long chatRoomId = chatRoomService.getOrCreateChatRoom(productId, sessionUser.getId());
 
         return "redirect:/chat/" + chatRoomId;
     }
@@ -68,11 +83,30 @@ public class ChatController {
     }
 
     @GetMapping("/chat/rooms")
-    public String chatRoomList(@AuthenticationPrincipal UserDetails currentUser, Model model) {
-        User user = userRepository.findByEmail(currentUser.getUsername())
-                .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
-        List<ChatRoom> chatRooms = chatRoomService.findAllRoomsByUserId(user.getId());
+    public String chatRoomList(@SessionAttribute("user") SessionUser sessionUser, Model model) {
+        List<ChatRoom> chatRooms = chatRoomService.findAllRoomsByUserId(sessionUser.getId());
         model.addAttribute("chatRooms", chatRooms);
         return "chatRoomList";
+    }
+
+    // --- API Endpoints for Overlay Chat ---
+
+    @GetMapping("/api/chat/rooms")
+    @ResponseBody
+    public List<ChatRoom> apiChatRooms(@SessionAttribute(name = "user", required = false) SessionUser sessionUser) {
+        if (sessionUser == null) return List.of();
+        return chatRoomService.findAllRoomsByUserId(sessionUser.getId());
+    }
+
+    @GetMapping("/api/chat/messages/{roomId}")
+    @ResponseBody
+    public List<ChatMessage> apiChatMessages(@PathVariable Long roomId) {
+        return chatMessageService.getMessages(roomId, null);
+    }
+
+    @GetMapping("/api/chat/room/{roomId}")
+    @ResponseBody
+    public ChatRoom apiChatRoom(@PathVariable Long roomId) {
+        return chatRoomService.findRoomById(roomId);
     }
 }

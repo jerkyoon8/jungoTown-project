@@ -15,4 +15,12 @@
         VALUES (#{userId}, #{productId})
     </insert>
 
+    <select id="findWishListByUserId" resultType="com.juwon.springcommunity.domain.Product">
+        SELECT p.*
+        FROM product p
+        JOIN product_wishlist w ON p.id = w.product_id
+        WHERE w.user_id = #{userId}
+        ORDER BY p.created_at DESC
+    </select>
+
 </mapper>

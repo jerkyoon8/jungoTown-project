@@ -1,16 +1,19 @@
 package com.juwon.springcommunity.controller;
 
 import com.juwon.springcommunity.domain.User;
+import com.juwon.springcommunity.dto.WishListResponseDto;
 import com.juwon.springcommunity.service.ProductWishListService;
 import com.juwon.springcommunity.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.security.Principal;
+import java.util.List;
 import java.util.Map;
 
 
@@ -44,5 +47,21 @@ public class ProductWishListController {
             // 서비스에서 상품이 존재하지 않을 경우 던진 예외를 처리합니다.
             return ResponseEntity.notFound().build(); // 404 Not Found
         }
+    }
+
+    // 찜 목록 조회 API
+    @GetMapping("/api/wishlist")
+    public ResponseEntity<List<WishListResponseDto>> getWishList(Principal principal) {
+        if (principal == null) {
+            return ResponseEntity.status(401).build(); // 로그인 필요
+        }
+        String username = principal.getName();
+        if (principal instanceof OAuth2AuthenticationToken) {
+            username = ((OAuth2AuthenticationToken) principal).getPrincipal().getAttribute("email");
+        }
+        User user = userService.findUserByEmail(username);
+        
+        List<WishListResponseDto> wishList = productWishListService.getWishList(user.getId());
+        return ResponseEntity.ok(wishList);
     }
 }

@@ -1,7 +1,10 @@
 package com.juwon.springcommunity.repository;
 
+import com.juwon.springcommunity.domain.Product;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
+
+import java.util.List;
 
 @Mapper
 public interface ProductWishListRepository {
@@ -20,4 +23,11 @@ public interface ProductWishListRepository {
      * @param productId 상품 ID
      */
     void save(@Param("userId") Long userId, @Param("productId") Long productId);
+
+    /**
+     * 사용자가 찜한 상품 목록을 조회합니다.
+     * @param userId 사용자 ID
+     * @return 찜한 상품 리스트
+     */
+    List<Product> findWishListByUserId(@Param("userId") Long userId);
 }

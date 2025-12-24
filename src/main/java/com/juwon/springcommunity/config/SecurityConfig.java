@@ -13,6 +13,7 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 
@@ -33,17 +34,25 @@ public class SecurityConfig {
     @Bean
     public AuthenticationSuccessHandler customLoginSuccessHandler() {
         return (request, response, authentication) -> {
-            // 인증된 사용자 정보 가져오기
-            UserDetails userDetails = (UserDetails) authentication.getPrincipal();
-            String username = userDetails.getUsername();
+            String email = null;
+            Object principal = authentication.getPrincipal();
 
-            // DB에서 전체 사용자 정보 조회
-            User user = userRepository.findByEmail(username) // 이메일을 username으로 사용한다고 가정
-                    .orElseThrow(() -> new IllegalStateException("Cannot find user with email: " + username));
+            if (principal instanceof UserDetails) {
+                email = ((UserDetails) principal).getUsername();
+            } else if (principal instanceof OAuth2User) {
+                email = ((OAuth2User) principal).getAttribute("email");
+            }
+            
+            if (email != null) {
+                String finalEmail = email;
+                // DB에서 전체 사용자 정보 조회
+                User user = userRepository.findByEmail(finalEmail) // 이메일을 username으로 사용한다고 가정
+                        .orElseThrow(() -> new IllegalStateException("Cannot find user with email: " + finalEmail));
 
-            // 세션에 SessionUser 저장
-            HttpSession session = request.getSession();
-            session.setAttribute("user", new SessionUser(user));
+                // 세션에 SessionUser 저장
+                HttpSession session = request.getSession();
+                session.setAttribute("user", new SessionUser(user));
+            }
 
             // 홈페이지로 리디렉션
             response.sendRedirect("/");

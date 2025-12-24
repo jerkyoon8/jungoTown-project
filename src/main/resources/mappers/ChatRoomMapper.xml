@@ -16,13 +16,13 @@
 
         <association property="buyer" javaType="com.juwon.springcommunity.domain.User">
             <id property="id" column="buyer_id"/>
-            <result property="username" column="buyer_username"/>
+            <result property="email" column="buyer_email"/>
             <result property="nickname" column="buyer_nickname"/>
         </association>
 
         <association property="seller" javaType="com.juwon.springcommunity.domain.User">
             <id property="id" column="seller_id"/>
-            <result property="username" column="seller_username"/>
+            <result property="email" column="seller_email"/>
             <result property="nickname" column="seller_nickname"/>
         </association>
 
@@ -40,10 +40,10 @@
             p.id as product_id,
             p.title as product_title,
             buyer.id as buyer_id,
-            buyer.username as buyer_username,
+            buyer.email as buyer_email,
             buyer.nickname as buyer_nickname,
             seller.id as seller_id,
-            seller.username as seller_username,
+            seller.email as seller_email,
             seller.nickname as seller_nickname
         FROM chat_room cr
         JOIN product p ON cr.product_id = p.id
@@ -59,10 +59,10 @@
             p.id as product_id,
             p.title as product_title,
             buyer.id as buyer_id,
-            buyer.username as buyer_username,
+            buyer.email as buyer_email,
             buyer.nickname as buyer_nickname,
             seller.id as seller_id,
-            seller.username as seller_username,
+            seller.email as seller_email,
             seller.nickname as seller_nickname
         FROM chat_room cr
         JOIN product p ON cr.product_id = p.id
@@ -78,10 +78,10 @@
             p.id as product_id,
             p.title as product_title,
             buyer.id as buyer_id,
-            buyer.username as buyer_username,
+            buyer.email as buyer_email,
             buyer.nickname as buyer_nickname,
             seller.id as seller_id,
-            seller.username as seller_username,
+            seller.email as seller_email,
             seller.nickname as seller_nickname
         FROM chat_room cr
         JOIN product p ON cr.product_id = p.id

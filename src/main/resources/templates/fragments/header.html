@@ -33,9 +33,9 @@
 
                     <!-- For authenticated users -->
                     <div sec:authorize="isAuthenticated()" class="auth-block">
-                        <span class="user-info" sec:authentication="name"></span><span class="user-info">님</span>
+                        <span class="user-info" th:if="${session.user != null}" th:text="${session.user.nickname}"></span><span class="user-info">님</span>
                         <a th:href="@{/users/{id}(id=${session.user.id})}">내 정보</a>
-                        <a th:href="@{/chat/rooms}">채팅</a>
+                        <a href="#" id="chat-btn">채팅</a>
                         <form th:action="@{/users/logout}" method="post">
                             <button type="submit">로그아웃</button>
                         </form>
@@ -46,13 +46,320 @@
         <nav class="header-nav">
             <ul>
                 <li><a href="#">카테고리</a></li>
-                <li><a th:href="@{/wishes}">찜한 상품</a></li>
+                <li><a href="#" id="wishlist-btn">찜한 상품</a></li>
                 <li><a href="#">임시메뉴</a></li>
                 <li><a href="#">추가메뉴</a></li>
                 <li><a href="#">테스트</a></li>
             </ul>
         </nav>
     </div>
+
+    <!-- Wishlist Sidebar & Overlay -->
+    <div id="wishlist-overlay" class="wishlist-overlay"></div>
+    <div id="wishlist-sidebar" class="wishlist-sidebar">
+        <div class="sidebar-header">
+            <h2>찜한 상품</h2>
+            <button id="close-wishlist" class="close-btn">&times;</button>
+        </div>
+        <div class="sidebar-content">
+            <!-- 여기에 찜한 상품 목록이 동적으로 로드되거나 표시됩니다 -->
+            <p>찜한 상품 목록이 여기에 표시됩니다.</p>
+        </div>
+    </div>
+
+    <!-- Chat Sidebar & Overlay -->
+    <div id="chat-overlay" class="chat-overlay"></div>
+    <div id="chat-sidebar" class="chat-sidebar">
+        <!-- Chat List View -->
+        <div id="chat-list-view">
+            <div class="sidebar-header">
+                <h2>채팅 목록</h2>
+                <button id="close-chat" class="close-btn">&times;</button>
+            </div>
+            <div class="sidebar-content" id="chat-list-content">
+                <p style="padding: 20px;">채팅 목록을 불러오는 중...</p>
+            </div>
+        </div>
+
+        <!-- Chat Room View (Hidden by default) -->
+        <div id="chat-room-view" style="display: none; height: 100%; flex-direction: column;">
+            <div class="sidebar-header">
+                <div style="display: flex; align-items: center;">
+                    <button id="back-to-chat-list" class="back-to-list-btn">←</button>
+                    <h2 id="current-chat-title">채팅방</h2>
+                </div>
+                <button id="close-chat-room" class="close-btn">&times;</button>
+            </div>
+            <div class="chat-messages-area" id="chat-messages-area">
+                <!-- Messages will be loaded here -->
+            </div>
+            <div class="chat-input-area">
+                <input type="text" id="chat-input" class="chat-input" placeholder="메시지 입력...">
+                <button id="send-chat-btn" class="chat-send-btn">전송</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // --- Wishlist Logic ---
+            const wishlistBtn = document.getElementById('wishlist-btn');
+            const wishlistOverlay = document.getElementById('wishlist-overlay');
+            const wishlistSidebar = document.getElementById('wishlist-sidebar');
+            const closeWishlistBtn = document.getElementById('close-wishlist');
+            const wishlistContent = document.querySelector('.sidebar-content');
+
+            function openWishlist(e) {
+                e.preventDefault();
+                wishlistOverlay.classList.add('active');
+                wishlistSidebar.classList.add('active');
+                loadWishList();
+            }
+
+            function closeWishlist() {
+                wishlistOverlay.classList.remove('active');
+                wishlistSidebar.classList.remove('active');
+            }
+
+            function loadWishList() {
+                wishlistContent.innerHTML = '<p style="padding: 20px;">로딩 중...</p>';
+                fetch('/api/wishlist')
+                    .then(response => {
+                        if (response.status === 401) throw new Error('로그인이 필요합니다.');
+                        if (!response.ok) throw new Error('데이터 오류');
+                        return response.json();
+                    })
+                    .then(products => {
+                        if (products.length === 0) {
+                            wishlistContent.innerHTML = '<p style="padding: 20px;">찜한 상품이 없습니다.</p>';
+                            return;
+                        }
+                        let html = '<ul class="wishlist-items">';
+                        products.forEach(product => {
+                            html += `
+                                <li class="wishlist-item">
+                                    <a href="/products/${product.id}" class="wishlist-link">
+                                        <img src="${product.thumbnailUrl}" alt="${product.title}" class="wishlist-thumb">
+                                        <div class="wishlist-info">
+                                            <p class="wishlist-title">${product.title}</p>
+                                            <p class="wishlist-price">${product.price.toLocaleString()}원</p>
+                                        </div>
+                                    </a>
+                                </li>
+                            `;
+                        });
+                        html += '</ul>';
+                        wishlistContent.innerHTML = html;
+                    })
+                    .catch(error => {
+                        if (error.message === '로그인이 필요합니다.') {
+                            wishlistContent.innerHTML = '<p style="padding: 20px;"><a href="/users/login">로그인</a>이 필요합니다.</p>';
+                        } else {
+                            wishlistContent.innerHTML = '<p style="padding: 20px;">불러오기 실패</p>';
+                        }
+                    });
+            }
+
+            if(wishlistBtn) wishlistBtn.addEventListener('click', openWishlist);
+            if(closeWishlistBtn) closeWishlistBtn.addEventListener('click', closeWishlist);
+            if(wishlistOverlay) wishlistOverlay.addEventListener('click', closeWishlist);
+
+
+            // --- Chat Overlay Logic ---
+            const chatBtn = document.getElementById('chat-btn');
+            const chatOverlay = document.getElementById('chat-overlay');
+            const chatSidebar = document.getElementById('chat-sidebar');
+            const closeChatBtn = document.getElementById('close-chat');
+            const closeChatRoomBtn = document.getElementById('close-chat-room');
+            const chatListContent = document.getElementById('chat-list-content');
+            const chatListView = document.getElementById('chat-list-view');
+            const chatRoomView = document.getElementById('chat-room-view');
+            const backToChatListBtn = document.getElementById('back-to-chat-list');
+            const chatMessagesArea = document.getElementById('chat-messages-area');
+            const chatInput = document.getElementById('chat-input');
+            const sendChatBtn = document.getElementById('send-chat-btn');
+            const currentChatTitle = document.getElementById('current-chat-title');
+
+            let currentRoomId = null;
+            let currentSubscription = null;
+            // 전역 stompClient 사용 (notifications.html 혹은 layout에서 초기화된 것 가정)
+            // 만약 없으면 여기서 새로 연결 로직 필요하지만, 보통 layout에 포함됨.
+            // 안전을 위해 여기서 연결 확인 로직 추가 가능.
+
+            function openChat(e) {
+                e.preventDefault();
+                chatOverlay.classList.add('active');
+                chatSidebar.classList.add('active');
+                showChatList();
+                loadChatRooms();
+            }
+
+            function closeChat() {
+                chatOverlay.classList.remove('active');
+                chatSidebar.classList.remove('active');
+                if (currentSubscription) {
+                    currentSubscription.unsubscribe();
+                    currentSubscription = null;
+                }
+                currentRoomId = null;
+            }
+
+            function showChatList() {
+                chatListView.style.display = 'block';
+                chatRoomView.style.display = 'none';
+                if (currentSubscription) {
+                    currentSubscription.unsubscribe();
+                    currentSubscription = null;
+                }
+                currentRoomId = null;
+            }
+
+            function showChatRoom(roomName) {
+                chatListView.style.display = 'none';
+                chatRoomView.style.display = 'flex'; // flex로 설정해야 내부 레이아웃 유지
+                currentChatTitle.innerText = roomName || '채팅방';
+            }
+
+            function loadChatRooms() {
+                chatListContent.innerHTML = '<p style="padding: 20px;">로딩 중...</p>';
+                fetch('/api/chat/rooms')
+                    .then(response => {
+                        if(response.status === 401) throw new Error('로그인 필요');
+                        return response.json();
+                    })
+                    .then(rooms => {
+                        if (!rooms || rooms.length === 0) {
+                            chatListContent.innerHTML = '<p style="padding: 20px;">참여 중인 채팅방이 없습니다.</p>';
+                            return;
+                        }
+                        let html = '<div class="chat-room-list">';
+                        rooms.forEach(room => {
+                            // 상대방 이름 찾기 (내가 buyer면 seller, seller면 buyer)
+                            // 현재 내 정보가 JS에 없으므로, 편의상 둘 다 표시하거나 API가 가공해서 주면 좋음.
+                            // 여기서는 간단히 product title과 상대방 정보를 조합.
+                            // *실제로는 currentUserId가 필요함.
+                            // 임시로 user info 없이 상품명 위주로 표시
+                            let roomName = room.product ? room.product.title : '알 수 없는 상품';
+                            
+                            html += `
+                                <div class="chat-room-item" data-room-id="${room.id}" data-room-name="${roomName}">
+                                    <div class="chat-room-title">${roomName}</div>
+                                    <div class="chat-room-info">
+                                        <span>${room.buyer ? room.buyer.nickname : '구매자'} / ${room.seller ? room.seller.nickname : '판매자'}</span>
+                                    </div>
+                                </div>
+                            `;
+                        });
+                        html += '</div>';
+                        chatListContent.innerHTML = html;
+
+                        // 클릭 이벤트 바인딩
+                        document.querySelectorAll('.chat-room-item').forEach(item => {
+                            item.addEventListener('click', function() {
+                                const roomId = this.getAttribute('data-room-id');
+                                const roomName = this.getAttribute('data-room-name');
+                                enterChatRoom(roomId, roomName);
+                            });
+                        });
+                    })
+                    .catch(err => {
+                        console.error(err);
+                        if(err.message === '로그인 필요') {
+                            chatListContent.innerHTML = '<p style="padding: 20px;"><a href="/users/login">로그인</a>하세요.</p>';
+                        } else {
+                            chatListContent.innerHTML = '<p style="padding: 20px;">목록 로드 실패</p>';
+                        }
+                    });
+            }
+
+            function enterChatRoom(roomId, roomName) {
+                currentRoomId = roomId;
+                showChatRoom(roomName);
+                chatMessagesArea.innerHTML = '<p style="padding: 10px; text-align: center; color: #999;">대화 내역을 불러오는 중...</p>';
+                
+                // 1. Load Messages
+                fetch('/api/chat/messages/' + roomId)
+                    .then(res => res.json())
+                    .then(messages => {
+                        chatMessagesArea.innerHTML = ''; // 초기화
+                        messages.forEach(msg => {
+                            appendMessage(msg);
+                        });
+                        scrollToBottom();
+                    });
+
+                // 2. Subscribe WebSocket
+                if (typeof stompClient !== 'undefined' && stompClient && stompClient.connected) {
+                    currentSubscription = stompClient.subscribe('/topic/chat/room/' + roomId, function(message) {
+                        const msgBody = JSON.parse(message.body);
+                        appendMessage(msgBody);
+                        scrollToBottom();
+                    });
+                } else {
+                    console.error("WebSocket is not connected.");
+                    // 재연결 로직이 필요할 수 있음
+                }
+            }
+
+            function appendMessage(msg) {
+                const div = document.createElement('div');
+                // 내 메시지인지 구분하려면 currentUserId 필요.
+                // 임시로: 내가 보낸건지 알 수 없으므로 모두 'other-message' 처럼 보이거나
+                // 메시지에 sender 정보가 있으니 그것을 표시.
+                // * 개선점: API가 isMine 필드를 주거나 HTML에 currentUserId를 박아둬야 함.
+                // 여기서는 단순히 모든 메시지를 왼쪽에 띄우되, 보낸 사람 이름을 표시.
+                
+                div.className = 'message-bubble other-message'; 
+                // 만약 msg.sender === myNickname (JS변수필요) 이면 'my-message' 추가
+                
+                div.innerHTML = `
+                    <div class="message-sender">${msg.sender}</div>
+                    ${msg.message}
+                `;
+                chatMessagesArea.appendChild(div);
+            }
+
+            function sendMessage() {
+                const text = chatInput.value.trim();
+                if(!text || !currentRoomId) return;
+
+                // 닉네임 가져오기: 헤더에 있는 user-info 활용
+                const userInfoSpan = document.querySelector('.user-info');
+                const sender = userInfoSpan ? userInfoSpan.innerText : '익명';
+
+                const chatMessage = {
+                    roomId: currentRoomId,
+                    sender: sender,
+                    message: text
+                };
+
+                if (typeof stompClient !== 'undefined' && stompClient && stompClient.connected) {
+                    stompClient.send("/app/chat/message", {}, JSON.stringify(chatMessage));
+                    chatInput.value = '';
+                } else {
+                    alert("채팅 서버와 연결되어 있지 않습니다.");
+                }
+            }
+
+            function scrollToBottom() {
+                chatMessagesArea.scrollTop = chatMessagesArea.scrollHeight;
+            }
+
+            // 이벤트 리스너 등록
+            if(chatBtn) chatBtn.addEventListener('click', openChat);
+            if(closeChatBtn) closeChatBtn.addEventListener('click', closeChat);
+            if(closeChatRoomBtn) closeChatRoomBtn.addEventListener('click', closeChat); // 방에서 닫기 눌러도 전체 닫기
+            if(chatOverlay) chatOverlay.addEventListener('click', closeChat);
+            if(backToChatListBtn) backToChatListBtn.addEventListener('click', showChatList);
+            
+            if(sendChatBtn) sendChatBtn.addEventListener('click', sendMessage);
+            if(chatInput) {
+                chatInput.addEventListener('keypress', function(e) {
+                    if(e.key === 'Enter') sendMessage();
+                });
+            }
+        });
+    </script>
 </header>
 </body>
 </html>

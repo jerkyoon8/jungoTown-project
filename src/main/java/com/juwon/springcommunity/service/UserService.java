@@ -6,6 +6,7 @@ import com.juwon.springcommunity.dto.UserCreateRequestDto;
 import com.juwon.springcommunity.dto.UserResponseDto;
 import com.juwon.springcommunity.dto.UserUpdateRequestDto;
 import com.juwon.springcommunity.repository.UserRepository;
+import com.juwon.springcommunity.security.oauth.SessionUser;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -140,5 +141,13 @@ public class UserService implements UserDetailsService {
                 .anyMatch(auth -> auth.getAuthority().equals("ROLE_ADMIN"));
 
         return isAdmin || currentUser.getUsername().equals(targetEmail);
+    }
+
+    public boolean isAuthorized(String targetEmail, SessionUser sessionUser) {
+        if (sessionUser == null) {
+            return false;
+        }
+        boolean isAdmin = Role.ADMIN.equals(sessionUser.getRole());
+        return isAdmin || sessionUser.getEmail().equals(targetEmail);
     }
 }

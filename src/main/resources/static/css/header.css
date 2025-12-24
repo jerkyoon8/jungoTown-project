@@ -13,6 +13,7 @@
 .header-wrapper {
     max-width: 1200px;
     margin: 0 auto;
+    position: relative; /* 오버레이/사이드바 위치 기준점 */
 }
 
 /* 상단 영역 (로고, 검색, 유저메뉴) */
@@ -130,4 +131,263 @@
 
 .header-nav ul li a:hover {
     color: #007bff; /* 호버 시 색상 변경 */
+}
+
+
+/* === Wishlist & Chat Sidebar & Overlay Styles === */
+
+/* 오버레이 (배경 어둡게 처리) */
+.wishlist-overlay, .chat-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5); /* 반투명 검은색 */
+    z-index: 998; /* 사이드바 바로 아래 */
+    display: none; /* 기본적으로 숨김 */
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.wishlist-overlay.active, .chat-overlay.active {
+    display: block;
+    opacity: 1;
+}
+
+/* 사이드바 본체 */
+.wishlist-sidebar, .chat-sidebar {
+    position: fixed;
+    top: 0;
+    right: -400px; /* 화면 오른쪽 밖에 숨김 */
+    width: 350px;
+    height: 100%;
+    background-color: #fff;
+    box-shadow: -2px 0 5px rgba(0,0,0,0.1);
+    z-index: 999; /* 최상위 */
+    transition: right 0.3s ease; /* 부드러운 슬라이드 효과 */
+    display: flex;
+    flex-direction: column;
+}
+
+.wishlist-sidebar.active, .chat-sidebar.active {
+    right: 0; /* 화면 안으로 들어옴 */
+}
+
+/* 사이드바 헤더 */
+.sidebar-header {
+    padding: 20px;
+    border-bottom: 1px solid #eee;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.sidebar-header h2 {
+    margin: 0;
+    font-size: 18px;
+    color: #333;
+}
+
+.close-btn {
+    background: none;
+    border: none;
+    font-size: 24px;
+    cursor: pointer;
+    color: #999;
+}
+
+.close-btn:hover {
+    color: #333;
+}
+
+/* 사이드바 콘텐츠 영역 */
+.sidebar-content {
+    flex-grow: 1;
+    padding: 0; /* 채팅은 내부 패딩을 유연하게 쓰기 위해 0으로 시작 */
+    overflow-y: auto; /* 내용이 넘치면 스크롤 */
+    display: flex;
+    flex-direction: column;
+}
+
+/* 찜 목록 컨테이너 (기존 패딩 유지) */
+.wishlist-container {
+    padding: 20px;
+}
+
+/* 찜 목록 아이템 스타일 */
+.wishlist-items {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.wishlist-item {
+    border-bottom: 1px solid #eee;
+    padding: 10px 0;
+}
+
+.wishlist-item:last-child {
+    border-bottom: none;
+}
+
+.wishlist-link {
+    display: flex;
+    text-decoration: none;
+    color: inherit;
+    align-items: center;
+    gap: 15px;
+}
+
+.wishlist-link:hover {
+    background-color: #f9f9f9;
+}
+
+.wishlist-thumb {
+    width: 60px;
+    height: 60px;
+    object-fit: cover;
+    border-radius: 4px;
+    border: 1px solid #eee;
+}
+
+.wishlist-info {
+    flex-grow: 1;
+}
+
+.wishlist-title {
+    margin: 0 0 5px 0;
+    font-size: 14px;
+    font-weight: bold;
+    color: #333;
+    line-height: 1.2;
+}
+
+.wishlist-price {
+    margin: 0;
+    font-size: 13px;
+    color: #e65100;
+    font-weight: 600;
+}
+
+/* === Chat Specific Styles === */
+
+/* 채팅 목록 아이템 */
+.chat-room-item {
+    padding: 15px 20px;
+    border-bottom: 1px solid #f0f0f0;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.chat-room-item:hover {
+    background-color: #f8f9fa;
+}
+
+.chat-room-title {
+    font-weight: bold;
+    margin-bottom: 5px;
+    font-size: 14px;
+    color: #333;
+}
+
+.chat-room-info {
+    font-size: 12px;
+    color: #888;
+    display: flex;
+    justify-content: space-between;
+}
+
+/* 채팅방 내부 (메시지 영역) */
+.chat-messages-area {
+    flex-grow: 1;
+    padding: 15px;
+    overflow-y: auto;
+    background-color: #fcfcfc;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.message-bubble {
+    max-width: 80%;
+    padding: 8px 12px;
+    border-radius: 12px;
+    font-size: 13px;
+    line-height: 1.4;
+    position: relative;
+    word-wrap: break-word;
+}
+
+.message-bubble.my-message {
+    align-self: flex-end;
+    background-color: #007bff;
+    color: white;
+    border-bottom-right-radius: 2px;
+}
+
+.message-bubble.other-message {
+    align-self: flex-start;
+    background-color: #e9ecef;
+    color: #333;
+    border-bottom-left-radius: 2px;
+}
+
+.message-sender {
+    font-size: 11px;
+    margin-bottom: 2px;
+    color: #666;
+}
+.my-message .message-sender {
+    color: #dae0e5; /* 내 메시지일 때 sender 색상 */
+    text-align: right;
+    display: none; /* 내 이름은 굳이 안 보여줘도 됨 */
+}
+
+/* 채팅 입력 영역 */
+.chat-input-area {
+    padding: 10px;
+    border-top: 1px solid #eee;
+    background-color: #fff;
+    display: flex;
+    gap: 10px;
+}
+
+.chat-input {
+    flex-grow: 1;
+    border: 1px solid #ddd;
+    border-radius: 20px;
+    padding: 8px 15px;
+    outline: none;
+    font-size: 13px;
+}
+
+.chat-input:focus {
+    border-color: #007bff;
+}
+
+.chat-send-btn {
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 20px;
+    padding: 8px 15px;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: bold;
+}
+
+.chat-send-btn:hover {
+    background-color: #0056b3;
+}
+
+/* 뒤로가기 버튼 (채팅방 -> 목록) */
+.back-to-list-btn {
+    background: none;
+    border: none;
+    font-size: 20px;
+    cursor: pointer;
+    margin-right: 10px;
+    color: #555;
+    padding: 0;
 }
