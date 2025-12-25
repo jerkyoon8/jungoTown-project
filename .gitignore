@@ -1,3 +1,4 @@
+
 # Gradle 관련
 .gradle/
 build/
@@ -39,3 +40,6 @@ docs/
 
 # Gemini Progress Log
 gemini_progress_log.txt
+
+# 설정 파일 (보안)
+src/main/resources/application.properties
