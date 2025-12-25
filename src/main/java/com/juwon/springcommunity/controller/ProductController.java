@@ -152,7 +152,20 @@ public class ProductController {
 
     // 상품 삭제
     @PostMapping("/{id}/delete")
-    public String deleteProduct(@PathVariable Long id) {
+    public String deleteProduct(@PathVariable Long id, Principal principal) {
+        ProductResponseDto product = productService.findProductById(id);
+
+        String username = principal.getName();
+        if (principal instanceof OAuth2AuthenticationToken) {
+            username = ((OAuth2AuthenticationToken) principal).getPrincipal().getAttribute("email");
+        }
+        User user = userService.findUserByEmail(username);
+
+        // 작성자 본인 확인 또는 관리자 권한 확인
+        if (!product.getUserId().equals(user.getId()) && !user.getRole().getKey().equals("ROLE_ADMIN")) {
+            throw new IllegalStateException("삭제 권한이 없습니다.");
+        }
+
         productService.deleteProduct(id);
         return "redirect:/products"; // 목록 페이지로 리다이렉트
     }

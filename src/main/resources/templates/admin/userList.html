@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/default_layout}">
+<head>
+    <title>관리자 페이지 - 회원 관리</title>
+</head>
+<body>
+<div layout:fragment="content" class="container mt-5">
+    <div class="row">
+        <div class="col-md-3">
+            <div class="list-group">
+                <a href="/admin" class="list-group-item list-group-item-action">대시보드</a>
+                <a href="/admin/users" class="list-group-item list-group-item-action active">회원 관리</a>
+            </div>
+        </div>
+        <div class="col-md-9">
+            <h2>회원 관리</h2>
+            <table class="table table-hover mt-4">
+                <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>이메일</th>
+                    <th>닉네임</th>
+                    <th>권한</th>
+                    <th>상세</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="user : ${users}">
+                    <td th:text="${user.id}"></td>
+                    <td th:text="${user.email}"></td>
+                    <td th:text="${user.nickname}"></td>
+                    <td th:text="${user.role}"></td>
+                    <td>
+                        <a th:href="@{/users/{id}(id=${user.id})}" class="btn btn-sm btn-primary">보기</a>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+</body>
+</html>

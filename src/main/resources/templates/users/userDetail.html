@@ -75,9 +75,9 @@
         </table>
 
         <div class="button-container">
-            <a th:href="@{/users}" class="button">목록으로</a>
+            <a th:href="${#authorization.expression('hasRole(''ADMIN'')')} ? '/admin/users' : '/users'" class="button">목록으로</a>
             <a th:href="@{/users/{id}/edit(id=${user.id})}" class="button" th:if="${isAuthorized}">수정</a>
-            <form th:action="@{/users/{id}/delete(id=${user.id})}" th:method="product" style="display: inline;" th:if="${isAuthorized}">
+            <form th:action="@{/users/{id}/delete(id=${user.id})}" th:method="post" style="display: inline;" th:if="${isAuthorized or #authorization.expression('hasRole(''ADMIN'')')}">
                 <button type="submit" class="button delete-button" onclick="return confirm('정말로 이 사용자를 삭제하시겠습니까?');">삭제</button>
             </form>
         </div>

@@ -113,11 +113,25 @@ public class UserController {
         return "redirect:/users/" + userId;
     }
 
-    // 사용자를 삭제한다
+    // 사용자 삭제 (본인 또는 관리자)
     @PostMapping("/users/{userId}/delete")
-    public String deleteUser(@PathVariable Long userId) {
+    public String deleteUser(@PathVariable Long userId, Principal principal) {
+        String email = principal.getName();
+        if (principal instanceof OAuth2AuthenticationToken) {
+            email = ((OAuth2AuthenticationToken) principal).getPrincipal().getAttribute("email");
+        }
+        com.juwon.springcommunity.domain.User user = userService.findUserByEmail(email);
+
+        if (!user.getId().equals(userId) && !user.getRole().getKey().equals("ROLE_ADMIN")) {
+            throw new IllegalStateException("권한이 없습니다.");
+        }
+
         userService.deleteUser(userId);
-        return "redirect:/users";
+
+        if (user.getRole().getKey().equals("ROLE_ADMIN")) {
+            return "redirect:/admin/users";
+        }
+        return "redirect:/";
     }
 
     // 로그인 Form

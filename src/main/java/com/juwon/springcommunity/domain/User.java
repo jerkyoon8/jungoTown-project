@@ -50,7 +50,7 @@ public class User implements UserDetails {
         if (this.role == null) {
             return Collections.emptyList();
         }
-        return Collections.singletonList(new SimpleGrantedAuthority(this.role.name()));
+        return Collections.singletonList(new SimpleGrantedAuthority(this.role.getKey()));
     }
 
     // 계정 만료 여부 확인

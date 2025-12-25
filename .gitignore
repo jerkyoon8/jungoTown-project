@@ -1,4 +1,3 @@
-
 # Gradle 관련
 .gradle/
 build/
@@ -37,3 +36,6 @@ docs/
 
 # 마크다운 파일
 *.md
+
+# Gemini Progress Log
+gemini_progress_log.txt

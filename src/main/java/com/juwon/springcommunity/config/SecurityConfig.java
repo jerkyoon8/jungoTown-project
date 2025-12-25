@@ -65,6 +65,7 @@ public class SecurityConfig {
                 .csrf((csrf) -> csrf.disable())
                 .authorizeHttpRequests((requests) -> requests
                         .requestMatchers("/css/**", "/image/**", "/favicon.ico").permitAll()
+                        .requestMatchers("/admin/**").hasRole("ADMIN") // 관리자 페이지 권한 설정
                         .requestMatchers("/products/new", "/products/*/edit", "/products/*/delete", "/chat/**").authenticated() // 로그인 필요
                         .requestMatchers("/users/new").anonymous() //  비로그인시만
                         .requestMatchers("/users/updateUserForm").authenticated() // 로그인 필요
