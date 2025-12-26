@@ -173,18 +173,26 @@ public class ProductService {
         productRepository.update(product);
     }
 
-    //상품과 이미지를 삭제
+    //상품 삭제 (Soft Delete)
     @Transactional
     public void deleteProduct(Long id) {
-        // 1. 이미지 파일과 DB 기록을 먼저 삭제합니다.
-        List<ProductImage> images = productImageRepository.findByProductId(id);
-        for (ProductImage image : images) {
-            fileStore.deleteFile(image.getStoredFileName());
-        }
-        productImageRepository.deleteByProductId(id);
-
-        // 2. 상품을 삭제합니다.
+        // Soft Delete이므로 이미지와 DB 기록은 유지하고 상태만 변경합니다.
         productRepository.deleteById(id);
+    }
+
+    // 삭제된 상품 목록 조회 (관리자용)
+    public List<ProductResponseDto> findDeletedProducts() {
+        List<Product> products = productRepository.findAllDeleted();
+        Set<Long> userIds = products.stream().map(Product::getUserId).collect(Collectors.toSet());
+        Map<Long, User> userMap = findUsersMapByIds(userIds);
+
+        return products.stream()
+                .map(product -> {
+                    User author = userMap.get(product.getUserId());
+                    List<ProductImage> images = productImageRepository.findByProductId(product.getId());
+                    return ProductResponseDto.of(product, author.getNickname(), images);
+                })
+                .collect(Collectors.toList());
     }
 
 

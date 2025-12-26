@@ -1,0 +1,3 @@
+ALTER TABLE product ADD COLUMN is_deleted BOOLEAN DEFAULT FALSE;
+-- 또는 MySQL 버전에 따라:
+-- ALTER TABLE product ADD COLUMN is_deleted TINYINT(1) DEFAULT 0;

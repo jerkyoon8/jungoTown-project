@@ -20,6 +20,7 @@ public class Product {
     private String dealRegion; // 거래 희망 지역
     private int views; // 조회수
     private int wishlistCount; // 찜하기 수
+    private boolean isDeleted; // 삭제 여부
     private ProductCategory category;
     private List<ProductImage> images; // 1:N 관계
     private LocalDateTime createdAt;

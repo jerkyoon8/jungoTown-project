@@ -42,5 +42,6 @@ public interface ProductRepository {
     // ID 목록으로 상품 목록 조회
     List<Product> findByIdIn(@Param("ids") List<Long> ids);
 
-
+    // 삭제된 상품 조회
+    List<Product> findAllDeleted();
 }

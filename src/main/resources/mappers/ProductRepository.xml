@@ -16,7 +16,7 @@
 
 <!-- ID로 상품 조회 -->
 <select id="findById">
-    SELECT id, title, content, user_id, category, price, deal_region, views, wishlist_count, created_at, updated_at
+    SELECT id, title, content, user_id, category, price, deal_region, views, wishlist_count, created_at, updated_at, is_deleted
     FROM product
     WHERE id = #{id}
 </select>
@@ -26,8 +26,9 @@
     SELECT id, title, content, user_id, category, price, deal_region, views, wishlist_count, created_at, updated_at
     FROM product
     <where>
+        is_deleted = 0
         <if test="keyword != null and keyword != ''">
-            title LIKE CONCAT('%', #{keyword}, '%')
+            AND title LIKE CONCAT('%', #{keyword}, '%')
         </if>
     </where>
     ORDER BY id DESC
@@ -46,10 +47,12 @@
         id = #{id}
 </update>
 
-<!-- 상품 삭제 -->
-<delete id="deleteById">
-    DELETE FROM product WHERE id = #{id}
-</delete>
+<!-- 상품 삭제 (Soft Delete) -->
+<update id="deleteById">
+    UPDATE product
+    SET is_deleted = 1
+    WHERE id = #{id}
+</update>
 
 <!-- 조회수 증가 -->
 <update id="increaseViews">
@@ -69,8 +72,9 @@
 <select id="countAll" resultType="long">
     SELECT count(*)
     FROM product
+    WHERE is_deleted = 0
     <if test="keyword != null and keyword != ''">
-        WHERE title LIKE CONCAT('%', #{keyword}, '%')
+        AND title LIKE CONCAT('%', #{keyword}, '%')
     </if>
 </select>
 
@@ -79,8 +83,9 @@
     SELECT id, title, content, user_id, category, price, deal_region, views, wishlist_count, created_at, updated_at
     FROM product
     <where>
+        is_deleted = 0
         <if test="keyword != null and keyword != ''">
-            title LIKE CONCAT('%', #{keyword}, '%')
+            AND title LIKE CONCAT('%', #{keyword}, '%')
         </if>
     </where>
     <choose>
@@ -105,6 +110,14 @@
         <foreach item="id" collection="ids" open="(" separator="," close=")">
             #{id}
         </foreach>
+    </select>
+
+    <!-- 삭제된 상품 조회 -->
+    <select id="findAllDeleted" resultType="com.juwon.springcommunity.domain.Product">
+        SELECT id, title, content, user_id, category, price, deal_region, views, wishlist_count, created_at, updated_at, is_deleted
+        FROM product
+        WHERE is_deleted = 1
+        ORDER BY id DESC
     </select>
 
 </mapper>
