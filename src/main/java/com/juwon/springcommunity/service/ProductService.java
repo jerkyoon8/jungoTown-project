@@ -72,7 +72,7 @@ public class ProductService {
     public Map<String, Object> findPaginated(int page, int size, String sort, String keyword) {
 
 
-        // 페이징 범위의 상품 조회 (offset range offset + size)
+        // 페이지 번호와 사이즈를 이용해 DB에서 가져올 시작 지점(offset) 계산
         int offset = (page - 1) * size;
         Map<String, Object> params = new HashMap<>();
         params.put("offset", offset);
@@ -81,7 +81,7 @@ public class ProductService {
         params.put("keyword", keyword);
         List<Product> products = productRepository.findWithPaging(params);
 
-        // 상품의 작성자 정보 조회
+        // 조회된 상품들의 작성자 정보(닉네임 등)를 가져오기 위해 ID 수집
         Set<Long> userIds =
                 products.stream().map(Product::getUserId).collect(Collectors.toSet());
         Map<Long, User> userMap = findUsersMapByIds(userIds);

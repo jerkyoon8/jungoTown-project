@@ -74,7 +74,7 @@ public class ProductController {
                              Principal principal,
                              Model model) throws IOException {
 
-        // 유효성 검사
+        // 입력값 검증에 실패하면 다시 폼으로 돌려보냄 (에러 메시지 포함)
         if (bindingResult.hasErrors()) {
             
             model.addAttribute("categories", ProductCategory.values());
@@ -117,7 +117,7 @@ public class ProductController {
         recentProductService.addRecentProduct(userIdentifier, id);
         // === 최근 본 상품 기록 로직 추가 끝 ===
 
-        // 조회 상품이 자신이 작성한 상품인가 검사하는 로직
+        // 현재 보고 있는 상품이 로그인한 사용자가 작성한 것인지 확인 (수정/삭제 버튼 노출 여부 결정)
         boolean isOwner = false;
         if (principal != null) {
             String ownerEmail = userService.findEmailById(product.getUserId());
