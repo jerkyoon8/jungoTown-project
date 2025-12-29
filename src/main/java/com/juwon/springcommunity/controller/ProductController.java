@@ -33,11 +33,15 @@ public class ProductController {
     private final ProductService productService;
     private final UserService userService;
     private final RecentProductService recentProductService;
+    private final com.juwon.springcommunity.service.ProductCategoryService productCategoryService;
+    private final com.fasterxml.jackson.databind.ObjectMapper objectMapper;
 
-    public ProductController(ProductService productService, UserService userService, RecentProductService recentProductService) {
+    public ProductController(ProductService productService, UserService userService, RecentProductService recentProductService, com.juwon.springcommunity.service.ProductCategoryService productCategoryService, com.fasterxml.jackson.databind.ObjectMapper objectMapper) {
         this.productService = productService;
         this.userService = userService;
         this.recentProductService = recentProductService;
+        this.productCategoryService = productCategoryService;
+        this.objectMapper = objectMapper;
     }
 
     // 전체 상품 목록을 보여줌.
@@ -59,9 +63,10 @@ public class ProductController {
 
     // 새 상품 생성 폼으로 연결
     @GetMapping("/new")
-    public String showCreateForm(Model model) {
+    public String showCreateForm(Model model) throws com.fasterxml.jackson.core.JsonProcessingException {
         model.addAttribute("product", new ProductCreateRequestDto()); // 빈 DTO 객체 전달
-        model.addAttribute("categories", ProductCategory.values()); // Enum 카테고리 목록 전달
+        String categoriesJson = objectMapper.writeValueAsString(productCategoryService.getAllCategories());
+        model.addAttribute("categoriesJson", categoriesJson);
         model.addAttribute("isEdit", false);
 
         return "products/createProductForm";
@@ -76,8 +81,8 @@ public class ProductController {
 
         // 입력값 검증에 실패하면 다시 폼으로 돌려보냄 (에러 메시지 포함)
         if (bindingResult.hasErrors()) {
-            
-            model.addAttribute("categories", ProductCategory.values());
+            String categoriesJson = objectMapper.writeValueAsString(productCategoryService.getAllCategories());
+            model.addAttribute("categoriesJson", categoriesJson);
             return "products/createProductForm";
         }
 
@@ -134,10 +139,11 @@ public class ProductController {
 
     // 상품 수정 폼으로 연결
     @GetMapping("/{id}/edit")
-    public String showEditForm(@PathVariable Long id, Model model) {
+    public String showEditForm(@PathVariable Long id, Model model) throws com.fasterxml.jackson.core.JsonProcessingException {
         ProductResponseDto product = productService.findProductById(id);
         model.addAttribute("product", product);
-        model.addAttribute("categories", ProductCategory.values());
+        String categoriesJson = objectMapper.writeValueAsString(productCategoryService.getAllCategories());
+        model.addAttribute("categoriesJson", categoriesJson);
         model.addAttribute("isEdit", true);
         return "products/createProductForm";
     }

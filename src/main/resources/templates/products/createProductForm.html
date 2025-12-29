@@ -4,59 +4,118 @@
     <meta charset="UTF-8">
     <title>상품 등록/수정</title>
     <style>
-        body { font-family: sans-serif; margin: 40px; }
-        form { max-width: 600px; margin: auto; padding: 20px; border: 1px solid #ddd; border-radius: 5px; }
-        .form-group { margin-bottom: 15px; }
-        label { display: block; margin-bottom: 5px; }
-        input[type="text"], textarea, select { width: 100%; padding: 8px; box-sizing: border-box; }
-        textarea { height: 200px; }
-        .btn-group { margin-top: 20px; text-align: right; }
-        button { padding: 10px 15px; border: none; border-radius: 5px; cursor: pointer; }
+        body { font-family: 'Noto Sans KR', sans-serif; margin: 40px; background-color: #f8f9fa; }
+        form { max-width: 800px; margin: auto; padding: 30px; border: 1px solid #ddd; border-radius: 8px; background-color: #fff; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        .form-group { margin-bottom: 20px; }
+        label { display: block; margin-bottom: 8px; font-weight: bold; color: #333; }
+        input[type="text"], input[type="number"], textarea { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
+        textarea { height: 200px; resize: vertical; }
+        
+        /* 카테고리 선택 UI 스타일 */
+        .category-container {
+            display: flex;
+            gap: 10px;
+            border: 1px solid #ccc;
+            padding: 10px;
+            border-radius: 4px;
+            background-color: #fff;
+            height: 200px;
+        }
+        .category-column {
+            flex: 1;
+            border-right: 1px solid #eee;
+            overflow-y: auto;
+            padding-right: 5px;
+        }
+        .category-column:last-child {
+            border-right: none;
+        }
+        .category-item {
+            padding: 8px 10px;
+            cursor: pointer;
+            border-radius: 4px;
+            transition: background-color 0.2s;
+        }
+        .category-item:hover {
+            background-color: #f0f0f0;
+        }
+        .category-item.active {
+            background-color: #007bff;
+            color: white;
+            font-weight: bold;
+        }
+        .category-empty {
+            color: #aaa;
+            text-align: center;
+            padding-top: 20px;
+            font-size: 0.9em;
+        }
+        
+        .selected-category-display {
+            margin-top: 10px;
+            font-size: 0.9em;
+            color: #007bff;
+            font-weight: bold;
+        }
+
+        .btn-group { margin-top: 30px; text-align: right; }
+        button { padding: 10px 20px; border: none; border-radius: 4px; cursor: pointer; font-size: 16px; }
         .btn-submit { background-color: #007bff; color: white; }
-        .btn-cancel { background-color: #6c757d; color: white; margin-right: 10px; text-decoration: none; display: inline-block; padding: 10px 15px; }
+        .btn-submit:hover { background-color: #0056b3; }
+        .btn-cancel { background-color: #6c757d; color: white; margin-right: 10px; text-decoration: none; display: inline-block; padding: 10px 20px; border-radius: 4px; font-size: 16px; }
+        .btn-cancel:hover { background-color: #545b62; }
     </style>
 </head>
 <body>
 
-<h1 th:if="${!isEdit}">새 상품 등록</h1>
-<h1 th:if="${isEdit}">상품 수정</h1>
+<h1 th:if="${!isEdit}" style="text-align: center; margin-bottom: 30px;">새 상품 등록</h1>
+<h1 th:if="${isEdit}" style="text-align: center; margin-bottom: 30px;">상품 수정</h1>
 
 
 <form th:action="${isEdit} ? @{|/products/${product.id}/edit|} : @{/products/new}" th:object="${product}" method="post" enctype="multipart/form-data">
 
     <div class="form-group">
         <label for="title">제목</label>
-        <input type="text" id="title" th:field="*{title}" required>
+        <input type="text" id="title" th:field="*{title}" required placeholder="상품 제목을 입력하세요">
     </div>
 
+    <!-- 카테고리 선택 영역 -->
     <div class="form-group">
-        <label for="category">카테고리</label>
-        <select id="category" th:field="*{category}">
-            <option th:each="cat : ${categories}"
-                    th:value="${cat}"
-                    th:text="${cat.description}"
-                    th:selected="${cat == product.category}">일반</option>
-        </select>
+        <label>카테고리</label>
+        <div class="category-container">
+            <div class="category-column" id="category-depth-1">
+                <!-- 1차 카테고리가 JS로 렌더링 됩니다 -->
+            </div>
+            <div class="category-column" id="category-depth-2">
+                <div class="category-empty">대분류를 선택해주세요</div>
+            </div>
+            <div class="category-column" id="category-depth-3">
+                 <div class="category-empty">중분류를 선택해주세요</div>
+            </div>
+        </div>
+        <div id="selected-category-text" class="selected-category-display"></div>
+        <!-- 실제 서버로 전송될 카테고리 ID -->
+        <input type="hidden" id="categoryId" th:field="*{categoryId}" required>
     </div>
 
     <div class="form-group">
         <label for="price">가격</label>
-        <input type="number" id="price" th:field="*{price}" required>
+        <input type="number" id="price" th:field="*{price}" required placeholder="숫자만 입력해주세요">
     </div>
 
     <div class="form-group">
         <label for="dealRegion">거래 희망 지역</label>
-        <input type="text" id="dealRegion" th:field="*{dealRegion}" required>
+        <input type="text" id="dealRegion" th:field="*{dealRegion}" required placeholder="예: 서울시 강남구">
     </div>
 
     <div class="form-group">
         <label for="content">내용</label>
-        <textarea id="content" th:field="*{content}" required></textarea>
+        <textarea id="content" th:field="*{content}" required placeholder="상품에 대한 자세한 설명을 적어주세요"></textarea>
     </div>
 
     <div class="form-group">
         <label for="imageFiles">이미지 파일</label>
-        <input type="file" id="imageFiles" name="imageFiles" class="form-control" multiple="multiple">
+        <input type="file" id="imageFiles" name="imageFiles" multiple="multiple">
     </div>
 
     <div class="btn-group">
@@ -65,6 +124,194 @@
     </div>
 
 </form>
+
+<!-- 카테고리 데이터 및 로직 -->
+<script th:inline="javascript">
+    /*<![CDATA[*/
+    // 1. 서버에서 받은 JSON 데이터를 파싱하여 JS 객체로 저장
+    const categories = JSON.parse(/*[[${categoriesJson}]]*/ '[]');
+    const initialCategoryId = /*[[${product.categoryId}]]*/ null;
+    /*]]>*/
+
+    // DOM 요소 참조
+    const depth1Container = document.getElementById('category-depth-1');
+    const depth2Container = document.getElementById('category-depth-2');
+    const depth3Container = document.getElementById('category-depth-3');
+    const categoryIdInput = document.getElementById('categoryId');
+    const selectedCategoryText = document.getElementById('selected-category-text');
+
+    let selectedDepth1 = null;
+    let selectedDepth2 = null;
+    let selectedDepth3 = null;
+
+    // 초기화 실행
+    init();
+
+    function init() {
+        renderDepth1();
+        
+        // 수정 모드일 경우 기존 선택값 복원
+        if (initialCategoryId) {
+            restoreSelection(initialCategoryId);
+        }
+    }
+
+    // 1차 카테고리 렌더링
+    function renderDepth1() {
+        depth1Container.innerHTML = '';
+        categories.forEach(cat => {
+            const item = createCategoryItem(cat, 1);
+            depth1Container.appendChild(item);
+        });
+    }
+
+    // 2차 카테고리 렌더링
+    function renderDepth2(parentCategory) {
+        depth2Container.innerHTML = '';
+        depth3Container.innerHTML = '<div class="category-empty">중분류를 선택해주세요</div>'; // 3차 초기화
+        
+        if (!parentCategory.children || parentCategory.children.length === 0) {
+            depth2Container.innerHTML = '<div class="category-empty">하위 카테고리가 없습니다</div>';
+            return;
+        }
+
+        parentCategory.children.forEach(cat => {
+            const item = createCategoryItem(cat, 2);
+            depth2Container.appendChild(item);
+        });
+    }
+
+    // 3차 카테고리 렌더링 (필요하다면)
+    function renderDepth3(parentCategory) {
+        depth3Container.innerHTML = '';
+        
+        if (!parentCategory.children || parentCategory.children.length === 0) {
+            depth3Container.innerHTML = '<div class="category-empty">하위 카테고리가 없습니다</div>';
+            return;
+        }
+
+        parentCategory.children.forEach(cat => {
+            const item = createCategoryItem(cat, 3);
+            depth3Container.appendChild(item);
+        });
+    }
+
+    // 카테고리 아이템(DOM) 생성 함수
+    function createCategoryItem(category, depth) {
+        const div = document.createElement('div');
+        div.className = 'category-item';
+        div.textContent = category.name;
+        div.dataset.id = category.id;
+
+        div.addEventListener('click', () => {
+            handleCategoryClick(category, depth, div);
+        });
+        
+        return div;
+    }
+
+    // 클릭 이벤트 핸들러
+    function handleCategoryClick(category, depth, element) {
+        // 하이라이트 처리
+        highlightSelection(element, depth);
+
+        // 로직 처리
+        if (depth === 1) {
+            selectedDepth1 = category;
+            selectedDepth2 = null;
+            selectedDepth3 = null;
+            renderDepth2(category);
+            updateSelectedText();
+            // 1차만 선택해도 값을 넣을지, 끝까지 가야 넣을지 결정 (여기선 1차만 선택해도 저장되게 함, 하지만 보통 마지막 자식이어야 함)
+            // 우선은 가장 구체적인 선택을 값으로 설정
+            categoryIdInput.value = category.id; 
+        } else if (depth === 2) {
+            selectedDepth2 = category;
+            selectedDepth3 = null;
+            renderDepth3(category);
+            updateSelectedText();
+            categoryIdInput.value = category.id;
+        } else if (depth === 3) {
+            selectedDepth3 = category;
+            updateSelectedText();
+            categoryIdInput.value = category.id;
+        }
+    }
+
+    // 선택된 항목 하이라이트 (active 클래스 토글)
+    function highlightSelection(element, depth) {
+        let container;
+        if (depth === 1) container = depth1Container;
+        else if (depth === 2) container = depth2Container;
+        else if (depth === 3) container = depth3Container;
+
+        // 기존 active 제거
+        const siblings = container.querySelectorAll('.category-item');
+        siblings.forEach(el => el.classList.remove('active'));
+
+        // 현재 클릭한 것 active 추가
+        element.classList.add('active');
+    }
+
+    // 선택된 경로 텍스트 업데이트
+    function updateSelectedText() {
+        let text = "";
+        if (selectedDepth1) text += selectedDepth1.name;
+        if (selectedDepth2) text += " > " + selectedDepth2.name;
+        if (selectedDepth3) text += " > " + selectedDepth3.name;
+        
+        selectedCategoryText.textContent = "선택된 카테고리: " + text;
+    }
+    
+    // 초기값 복원 (수정 모드용) - 재귀적으로 찾아서 클릭 이벤트 트리거 or UI 상태 설정
+    function restoreSelection(targetId) {
+        // 1. 전체 트리에서 targetId를 가진 노드와 그 부모들을 찾음 (경로 탐색)
+        let path = findCategoryPath(categories, targetId);
+        
+        if (path) {
+            // path[0] = 1차, path[1] = 2차 ...
+            
+            // 1차 선택
+            if (path[0]) {
+                const el1 = findElementByDataId(depth1Container, path[0].id);
+                if (el1) el1.click(); // 클릭 이벤트 트리거로 하위 렌더링 유도
+            }
+            
+            // 2차 선택
+            if (path[1]) {
+                const el2 = findElementByDataId(depth2Container, path[1].id);
+                if (el2) el2.click();
+            }
+            
+            // 3차 선택
+            if (path[2]) {
+                const el3 = findElementByDataId(depth3Container, path[2].id);
+                if (el3) el3.click();
+            }
+        }
+    }
+
+    // 트리에서 ID로 경로(부모들) 찾기
+    function findCategoryPath(nodes, targetId) {
+        for (const node of nodes) {
+            if (node.id === targetId) {
+                return [node];
+            }
+            if (node.children) {
+                const childPath = findCategoryPath(node.children, targetId);
+                if (childPath) {
+                    return [node, ...childPath];
+                }
+            }
+        }
+        return null;
+    }
+    
+    function findElementByDataId(container, id) {
+        return container.querySelector(`.category-item[data-id="${id}"]`);
+    }
+
+</script>
 
 </body>
 </html>

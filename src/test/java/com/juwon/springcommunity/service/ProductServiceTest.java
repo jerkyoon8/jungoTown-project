@@ -54,7 +54,12 @@ class ProductServiceTest {
         product.setUserId(userId);
         product.setTitle("테스트 상품");
         product.setPrice(10000);
-        product.setCategory(ProductCategory.GENERAL);
+        
+        ProductCategory category = new ProductCategory();
+        category.setId(1L);
+        category.setName("일반");
+        product.setCategory(category);
+        
         product.setCreatedAt(LocalDateTime.now());
 
         User user = new User();

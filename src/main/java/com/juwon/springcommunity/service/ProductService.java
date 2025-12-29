@@ -169,7 +169,7 @@ public class ProductService {
 
         // 상품 수정.
         Product product = productRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("Invalid product Id:" + id));
-        product.update(requestDto.getTitle(), requestDto.getContent(), requestDto.getPrice(), requestDto.getDealRegion(), requestDto.getCategory());
+        product.update(requestDto.getTitle(), requestDto.getContent(), requestDto.getPrice(), requestDto.getDealRegion(), requestDto.getCategoryId());
         productRepository.update(product);
     }
 

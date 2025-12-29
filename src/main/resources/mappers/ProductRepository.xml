@@ -5,119 +5,147 @@
 
     <resultMap id="productResultMap" type="com.juwon.springcommunity.domain.Product">
         <id property="id" column="id"/>
-        <result column="wishlist_count" property="wishlistCount"/>
+        <result property="userId" column="user_id"/>
+        <result property="title" column="title"/>
+        <result property="content" column="content"/>
+        <result property="price" column="price"/>
+        <result property="dealRegion" column="deal_region"/>
+        <result property="views" column="views"/>
+        <result property="wishlistCount" column="wishlist_count"/>
+        <result property="isDeleted" column="is_deleted"/>
+        <result property="createdAt" column="created_at"/>
+        <result property="updatedAt" column="updated_at"/>
+        <result property="categoryId" column="category_id"/>
+
+        <!-- 카테고리 객체 매핑 -->
+        <association property="category" javaType="com.juwon.springcommunity.domain.ProductCategory">
+            <id property="id" column="cat_id"/>
+            <result property="name" column="cat_name"/>
+            <result property="parentId" column="cat_parent_id"/>
+        </association>
     </resultMap>
 
-<!-- 상품 저장 -->
-<insert id="save" useGeneratedKeys="true" keyProperty="id">
-    INSERT INTO product (title, content, user_id, category, price, deal_region, views, wishlist_count)
-    VALUES (#{title}, #{content}, #{userId}, #{category}, #{price}, #{dealRegion}, 0, 0)
-</insert>
+    <!-- 공통 컬럼 정의 -->
+    <sql id="productColumns">
+        p.id, p.title, p.content, p.user_id, p.category_id, p.price, p.deal_region, p.views, p.wishlist_count, p.created_at, p.updated_at, p.is_deleted,
+        c.id AS cat_id, c.name AS cat_name, c.parent_id AS cat_parent_id
+    </sql>
 
-<!-- ID로 상품 조회 -->
-<select id="findById">
-    SELECT id, title, content, user_id, category, price, deal_region, views, wishlist_count, created_at, updated_at, is_deleted
-    FROM product
-    WHERE id = #{id}
-</select>
+    <!-- 상품 저장 -->
+    <insert id="save" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO product (title, content, user_id, category_id, price, deal_region, views, wishlist_count)
+        VALUES (#{title}, #{content}, #{userId}, #{categoryId}, #{price}, #{dealRegion}, 0, 0)
+    </insert>
 
-<!-- 모든 상품 조회 -->
-<select id="findAll">
-    SELECT id, title, content, user_id, category, price, deal_region, views, wishlist_count, created_at, updated_at
-    FROM product
-    <where>
-        is_deleted = 0
+    <!-- ID로 상품 조회 -->
+    <select id="findById" resultMap="productResultMap">
+        SELECT <include refid="productColumns"/>
+        FROM product p
+        LEFT JOIN product_category c ON p.category_id = c.id
+        WHERE p.id = #{id}
+    </select>
+
+    <!-- 모든 상품 조회 -->
+    <select id="findAll" resultMap="productResultMap">
+        SELECT <include refid="productColumns"/>
+        FROM product p
+        LEFT JOIN product_category c ON p.category_id = c.id
+        <where>
+            p.is_deleted = 0
+            <if test="keyword != null and keyword != ''">
+                AND p.title LIKE CONCAT('%', #{keyword}, '%')
+            </if>
+        </where>
+        ORDER BY p.id DESC
+    </select>
+
+    <!-- 상품 수정 -->
+    <update id="update">
+        UPDATE product
+        SET
+            title = #{title},
+            content = #{content},
+            price = #{price},
+            deal_region = #{dealRegion},
+            category_id = #{categoryId}
+        WHERE
+            id = #{id}
+    </update>
+
+    <!-- 상품 삭제 (Soft Delete) -->
+    <update id="deleteById">
+        UPDATE product
+        SET is_deleted = 1
+        WHERE id = #{id}
+    </update>
+
+    <!-- 조회수 증가 -->
+    <update id="increaseViews">
+        UPDATE product
+        SET views = views + 1
+        WHERE id = #{id}
+    </update>
+
+    <!-- 찜하기 증가 -->
+    <update id="increaseWishlistCount">
+        UPDATE product
+        SET wishlist_count = wishlist_count + 1
+        WHERE id = #{id}
+    </update>
+
+    <!-- 모든 상품 수 조회 -->
+    <select id="countAll" resultType="long">
+        SELECT count(*)
+        FROM product
+        WHERE is_deleted = 0
         <if test="keyword != null and keyword != ''">
             AND title LIKE CONCAT('%', #{keyword}, '%')
         </if>
-    </where>
-    ORDER BY id DESC
-</select>
+    </select>
 
-<!-- 상품 수정 -->
-<update id="update">
-    UPDATE product
-    SET
-        title = #{title},
-        content = #{content},
-        price = #{price},
-        deal_region = #{dealRegion},
-        category = #{category}
-    WHERE
-        id = #{id}
-</update>
-
-<!-- 상품 삭제 (Soft Delete) -->
-<update id="deleteById">
-    UPDATE product
-    SET is_deleted = 1
-    WHERE id = #{id}
-</update>
-
-<!-- 조회수 증가 -->
-<update id="increaseViews">
-    UPDATE product
-    SET views = views + 1
-    WHERE id = #{id}
-</update>
-
-<!-- 찜하기 증가 -->
-<update id="increaseWishlistCount">
-    UPDATE product
-    SET wishlist_count = wishlist_count + 1
-    WHERE id = #{id}
-</update>
-
-<!-- 모든 상품 수 조회 -->
-<select id="countAll" resultType="long">
-    SELECT count(*)
-    FROM product
-    WHERE is_deleted = 0
-    <if test="keyword != null and keyword != ''">
-        AND title LIKE CONCAT('%', #{keyword}, '%')
-    </if>
-</select>
-
-<!-- 페이징 처리 상품 조회 -->
-<select id="findWithPaging" parameterType="map">
-    SELECT id, title, content, user_id, category, price, deal_region, views, wishlist_count, created_at, updated_at
-    FROM product
-    <where>
-        is_deleted = 0
-        <if test="keyword != null and keyword != ''">
-            AND title LIKE CONCAT('%', #{keyword}, '%')
-        </if>
-    </where>
-    <choose>
-        <when test="sort == 'views'">
-            ORDER BY views DESC, id DESC
-        </when>
-        <when test="sort == 'wishlistCount'">
-            ORDER BY wishlist_count DESC, id DESC
-        </when>
-        <otherwise>
-            ORDER BY created_at DESC, id DESC
-        </otherwise>
-    </choose>
-    LIMIT #{size} OFFSET #{offset}
-</select>
+    <!-- 페이징 처리 상품 조회 -->
+    <select id="findWithPaging" parameterType="map" resultMap="productResultMap">
+        SELECT <include refid="productColumns"/>
+        FROM product p
+        LEFT JOIN product_category c ON p.category_id = c.id
+        <where>
+            p.is_deleted = 0
+            <if test="keyword != null and keyword != ''">
+                AND p.title LIKE CONCAT('%', #{keyword}, '%')
+            </if>
+        </where>
+        <choose>
+            <when test="sort == 'views'">
+                ORDER BY p.views DESC, p.id DESC
+            </when>
+            <when test="sort == 'wishlistCount'">
+                ORDER BY p.wishlist_count DESC, p.id DESC
+            </when>
+            <otherwise>
+                ORDER BY p.created_at DESC, p.id DESC
+            </otherwise>
+        </choose>
+        LIMIT #{size} OFFSET #{offset}
+    </select>
 
     <!-- ID 목록으로 상품 목록 조회 -->
-    <select id="findByIdIn" resultType="com.juwon.springcommunity.domain.Product">
-        SELECT id, title, content, user_id, category, price, deal_region, views, wishlist_count, created_at, updated_at
-        FROM product
-        WHERE id IN
+    <select id="findByIdIn" resultMap="productResultMap">
+        SELECT <include refid="productColumns"/>
+        FROM product p
+        LEFT JOIN product_category c ON p.category_id = c.id
+        WHERE p.id IN
         <foreach item="id" collection="ids" open="(" separator="," close=")">
             #{id}
         </foreach>
     </select>
 
     <!-- 삭제된 상품 조회 -->
-    <select id="findAllDeleted" resultType="com.juwon.springcommunity.domain.Product">
-        SELECT id, title, content, user_id, category, price, deal_region, views, wishlist_count, created_at, updated_at, is_deleted
-        FROM product
-        WHERE is_deleted = 1
-        ORDER BY id DESC
+    <select id="findAllDeleted" resultMap="productResultMap">
+        SELECT <include refid="productColumns"/>
+        FROM product p
+        LEFT JOIN product_category c ON p.category_id = c.id
+        WHERE p.is_deleted = 1
+        ORDER BY p.id DESC
     </select>
 
 </mapper>

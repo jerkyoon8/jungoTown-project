@@ -1,18 +1,24 @@
 package com.juwon.springcommunity.domain;
 
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
-public enum ProductCategory {
-    GENERAL("일반"),
-    INFORMATION("정보"),
-    NOTICE("공지");
+import java.util.ArrayList;
+import java.util.List;
 
-    private final String description;
+@Getter
+@Setter
+@NoArgsConstructor
+public class ProductCategory {
 
-    ProductCategory(String description) {
-        this.description = description;
-    }
+    private Long id;
+    private String name;
+    private Long parentId;
+    private List<ProductCategory> children = new ArrayList<>();
 
-    public String getDescription() {
-        return description;
+    public ProductCategory(String name, Long parentId) {
+        this.name = name;
+        this.parentId = parentId;
     }
 }

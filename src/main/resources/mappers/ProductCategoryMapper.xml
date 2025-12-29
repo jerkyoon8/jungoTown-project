@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.juwon.springcommunity.repository.ProductCategoryRepository">
+
+    <resultMap id="CategoryResultMap" type="com.juwon.springcommunity.domain.ProductCategory">
+        <id property="id" column="id"/>
+        <result property="name" column="name"/>
+        <result property="parentId" column="parent_id"/>
+    </resultMap>
+
+    <select id="findAll" resultMap="CategoryResultMap">
+        SELECT id, name, parent_id
+        FROM product_category
+        ORDER BY parent_id ASC, id ASC
+    </select>
+
+    <select id="findById" resultMap="CategoryResultMap">
+        SELECT id, name, parent_id
+        FROM product_category
+        WHERE id = #{id}
+    </select>
+
+</mapper>
