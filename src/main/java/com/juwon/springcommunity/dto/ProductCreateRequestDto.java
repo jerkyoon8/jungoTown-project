@@ -32,7 +32,7 @@ public class ProductCreateRequestDto {
     private String dealRegion;
 
     @NotNull(message = "카테고리를 선택해주세요.")
-    private ProductCategory category;
+    private Long categoryId;
 
     private List<MultipartFile> imageFiles;
 
@@ -42,7 +42,7 @@ public class ProductCreateRequestDto {
         product.setContent(this.content);
         product.setPrice(this.price);
         product.setDealRegion(this.dealRegion);
-        product.setCategory(this.category);
+        product.setCategoryId(this.categoryId);
         product.setUserId(userId);
         return product;
     }

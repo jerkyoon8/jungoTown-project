@@ -15,7 +15,7 @@ public class ProductUpdateRequestDto {
     private String content;
     private int price;
     private String dealRegion;
-    private ProductCategory category;
+    private Long categoryId;
 
     private List<MultipartFile> imageFiles; // 새로 추가할 이미지
     private List<Long> deleteImageIds; // 삭제할 이미지 ID 목록

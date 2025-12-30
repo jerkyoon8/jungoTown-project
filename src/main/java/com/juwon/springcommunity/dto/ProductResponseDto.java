@@ -30,6 +30,10 @@ public class ProductResponseDto {
     private final List<String> storedFileNames; // 이미지 파일 이름 목록
 
 
+    public Long getCategoryId() {
+        return category != null ? category.getId() : null;
+    }
+
     public ProductResponseDto(Product product, String author, List<ProductImage> images) {
         this.id = product.getId();
         this.title = product.getTitle();

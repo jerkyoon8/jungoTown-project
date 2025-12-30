@@ -1,29 +1,22 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/default_layout}">
 <head>
-    <meta charset="UTF-8">
-    <title>상품 등록/수정</title>
-    <style>
-        body { font-family: 'Noto Sans KR', sans-serif; margin: 40px; background-color: #f8f9fa; }
-        form { max-width: 800px; margin: auto; padding: 30px; border: 1px solid #ddd; border-radius: 8px; background-color: #fff; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
-        .form-group { margin-bottom: 20px; }
-        label { display: block; margin-bottom: 8px; font-weight: bold; color: #333; }
-        input[type="text"], input[type="number"], textarea { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
-        textarea { height: 200px; resize: vertical; }
-        
-        /* 카테고리 선택 UI 스타일 */
+    <title th:text="${isEdit} ? '상품 수정' : '새 상품 등록'">상품 등록</title>
+    <style layout:fragment="css">
         .category-container {
             display: flex;
             gap: 10px;
-            border: 1px solid #ccc;
+            border: 1px solid #dee2e6; /* Bootstrap border color */
             padding: 10px;
-            border-radius: 4px;
+            border-radius: 0.375rem; /* Bootstrap border-radius */
             background-color: #fff;
-            height: 200px;
+            height: 250px;
         }
         .category-column {
             flex: 1;
-            border-right: 1px solid #eee;
+            border-right: 1px solid #dee2e6;
             overflow-y: auto;
             padding-right: 5px;
         }
@@ -31,287 +24,430 @@
             border-right: none;
         }
         .category-item {
-            padding: 8px 10px;
+            padding: 8px 12px;
             cursor: pointer;
-            border-radius: 4px;
-            transition: background-color 0.2s;
+            border-radius: 0.25rem;
+            transition: background-color 0.15s ease-in-out;
         }
         .category-item:hover {
-            background-color: #f0f0f0;
+            background-color: #f8f9fa;
         }
         .category-item.active {
-            background-color: #007bff;
+            background-color: #0d6efd; /* Bootstrap primary color */
             color: white;
-            font-weight: bold;
+            font-weight: 500;
         }
         .category-empty {
-            color: #aaa;
+            color: #6c757d;
             text-align: center;
             padding-top: 20px;
             font-size: 0.9em;
         }
-        
         .selected-category-display {
             margin-top: 10px;
-            font-size: 0.9em;
-            color: #007bff;
-            font-weight: bold;
+            font-size: 0.95em;
+            color: #0d6efd;
+            font-weight: 600;
+        }
+        /* Custom scrollbar for categories */
+        .category-column::-webkit-scrollbar {
+        width: 6px;
+        }
+        .category-column::-webkit-scrollbar-thumb {
+        background-color: #ced4da;
+        border-radius: 3px;
         }
 
-        .btn-group { margin-top: 30px; text-align: right; }
-        button { padding: 10px 20px; border: none; border-radius: 4px; cursor: pointer; font-size: 16px; }
-        .btn-submit { background-color: #007bff; color: white; }
-        .btn-submit:hover { background-color: #0056b3; }
-        .btn-cancel { background-color: #6c757d; color: white; margin-right: 10px; text-decoration: none; display: inline-block; padding: 10px 20px; border-radius: 4px; font-size: 16px; }
-        .btn-cancel:hover { background-color: #545b62; }
-    </style>
+    /* 이미지 업로드 관련 스타일 */
+    .image-upload-section {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        flex-wrap: wrap;
+    }
+    .upload-btn-wrapper {
+        width: 100px;
+        height: 100px;
+        cursor: pointer;
+        border-radius: 8px;
+        overflow: hidden;
+        border: 1px solid #dee2e6;
+        transition: all 0.2s;
+    }
+    .upload-btn-wrapper:hover {
+        opacity: 0.8;
+        border-color: #0d6efd;
+    }
+    .upload-btn-wrapper img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+    .preview-item {
+        width: 100px;
+        height: 100px;
+        position: relative;
+        border-radius: 8px;
+        overflow: hidden;
+        border: 1px solid #dee2e6;
+    }
+    .preview-item img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+    .preview-delete {
+        position: absolute;
+        top: 5px;
+        right: 5px;
+        width: 20px;
+        height: 20px;
+        background-color: rgba(0,0,0,0.6);
+        color: white;
+        border-radius: 50%;
+        text-align: center;
+        line-height: 18px;
+        font-size: 14px;
+        cursor: pointer;
+        z-index: 10;
+    }
+    .preview-delete:hover {
+        background-color: rgba(220, 53, 69, 0.9);
+    }
+    .image-count-text {
+        font-size: 0.9rem;
+        color: #6c757d;
+        margin-bottom: 5px;
+        font-weight: 600;
+    }
+</style>
 </head>
 <body>
 
-<h1 th:if="${!isEdit}" style="text-align: center; margin-bottom: 30px;">새 상품 등록</h1>
-<h1 th:if="${isEdit}" style="text-align: center; margin-bottom: 30px;">상품 수정</h1>
+<main layout:fragment="content" class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+            <h2 class="mb-4 text-center fw-bold" th:text="${isEdit} ? '상품 수정' : '새 상품 등록'">새 상품 등록</h2>
 
+            <form th:action="${isEdit} ? @{|/products/${product.id}/edit|} : @{/products/new}"
+                  th:object="${product}" method="post" enctype="multipart/form-data" class="needs-validation">
 
-<form th:action="${isEdit} ? @{|/products/${product.id}/edit|} : @{/products/new}" th:object="${product}" method="post" enctype="multipart/form-data">
+                <!-- 제목 -->
+                <div class="mb-3">
+                    <label for="title" class="form-label fw-bold">제목</label>
+                    <input type="text" id="title" th:field="*{title}" class="form-control" required placeholder="상품 제목을 입력하세요">
+                    <div class="invalid-feedback">제목을 입력해주세요.</div>
+                </div>
 
-    <div class="form-group">
-        <label for="title">제목</label>
-        <input type="text" id="title" th:field="*{title}" required placeholder="상품 제목을 입력하세요">
-    </div>
+                <!-- 카테고리 선택 -->
+                <div class="mb-3">
+                    <label class="form-label fw-bold">카테고리</label>
+                    <div class="category-container shadow-sm">
+                        <div class="category-column" id="category-depth-1">
+                            <!-- 1차 카테고리 -->
+                        </div>
+                        <div class="category-column" id="category-depth-2">
+                            <div class="category-empty">대분류를 선택해주세요</div>
+                        </div>
+                        <div class="category-column" id="category-depth-3">
+                            <div class="category-empty">중분류를 선택해주세요</div>
+                        </div>
+                    </div>
+                    <div id="selected-category-text" class="selected-category-display"></div>
+                    <input type="hidden" id="categoryId" th:field="*{categoryId}" required>
+                </div>
 
-    <!-- 카테고리 선택 영역 -->
-    <div class="form-group">
-        <label>카테고리</label>
-        <div class="category-container">
-            <div class="category-column" id="category-depth-1">
-                <!-- 1차 카테고리가 JS로 렌더링 됩니다 -->
+                <!-- 가격 -->
+                <div class="mb-3">
+                    <label for="price" class="form-label fw-bold">가격</label>
+                    <div class="input-group">
+                        <input type="number" id="price" th:field="*{price}" class="form-control" required placeholder="가격을 입력해주세요">
+                        <span class="input-group-text">원</span>
+                    </div>
+                </div>
+
+                <!-- 거래 희망 지역 -->
+                <div class="mb-3">
+                    <label for="dealRegion" class="form-label fw-bold">거래 희망 지역</label>
+                    <input type="text" id="dealRegion" th:field="*{dealRegion}" class="form-control" required placeholder="예: 서울시 강남구">
+                </div>
+
+                <!-- 내용 -->
+                <div class="mb-3">
+                    <label for="content" class="form-label fw-bold">내용</label>
+                    <textarea id="content" th:field="*{content}" class="form-control" rows="10" required placeholder="상품에 대한 자세한 설명을 적어주세요"></textarea>
+                </div>
+
+                <!-- 이미지 파일 -->
+                <div class="mb-4">
+                <label class="form-label fw-bold">이미지 파일</label>
+                <div class="image-count-text">이미지 등록 (<span id="current-count">0</span>/10)</div>
+                
+                    <div class="image-upload-section">
+                    <!-- 업로드 버튼 -->
+                    <div class="upload-btn-wrapper" id="upload-trigger">
+                        <img th:src="@{/image_upload_button.png}" alt="이미지 업로드">
+                    </div>
+                    
+                    <!-- 미리보기 영역 -->
+                    <div id="preview-container" class="d-flex gap-2 flex-wrap">
+                        <!-- JS로 이미지가 추가됨 -->
+                    </div>
+                </div>
+                
+                <!-- 실제 파일 인풋 (숨김) -->
+                <input type="file" id="imageFiles" name="imageFiles" class="d-none" multiple accept="image/*">
             </div>
-            <div class="category-column" id="category-depth-2">
-                <div class="category-empty">대분류를 선택해주세요</div>
-            </div>
-            <div class="category-column" id="category-depth-3">
-                 <div class="category-empty">중분류를 선택해주세요</div>
-            </div>
+
+                <!-- 버튼 그룹 -->
+                <div class="d-flex justify-content-end gap-2 mb-5">
+                    <a th:href="@{/products}" class="btn btn-secondary btn-lg">취소</a>
+                    <button type="submit" class="btn btn-primary btn-lg px-4">저장</button>
+                </div>
+
+            </form>
         </div>
-        <div id="selected-category-text" class="selected-category-display"></div>
-        <!-- 실제 서버로 전송될 카테고리 ID -->
-        <input type="hidden" id="categoryId" th:field="*{categoryId}" required>
     </div>
+</main>
 
-    <div class="form-group">
-        <label for="price">가격</label>
-        <input type="number" id="price" th:field="*{price}" required placeholder="숫자만 입력해주세요">
-    </div>
+<th:block layout:fragment="script">
+    <script th:inline="javascript">
+        /*<![CDATA[*/
+        const categories = JSON.parse(/*[[${categoriesJson}]]*/ '[]');
+        const initialCategoryId = /*[[${product.categoryId}]]*/ null;
+        /*]]>*/
 
-    <div class="form-group">
-        <label for="dealRegion">거래 희망 지역</label>
-        <input type="text" id="dealRegion" th:field="*{dealRegion}" required placeholder="예: 서울시 강남구">
-    </div>
+        const depth1Container = document.getElementById('category-depth-1');
+        const depth2Container = document.getElementById('category-depth-2');
+        const depth3Container = document.getElementById('category-depth-3');
+        const categoryIdInput = document.getElementById('categoryId');
+        const selectedCategoryText = document.getElementById('selected-category-text');
 
-    <div class="form-group">
-        <label for="content">내용</label>
-        <textarea id="content" th:field="*{content}" required placeholder="상품에 대한 자세한 설명을 적어주세요"></textarea>
-    </div>
+        let selectedDepth1 = null;
+        let selectedDepth2 = null;
+        let selectedDepth3 = null;
 
-    <div class="form-group">
-        <label for="imageFiles">이미지 파일</label>
-        <input type="file" id="imageFiles" name="imageFiles" multiple="multiple">
-    </div>
+        document.addEventListener('DOMContentLoaded', init);
 
-    <div class="btn-group">
-        <a href="/products" th:href="@{/products}" class="btn-cancel">취소</a>
-        <button type="submit" class="btn-submit">저장</button>
-    </div>
-
-</form>
-
-<!-- 카테고리 데이터 및 로직 -->
-<script th:inline="javascript">
-    /*<![CDATA[*/
-    // 1. 서버에서 받은 JSON 데이터를 파싱하여 JS 객체로 저장
-    const categories = JSON.parse(/*[[${categoriesJson}]]*/ '[]');
-    const initialCategoryId = /*[[${product.categoryId}]]*/ null;
-    /*]]>*/
-
-    // DOM 요소 참조
-    const depth1Container = document.getElementById('category-depth-1');
-    const depth2Container = document.getElementById('category-depth-2');
-    const depth3Container = document.getElementById('category-depth-3');
-    const categoryIdInput = document.getElementById('categoryId');
-    const selectedCategoryText = document.getElementById('selected-category-text');
-
-    let selectedDepth1 = null;
-    let selectedDepth2 = null;
-    let selectedDepth3 = null;
-
-    // 초기화 실행
-    init();
-
-    function init() {
-        renderDepth1();
-        
-        // 수정 모드일 경우 기존 선택값 복원
-        if (initialCategoryId) {
-            restoreSelection(initialCategoryId);
-        }
-    }
-
-    // 1차 카테고리 렌더링
-    function renderDepth1() {
-        depth1Container.innerHTML = '';
-        categories.forEach(cat => {
-            const item = createCategoryItem(cat, 1);
-            depth1Container.appendChild(item);
-        });
-    }
-
-    // 2차 카테고리 렌더링
-    function renderDepth2(parentCategory) {
-        depth2Container.innerHTML = '';
-        depth3Container.innerHTML = '<div class="category-empty">중분류를 선택해주세요</div>'; // 3차 초기화
-        
-        if (!parentCategory.children || parentCategory.children.length === 0) {
-            depth2Container.innerHTML = '<div class="category-empty">하위 카테고리가 없습니다</div>';
-            return;
+        function init() {
+            renderDepth1();
+            if (initialCategoryId) {
+                restoreSelection(initialCategoryId);
+            }
         }
 
-        parentCategory.children.forEach(cat => {
-            const item = createCategoryItem(cat, 2);
-            depth2Container.appendChild(item);
-        });
-    }
-
-    // 3차 카테고리 렌더링 (필요하다면)
-    function renderDepth3(parentCategory) {
-        depth3Container.innerHTML = '';
-        
-        if (!parentCategory.children || parentCategory.children.length === 0) {
-            depth3Container.innerHTML = '<div class="category-empty">하위 카테고리가 없습니다</div>';
-            return;
+        function renderDepth1() {
+            depth1Container.innerHTML = '';
+            categories.forEach(cat => {
+                const item = createCategoryItem(cat, 1);
+                depth1Container.appendChild(item);
+            });
         }
 
-        parentCategory.children.forEach(cat => {
-            const item = createCategoryItem(cat, 3);
-            depth3Container.appendChild(item);
-        });
-    }
-
-    // 카테고리 아이템(DOM) 생성 함수
-    function createCategoryItem(category, depth) {
-        const div = document.createElement('div');
-        div.className = 'category-item';
-        div.textContent = category.name;
-        div.dataset.id = category.id;
-
-        div.addEventListener('click', () => {
-            handleCategoryClick(category, depth, div);
-        });
-        
-        return div;
-    }
-
-    // 클릭 이벤트 핸들러
-    function handleCategoryClick(category, depth, element) {
-        // 하이라이트 처리
-        highlightSelection(element, depth);
-
-        // 로직 처리
-        if (depth === 1) {
-            selectedDepth1 = category;
-            selectedDepth2 = null;
-            selectedDepth3 = null;
-            renderDepth2(category);
-            updateSelectedText();
-            // 1차만 선택해도 값을 넣을지, 끝까지 가야 넣을지 결정 (여기선 1차만 선택해도 저장되게 함, 하지만 보통 마지막 자식이어야 함)
-            // 우선은 가장 구체적인 선택을 값으로 설정
-            categoryIdInput.value = category.id; 
-        } else if (depth === 2) {
-            selectedDepth2 = category;
-            selectedDepth3 = null;
-            renderDepth3(category);
-            updateSelectedText();
-            categoryIdInput.value = category.id;
-        } else if (depth === 3) {
-            selectedDepth3 = category;
-            updateSelectedText();
-            categoryIdInput.value = category.id;
-        }
-    }
-
-    // 선택된 항목 하이라이트 (active 클래스 토글)
-    function highlightSelection(element, depth) {
-        let container;
-        if (depth === 1) container = depth1Container;
-        else if (depth === 2) container = depth2Container;
-        else if (depth === 3) container = depth3Container;
-
-        // 기존 active 제거
-        const siblings = container.querySelectorAll('.category-item');
-        siblings.forEach(el => el.classList.remove('active'));
-
-        // 현재 클릭한 것 active 추가
-        element.classList.add('active');
-    }
-
-    // 선택된 경로 텍스트 업데이트
-    function updateSelectedText() {
-        let text = "";
-        if (selectedDepth1) text += selectedDepth1.name;
-        if (selectedDepth2) text += " > " + selectedDepth2.name;
-        if (selectedDepth3) text += " > " + selectedDepth3.name;
-        
-        selectedCategoryText.textContent = "선택된 카테고리: " + text;
-    }
-    
-    // 초기값 복원 (수정 모드용) - 재귀적으로 찾아서 클릭 이벤트 트리거 or UI 상태 설정
-    function restoreSelection(targetId) {
-        // 1. 전체 트리에서 targetId를 가진 노드와 그 부모들을 찾음 (경로 탐색)
-        let path = findCategoryPath(categories, targetId);
-        
-        if (path) {
-            // path[0] = 1차, path[1] = 2차 ...
+        function renderDepth2(parentCategory) {
+            depth2Container.innerHTML = '';
+            depth3Container.innerHTML = '<div class="category-empty">중분류를 선택해주세요</div>';
             
-            // 1차 선택
-            if (path[0]) {
-                const el1 = findElementByDataId(depth1Container, path[0].id);
-                if (el1) el1.click(); // 클릭 이벤트 트리거로 하위 렌더링 유도
+            if (!parentCategory.children || parentCategory.children.length === 0) {
+                depth2Container.innerHTML = '<div class="category-empty">하위 카테고리가 없습니다</div>';
+                return;
             }
+
+            parentCategory.children.forEach(cat => {
+                const item = createCategoryItem(cat, 2);
+                depth2Container.appendChild(item);
+            });
+        }
+
+        function renderDepth3(parentCategory) {
+            depth3Container.innerHTML = '';
             
-            // 2차 선택
-            if (path[1]) {
-                const el2 = findElementByDataId(depth2Container, path[1].id);
-                if (el2) el2.click();
+            if (!parentCategory.children || parentCategory.children.length === 0) {
+                depth3Container.innerHTML = '<div class="category-empty">하위 카테고리가 없습니다</div>';
+                return;
             }
-            
-            // 3차 선택
-            if (path[2]) {
-                const el3 = findElementByDataId(depth3Container, path[2].id);
-                if (el3) el3.click();
+
+            parentCategory.children.forEach(cat => {
+                const item = createCategoryItem(cat, 3);
+                depth3Container.appendChild(item);
+            });
+        }
+
+        function createCategoryItem(category, depth) {
+            const div = document.createElement('div');
+            div.className = 'category-item';
+            div.textContent = category.name;
+            div.dataset.id = category.id;
+
+            div.addEventListener('click', () => {
+                handleCategoryClick(category, depth, div);
+            });
+            return div;
+        }
+
+        function handleCategoryClick(category, depth, element) {
+            highlightSelection(element, depth);
+
+            if (depth === 1) {
+                selectedDepth1 = category;
+                selectedDepth2 = null;
+                selectedDepth3 = null;
+                renderDepth2(category);
+                updateSelectedText();
+                categoryIdInput.value = category.id;
+            } else if (depth === 2) {
+                selectedDepth2 = category;
+                selectedDepth3 = null;
+                renderDepth3(category);
+                updateSelectedText();
+                categoryIdInput.value = category.id;
+            } else if (depth === 3) {
+                selectedDepth3 = category;
+                updateSelectedText();
+                categoryIdInput.value = category.id;
             }
         }
-    }
 
-    // 트리에서 ID로 경로(부모들) 찾기
-    function findCategoryPath(nodes, targetId) {
-        for (const node of nodes) {
-            if (node.id === targetId) {
-                return [node];
-            }
-            if (node.children) {
-                const childPath = findCategoryPath(node.children, targetId);
-                if (childPath) {
-                    return [node, ...childPath];
+        function highlightSelection(element, depth) {
+            let container;
+            if (depth === 1) container = depth1Container;
+            else if (depth === 2) container = depth2Container;
+            else if (depth === 3) container = depth3Container;
+
+            const siblings = container.querySelectorAll('.category-item');
+            siblings.forEach(el => el.classList.remove('active'));
+
+            element.classList.add('active');
+        }
+
+        function updateSelectedText() {
+            let text = "";
+            if (selectedDepth1) text += selectedDepth1.name;
+            if (selectedDepth2) text += " > " + selectedDepth2.name;
+            if (selectedDepth3) text += " > " + selectedDepth3.name;
+            
+            selectedCategoryText.textContent = "선택된 카테고리: " + text;
+        }
+        
+        function restoreSelection(targetId) {
+            let path = findCategoryPath(categories, targetId);
+            if (path) {
+                if (path[0]) {
+                    const el1 = findElementByDataId(depth1Container, path[0].id);
+                    if (el1) el1.click();
+                }
+                if (path[1]) {
+                    const el2 = findElementByDataId(depth2Container, path[1].id);
+                    if (el2) el2.click();
+                }
+                if (path[2]) {
+                    const el3 = findElementByDataId(depth3Container, path[2].id);
+                    if (el3) el3.click();
                 }
             }
         }
-        return null;
-    }
-    
-    function findElementByDataId(container, id) {
+
+        function findCategoryPath(nodes, targetId) {
+            for (const node of nodes) {
+                if (node.id === targetId) {
+                    return [node];
+                }
+                if (node.children) {
+                    const childPath = findCategoryPath(node.children, targetId);
+                    if (childPath) {
+                        return [node, ...childPath];
+                    }
+                }
+            }
+            return null;
+        }
+        
+        function findElementByDataId(container, id) {
         return container.querySelector(`.category-item[data-id="${id}"]`);
+        }
+
+    /* 이미지 업로드 로직 */
+    const uploadTrigger = document.getElementById('upload-trigger');
+    const fileInput = document.getElementById('imageFiles');
+    const previewContainer = document.getElementById('preview-container');
+    const currentCountSpan = document.getElementById('current-count');
+    
+    let accumulatedFiles = [];
+    const MAX_IMAGES = 10;
+
+    if (uploadTrigger) {
+        uploadTrigger.addEventListener('click', () => {
+            if (accumulatedFiles.length >= MAX_IMAGES) {
+                alert('이미지는 최대 10장까지만 등록할 수 있습니다.');
+                return;
+            }
+            fileInput.click();
+        });
     }
 
-</script>
+    if (fileInput) {
+        fileInput.addEventListener('change', (e) => {
+            const files = Array.from(e.target.files);
+            if (files.length === 0) return;
 
+            const remainingSlots = MAX_IMAGES - accumulatedFiles.length;
+            if (files.length > remainingSlots) {
+                alert(`최대 ${MAX_IMAGES}장까지만 등록 가능합니다. ${remainingSlots}장만 추가됩니다.`);
+            }
+
+            const filesToAdd = files.slice(0, remainingSlots);
+            
+            filesToAdd.forEach(file => {
+                if (file.type.match('image.*')) {
+                    accumulatedFiles.push(file);
+                }
+            });
+
+            updateFileInputAndPreview();
+        });
+    }
+
+    function updateFileInputAndPreview() {
+        // 1. DataTransfer로 input.files 업데이트
+        const dataTransfer = new DataTransfer();
+        accumulatedFiles.forEach(file => dataTransfer.items.add(file));
+        fileInput.files = dataTransfer.files;
+
+        // 2. 카운트 업데이트
+        if (currentCountSpan) {
+            currentCountSpan.textContent = accumulatedFiles.length;
+        }
+
+        // 3. 미리보기 렌더링
+        if (previewContainer) {
+            previewContainer.innerHTML = '';
+            accumulatedFiles.forEach((file, index) => {
+                const previewItem = document.createElement('div');
+                previewItem.className = 'preview-item';
+
+                const img = document.createElement('img');
+                img.src = URL.createObjectURL(file);
+                
+                const deleteBtn = document.createElement('div');
+                deleteBtn.className = 'preview-delete';
+                deleteBtn.innerHTML = '&#10005;'; // X mark
+                deleteBtn.onclick = (e) => {
+                    e.stopPropagation();
+                    removeImage(index);
+                };
+
+                previewItem.appendChild(img);
+                previewItem.appendChild(deleteBtn);
+                previewContainer.appendChild(previewItem);
+            });
+        }
+    }
+
+    function removeImage(index) {
+        accumulatedFiles.splice(index, 1);
+        updateFileInputAndPreview();
+    }
+</script>
+</th:block>
 </body>
 </html>
