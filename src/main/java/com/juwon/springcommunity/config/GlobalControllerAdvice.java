@@ -1,20 +1,37 @@
 package com.juwon.springcommunity.config;
 
+import com.juwon.springcommunity.domain.ProductCategory;
+import com.juwon.springcommunity.service.ProductCategoryService;
 import jakarta.servlet.http.HttpServletRequest;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.servlet.ModelAndView;
 
+import java.util.List;
+
 @Slf4j
 @ControllerAdvice
+@RequiredArgsConstructor
 public class GlobalControllerAdvice {
 
+    private final ProductCategoryService productCategoryService;
+
     /**
-     * 모든 뷰에 공통 모델 속성을 추가합니다.
+     * 모든 뷰에 공통적으로 카테고리 목록을 제공합니다.
+     * 헤더의 드롭다운 메뉴 등에서 사용됩니다.
+     */
+    @ModelAttribute("headerCategories")
+    public List<ProductCategory> headerCategories() {
+        return productCategoryService.getAllCategories();
+    }
+
+    /**
+     * 모든 뷰에 공통 모델 속성을 추가합니다。
      * 현재 요청 경로가 "/chat"으로 시작하는지 여부를 확인하여,
-     * 알림을 숨겨야 하는지 결정하는 'hideNotifications' 플래그를 모델에 추가합니다.
+     * 알림을 숨겨야 하는지 결정하는 'hideNotifications' 플래그를 모델에 추가합니다。
      * @param request 현재 HTTP 요청
      * @return 알림을 숨겨야 하면 true, 그렇지 않으면 false
      */

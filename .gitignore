@@ -45,3 +45,5 @@ src/main/resources/application.properties
 
 # SQL 스크립트
 *.sql
+# Test folder
+src/main/resources/static/test/

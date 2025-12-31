@@ -23,12 +23,13 @@ public class HomeController {
 
     private final RecentProductService recentProductService;
     private final UserService userService;
+    private final com.juwon.springcommunity.service.ProductCategoryService productCategoryService;
 
     // index 페이지를 연결
     @GetMapping("/")
     public String home(Model model, Principal principal, HttpSession session) {
 
-        // === (유지) 최근 본 상품 목록 조회 로직 추가 시작 ===
+        // === (기존) 최근 본 상품 목록 조회 로직 추가 시작 ===     
         String userIdentifier;
         if (principal != null) {
             String email = principal.getName();
@@ -47,7 +48,13 @@ public class HomeController {
         // === 최근 본 상품 목록 조회 로직 추가 끝 ===
 
 
-        // === (추가) 캐러셀 아이템 생성 로직 시작 ===
+        // === (추가) 카테고리 목록 조회 로직 시작 ===
+        List<com.juwon.springcommunity.domain.ProductCategory> categories = productCategoryService.getAllCategories();
+        model.addAttribute("categories", categories);
+        // === 카테고리 목록 조회 로직 끝 ===
+
+
+        // === (추가) 캐러셀 데이터 생성 로직 시작 ===
         List<Map<String, String>> carouselItems = new ArrayList<>();
 
         Map<String, String> item1 = new HashMap<>();

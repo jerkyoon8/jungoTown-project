@@ -13,7 +13,7 @@
 .header-wrapper {
     max-width: 1200px;
     margin: 0 auto;
-    position: relative; /* 오버레이/사이드바 위치 기준점 */
+    position: relative; /* 오버레이/사이드바 위치 기준 */
 }
 
 /* 상단 영역 (로고, 검색, 유저메뉴) */
@@ -143,7 +143,7 @@
     left: 0;
     width: 100%;
     height: 100%;
-    background-color: rgba(0, 0, 0, 0.5); /* 반투명 검은색 */
+    background-color: rgba(0, 0, 0, 0.5); /* 반투명 검정 */
     z-index: 998; /* 사이드바 바로 아래 */
     display: none; /* 기본적으로 숨김 */
     opacity: 0;
@@ -204,7 +204,7 @@
 /* 사이드바 콘텐츠 영역 */
 .sidebar-content {
     flex-grow: 1;
-    padding: 0; /* 채팅은 내부 패딩을 유연하게 쓰기 위해 0으로 시작 */
+    padding: 0; /* 채팅은 내부 패딩을 유연하게 쓰기 위해 0으로 시작 */  
     overflow-y: auto; /* 내용이 넘치면 스크롤 */
     display: flex;
     flex-direction: column;
@@ -339,7 +339,7 @@
     color: #666;
 }
 .my-message .message-sender {
-    color: #dae0e5; /* 내 메시지일 때 sender 색상 */
+    color: #dae0e5; /* 내 메시지의 sender 색상 */
     text-align: right;
     display: none; /* 내 이름은 굳이 안 보여줘도 됨 */
 }
@@ -390,4 +390,115 @@
     margin-right: 10px;
     color: #555;
     padding: 0;
+}
+
+/* === Category Dropdown (Split Layout) === */
+.category-dropdown-container {
+    position: relative;
+    height: 100%;
+}
+
+.category-trigger {
+    display: flex;
+    align-items: center;
+    height: 100%;
+    cursor: pointer;
+    padding: 0 10px; /* 클릭/호버 영역 확보 */
+}
+
+.category-dropdown {
+    display: none; /* 기본적으로 숨김 */
+    position: absolute;
+    top: 100%; /* 메뉴 바 바로 아래 */
+    left: 0;
+    background-color: #fff;
+    border: 1px solid #ddd;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.15);
+    z-index: 1000;
+    width: 600px; /* 전체 너비 */
+    height: 400px; /* 메뉴 높이 고정 */
+    border-radius: 0 0 4px 4px;
+}
+
+/* 메뉴 컨테이너에 호버 시 드롭다운 보이기 (flex) */
+.category-dropdown-container:hover .category-dropdown {
+    display: flex;
+}
+
+/* --- Left Side: Main Categories --- */
+.category-sidebar {
+    width: 30%; /* 좌측 30% */
+    background-color: #f8f9fa;
+    border-right: 1px solid #eee;
+    overflow-y: auto; /* 내용 많으면 스크롤 */
+    padding: 10px 0;
+}
+
+.sidebar-item {
+    display: block;
+    padding: 12px 15px;
+    color: #333;
+    text-decoration: none;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.2s;
+    border-left: 3px solid transparent; /* 활성 표시용 */
+}
+
+/* 마우스 올렸을 때 or 활성화 되었을 때 스타일 */
+.sidebar-item:hover, .sidebar-item.active {
+    background-color: #fff;
+    color: #007bff;
+    font-weight: bold;
+    border-left-color: #007bff;
+}
+
+/* --- Right Side: Sub Categories --- */
+.category-content {
+    width: 70%; /* 우측 70% */
+    padding: 20px;
+    background-color: #fff;
+    overflow-y: auto;
+}
+
+.sub-category-group {
+    display: none; /* 기본적으로 모두 숨김 */
+}
+
+.sub-category-group.active {
+    display: block; /* 선택된 그룹만 보임 */
+    animation: fadeIn 0.2s ease-in-out;
+}
+
+.sub-category-title {
+    font-size: 16px;
+    font-weight: bold;
+    margin-bottom: 15px;
+    padding-bottom: 10px;
+    border-bottom: 2px solid #333;
+    color: #000;
+}
+
+.sub-category-list {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr); /* 2열로 배치 */
+    gap: 10px;
+}
+
+.sub-category-item {
+    font-size: 13px;
+    color: #555;
+    text-decoration: none;
+    padding: 5px 0;
+    display: block;
+}
+
+.sub-category-item:hover {
+    color: #007bff;
+    text-decoration: underline;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
 }

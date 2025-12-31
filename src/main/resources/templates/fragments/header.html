@@ -46,7 +46,72 @@
         </div>
         <nav class="header-nav">
             <ul>
-                <li><a href="#">카테고리</a></li>
+                <li class="category-dropdown-container">
+                    <a href="#" class="category-trigger">카테고리</a>
+                    <div class="category-dropdown">
+                        <!-- 1. 좌측: 대분류 사이드바 -->
+                        <div class="category-sidebar">
+                            <div th:each="category, stat : ${headerCategories}"
+                                 class="sidebar-item"
+                                 th:classappend="${stat.first} ? 'active'"
+                                 th:text="${category.name}"
+                                 th:onmouseover="'showSubCategory(' + ${category.id} + ', this)'">
+                                 카테고리명
+                            </div>
+                            <div th:if="${headerCategories == null or #lists.isEmpty(headerCategories)}" 
+                                 style="padding: 15px; color: #999; font-size: 13px;">
+                                카테고리 없음
+                            </div>
+                        </div>
+
+                        <!-- 2. 우측: 소분류 콘텐츠 -->
+                        <div class="category-content">
+                            <div th:each="category, stat : ${headerCategories}"
+                                 th:id="'sub-group-' + ${category.id}"
+                                 class="sub-category-group"
+                                 th:classappend="${stat.first} ? 'active'">
+                                
+                                <!-- 소분류 제목 (클릭 시 해당 카테고리 검색) -->
+                                <div class="sub-category-title">
+                                    <a th:href="@{/products(categoryId=${category.id})}" 
+                                       th:text="${category.name} + ' 전체보기'" 
+                                       style="text-decoration: none; color: inherit;">
+                                        카테고리명
+                                    </a>
+                                </div>
+
+                                <!-- 소분류 리스트 -->
+                                <div class="sub-category-list">
+                                    <a th:each="child : ${category.children}"
+                                       th:href="@{/products(categoryId=${child.id})}"
+                                       class="sub-category-item"
+                                       th:text="${child.name}">
+                                       소분류명
+                                    </a>
+                                    <p th:if="${#lists.isEmpty(category.children)}" style="color: #999; font-size: 13px;">하위 카테고리가 없습니다.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- JS: 마우스 오버 시 우측 패널 변경 -->
+                    <script>
+                        function showSubCategory(categoryId, element) {
+                            // 1. 모든 사이드바 아이템의 active 제거
+                            document.querySelectorAll('.sidebar-item').forEach(item => item.classList.remove('active'));
+                            // 2. 현재 선택된 아이템 active 추가
+                            element.classList.add('active');
+
+                            // 3. 모든 서브 카테고리 그룹 숨기기
+                            document.querySelectorAll('.sub-category-group').forEach(group => group.classList.remove('active'));
+                            // 4. 해당하는 서브 카테고리 그룹 보이기
+                            const targetGroup = document.getElementById('sub-group-' + categoryId);
+                            if(targetGroup) {
+                                targetGroup.classList.add('active');
+                            }
+                        }
+                    </script>
+                </li>
                 <li><a href="#" id="wishlist-btn">찜한 상품</a></li>
                 <li><a href="#">임시메뉴</a></li>
                 <li><a href="#">추가메뉴</a></li>
