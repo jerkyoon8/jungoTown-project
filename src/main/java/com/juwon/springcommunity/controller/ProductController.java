@@ -1,6 +1,7 @@
 package com.juwon.springcommunity.controller;
 
 import com.juwon.springcommunity.domain.ProductCategory;
+import com.juwon.springcommunity.domain.Role;
 import com.juwon.springcommunity.domain.User;
 import com.juwon.springcommunity.dto.ProductCreateRequestDto;
 import com.juwon.springcommunity.dto.ProductResponseDto;
@@ -42,6 +43,14 @@ public class ProductController {
         this.recentProductService = recentProductService;
         this.productCategoryService = productCategoryService;
         this.objectMapper = objectMapper;
+    }
+
+    private String getCurrentUserEmail(Principal principal) {
+        if (principal == null) return null;
+        if (principal instanceof OAuth2AuthenticationToken) {
+            return ((OAuth2AuthenticationToken) principal).getPrincipal().getAttribute("email");
+        }
+        return principal.getName();
     }
 
     // 전체 상품 목록을 보여줌.
@@ -125,12 +134,12 @@ public class ProductController {
         // 현재 보고 있는 상품이 로그인한 사용자가 작성한 것인지 확인 (수정/삭제 버튼 노출 여부 결정)
         boolean isOwner = false;
         if (principal != null) {
+            String currentUserEmail = getCurrentUserEmail(principal);
+            User currentUser = userService.findUserByEmail(currentUserEmail);
             String ownerEmail = userService.findEmailById(product.getUserId());
-            String currentUserEmail = principal.getName();
-            if (principal instanceof OAuth2AuthenticationToken) {
-                currentUserEmail = ((OAuth2AuthenticationToken) principal).getPrincipal().getAttribute("email");
-            }
-            isOwner = ownerEmail != null && ownerEmail.equals(currentUserEmail);
+            
+            // 작성자 본인이거나 관리자 권한이 있는 경우 true
+            isOwner = (ownerEmail != null && ownerEmail.equals(currentUserEmail)) || currentUser.getRole() == Role.ADMIN;
         }
         model.addAttribute("isOwner", isOwner);
 
@@ -139,8 +148,18 @@ public class ProductController {
 
     // 상품 수정 폼으로 연결
     @GetMapping("/{id}/edit")
-    public String showEditForm(@PathVariable Long id, Model model) throws com.fasterxml.jackson.core.JsonProcessingException {
+    public String showEditForm(@PathVariable Long id, Model model, Principal principal) throws com.fasterxml.jackson.core.JsonProcessingException {
         ProductResponseDto product = productService.findProductById(id);
+
+        // 권한 확인: 작성자 본인이거나 관리자여야 함
+        String currentUserEmail = getCurrentUserEmail(principal);
+        User currentUser = userService.findUserByEmail(currentUserEmail);
+        String ownerEmail = userService.findEmailById(product.getUserId());
+
+        if (!(ownerEmail != null && ownerEmail.equals(currentUserEmail)) && currentUser.getRole() != Role.ADMIN) {
+            throw new IllegalStateException("수정 권한이 없습니다.");
+        }
+
         model.addAttribute("product", product);
         String categoriesJson = objectMapper.writeValueAsString(productCategoryService.getAllCategories());
         model.addAttribute("categoriesJson", categoriesJson);
@@ -150,8 +169,19 @@ public class ProductController {
 
     // 상품 수정
     @PostMapping("/{id}/edit")
-    public String updateProduct(@PathVariable Long id, @ModelAttribute ProductUpdateRequestDto productUpdateRequestDto)
+    public String updateProduct(@PathVariable Long id, @ModelAttribute ProductUpdateRequestDto productUpdateRequestDto, Principal principal)
     throws IOException {
+        ProductResponseDto product = productService.findProductById(id);
+
+        // 권한 확인: 작성자 본인이거나 관리자여야 함
+        String currentUserEmail = getCurrentUserEmail(principal);
+        User currentUser = userService.findUserByEmail(currentUserEmail);
+        String ownerEmail = userService.findEmailById(product.getUserId());
+
+        if (!(ownerEmail != null && ownerEmail.equals(currentUserEmail)) && currentUser.getRole() != Role.ADMIN) {
+            throw new IllegalStateException("수정 권한이 없습니다.");
+        }
+
         productService.updateProduct(id, productUpdateRequestDto);
         return "redirect:/products/" + id; // 수정된 상품의 상세 페이지로 리다이렉트
     }
@@ -161,14 +191,11 @@ public class ProductController {
     public String deleteProduct(@PathVariable Long id, Principal principal) {
         ProductResponseDto product = productService.findProductById(id);
 
-        String username = principal.getName();
-        if (principal instanceof OAuth2AuthenticationToken) {
-            username = ((OAuth2AuthenticationToken) principal).getPrincipal().getAttribute("email");
-        }
-        User user = userService.findUserByEmail(username);
+        String currentUserEmail = getCurrentUserEmail(principal);
+        User user = userService.findUserByEmail(currentUserEmail);
 
         // 작성자 본인 확인 또는 관리자 권한 확인
-        if (!product.getUserId().equals(user.getId()) && !user.getRole().getKey().equals("ROLE_ADMIN")) {
+        if (!product.getUserId().equals(user.getId()) && user.getRole() != Role.ADMIN) {
             throw new IllegalStateException("삭제 권한이 없습니다.");
         }
 
