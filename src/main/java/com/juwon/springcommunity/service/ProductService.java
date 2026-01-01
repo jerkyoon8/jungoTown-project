@@ -62,8 +62,9 @@ public class ProductService {
         return products.stream()
                 .map(product -> {
                     User author = userMap.get(product.getUserId());
+                    String nickname = (author != null) ? author.getNickname() : "알 수 없음";
                     List<ProductImage> images = productImageRepository.findByProductId(product.getId());
-                    return ProductResponseDto.of(product, author.getNickname(), images);
+                    return ProductResponseDto.of(product, nickname, images);
                 })
                 .collect(Collectors.toList());
     }
@@ -90,8 +91,9 @@ public class ProductService {
         List<ProductResponseDto> productDtos = products.stream()
                 .map(product -> {
                     User author = userMap.get(product.getUserId());
+                    String nickname = (author != null) ? author.getNickname() : "알 수 없음";
                     List<ProductImage> images = productImageRepository.findByProductId(product.getId());
-                    return ProductResponseDto.of(product, author.getNickname(), images);
+                    return ProductResponseDto.of(product, nickname, images);
                 })
                 .collect(Collectors.toList());
 
@@ -189,8 +191,9 @@ public class ProductService {
         return products.stream()
                 .map(product -> {
                     User author = userMap.get(product.getUserId());
+                    String nickname = (author != null) ? author.getNickname() : "알 수 없음";
                     List<ProductImage> images = productImageRepository.findByProductId(product.getId());
-                    return ProductResponseDto.of(product, author.getNickname(), images);
+                    return ProductResponseDto.of(product, nickname, images);
                 })
                 .collect(Collectors.toList());
     }
