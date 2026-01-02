@@ -15,5 +15,8 @@ public class WebConfig implements WebMvcConfigurer {
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
         registry.addResourceHandler("/images/**")
                 .addResourceLocations("file:///" + fileDir + "post/");
+        
+        registry.addResourceHandler("/carousel-images/**")
+                .addResourceLocations("file:///" + fileDir + "/carousel/");
     }
 }

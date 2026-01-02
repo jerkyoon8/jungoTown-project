@@ -42,7 +42,7 @@
                  class="carousel-item"
                  th:classappend="${stat.first} ? 'active'"
                  data-bs-interval="5000">
-                <img th:src="@{${item.image}}" class="d-block w-100" alt="Carousel Image">
+                <img th:src="@{${item.imageUrl}}" class="d-block w-100" alt="Carousel Image">
                 <div class="carousel-caption d-none d-md-block">
                     <h5 th:text="${item.title}"></h5>
                     <p th:text="${item.description}"></p>

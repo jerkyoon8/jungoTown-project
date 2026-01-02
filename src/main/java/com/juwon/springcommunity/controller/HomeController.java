@@ -24,6 +24,7 @@ public class HomeController {
     private final RecentProductService recentProductService;
     private final UserService userService;
     private final com.juwon.springcommunity.service.ProductCategoryService productCategoryService;
+    private final com.juwon.springcommunity.service.CarouselService carouselService;
 
     // index 페이지를 연결
     @GetMapping("/")
@@ -54,29 +55,10 @@ public class HomeController {
         // === 카테고리 목록 조회 로직 끝 ===
 
 
-        // === (추가) 캐러셀 데이터 생성 로직 시작 ===
-        List<Map<String, String>> carouselItems = new ArrayList<>();
-
-        Map<String, String> item1 = new HashMap<>();
-        item1.put("image", "/image/carousel/carousel-1.png");
-        item1.put("title", "신선한 과일의 세계");
-        item1.put("description", "제철을 맞은 신선한 과일들을 만나보세요.");
-        carouselItems.add(item1);
-
-        Map<String, String> item2 = new HashMap<>();
-        item2.put("image", "/image/carousel/carousel-2.png");
-        item2.put("title", "다채로운 채소 모음");
-        item2.put("description", "건강한 식단을 위한 최고의 선택!");
-        carouselItems.add(item2);
-
-        Map<String, String> item3 = new HashMap<>();
-        item3.put("image", "/image/carousel/carousel-3.png");
-        item3.put("title", "오늘의 특별 할인");
-        item3.put("description", "놓치면 후회할 특별한 가격의 상품들을 확인하세요.");
-        carouselItems.add(item3);
-
+        // === (추가) 캐러셀 데이터 조회 로직 시작 ===
+        List<com.juwon.springcommunity.domain.CarouselItem> carouselItems = carouselService.findActiveItems();
         model.addAttribute("carouselItems", carouselItems);
-        // === 캐러셀 아이템 생성 로직 끝 ===
+        // === 캐러셀 데이터 조회 로직 끝 ===
 
 
         return "index";

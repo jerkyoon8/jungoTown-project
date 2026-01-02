@@ -22,6 +22,11 @@ public class FileStore {
         return fileDir + "/post/" + filename;
     }
 
+    // 캐러셀 이미지 파일명을 받아 전체 저장 경로를 반환합니다.
+    public String getCarouselFullPath(String filename) {
+        return fileDir + "/carousel/" + filename;
+    }
+
     // 여러 개의 파일을 받아 저장하고, 저장된 파일 정보 리스트를 반환합니다.
     public List<ProductImage> storeFiles(List<MultipartFile> multipartFiles, Long postId) throws IOException {
         List<ProductImage> storeFileResult = new ArrayList<>();
@@ -44,6 +49,26 @@ public class FileStore {
         multipartFile.transferTo(new File(getFullPath(storeFileName)));
 
         return new ProductImage(null, postId, originalFilename, storeFileName, getFullPath(storeFileName), multipartFile.getSize(), null, null);
+    }
+
+    // 캐러셀 이미지를 저장하고 저장된 파일명을 반환합니다.
+    public String storeCarouselFile(MultipartFile multipartFile) throws IOException {
+        if (multipartFile.isEmpty()) {
+            return null;
+        }
+
+        String originalFilename = multipartFile.getOriginalFilename();
+        String storeFileName = createStoreFileName(originalFilename);
+        
+        // 캐러셀 디렉토리 생성 확인
+        File carouselDir = new File(fileDir + "/carousel/");
+        if (!carouselDir.exists()) {
+            carouselDir.mkdirs();
+        }
+        
+        multipartFile.transferTo(new File(getCarouselFullPath(storeFileName)));
+
+        return storeFileName;
     }
 
     // 서버에 저장된 파일을 삭제합니다.

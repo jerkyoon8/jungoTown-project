@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/default_layout}">
+<head>
+    <title>캐러셀 등록/수정</title>
+</head>
+<body>
+<div layout:fragment="content" class="container mt-5">
+    <div class="row">
+        <div class="col-md-3">
+            <div class="list-group">
+                <a href="/admin" class="list-group-item list-group-item-action">대시보드</a>
+                <a href="/admin/users" class="list-group-item list-group-item-action">회원 관리</a>
+                <a href="/admin/products/deleted" class="list-group-item list-group-item-action">삭제된 게시글</a>
+                <a href="/admin/carousel" class="list-group-item list-group-item-action active">캐러셀 관리</a>
+            </div>
+        </div>
+        <div class="col-md-9">
+            <h2 th:text="${form.id == null ? '캐러셀 등록' : '캐러셀 수정'}"></h2>
+            
+            <form th:action="@{${form.id == null ? '/admin/carousel/new' : '/admin/carousel/' + form.id + '/edit'}}" 
+                  th:object="${form}" method="post" enctype="multipart/form-data">
+                
+                <div class="mb-3">
+                    <label for="title" class="form-label">제목</label>
+                    <input type="text" class="form-control" id="title" th:field="*{title}" required>
+                </div>
+
+                <div class="mb-3">
+                    <label for="description" class="form-label">설명</label>
+                    <input type="text" class="form-control" id="description" th:field="*{description}">
+                </div>
+
+                <div class="mb-3">
+                    <label for="linkUrl" class="form-label">링크 URL</label>
+                    <input type="text" class="form-control" id="linkUrl" th:field="*{linkUrl}">
+                </div>
+
+                <div class="mb-3">
+                    <label for="sortOrder" class="form-label">정렬 순서</label>
+                    <input type="number" class="form-control" id="sortOrder" th:field="*{sortOrder}">
+                    <div class="form-text">낮은 숫자가 먼저 표시됩니다.</div>
+                </div>
+
+                <div class="mb-3 form-check">
+                    <input type="checkbox" class="form-check-input" id="isActive" th:field="*{isActive}">
+                    <label class="form-check-label" for="isActive">활성화 여부</label>
+                </div>
+
+                <div class="mb-3">
+                    <label for="imageFile" class="form-label">이미지 업로드</label>
+                    <input type="file" class="form-control" id="imageFile" th:field="*{imageFile}" accept="image/*">
+                    <div th:if="${form.savedImageUrl}" class="mt-2">
+                        <p>현재 이미지:</p>
+                        <img th:src="@{${form.savedImageUrl}}" alt="Current Image" style="max-height: 200px;">
+                    </div>
+                </div>
+
+                <button type="submit" class="btn btn-primary">저장</button>
+                <a href="/admin/carousel" class="btn btn-secondary">취소</a>
+            </form>
+        </div>
+    </div>
+</div>
+</body>
+</html>

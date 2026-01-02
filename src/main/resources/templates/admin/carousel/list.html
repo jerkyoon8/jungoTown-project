@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/default_layout}">
+<head>
+    <title>캐러셀 관리</title>
+</head>
+<body>
+<div layout:fragment="content" class="container mt-5">
+    <div class="row">
+        <div class="col-md-3">
+            <div class="list-group">
+                <a href="/admin" class="list-group-item list-group-item-action">대시보드</a>
+                <a href="/admin/users" class="list-group-item list-group-item-action">회원 관리</a>
+                <a href="/admin/products/deleted" class="list-group-item list-group-item-action">삭제된 게시글</a>
+                <a href="/admin/carousel" class="list-group-item list-group-item-action active">캐러셀 관리</a>
+            </div>
+        </div>
+        <div class="col-md-9">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h2>캐러셀 관리</h2>
+                <a href="/admin/carousel/new" class="btn btn-primary">새 항목 등록</a>
+            </div>
+            
+            <div th:if="${message}" class="alert alert-success" role="alert" th:text="${message}"></div>
+
+            <table class="table table-striped table-hover">
+                <thead>
+                <tr>
+                    <th>순서</th>
+                    <th>이미지</th>
+                    <th>제목</th>
+                    <th>상태</th>
+                    <th>관리</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="item : ${items}">
+                    <td th:text="${item.sortOrder}"></td>
+                    <td>
+                        <img th:src="@{${item.imageUrl}}" alt="Thumbnail" style="height: 50px; width: 100px; object-fit: cover;">
+                    </td>
+                    <td th:text="${item.title}"></td>
+                    <td>
+                        <span th:if="${item.isActive}" class="badge bg-success">활성</span>
+                        <span th:unless="${item.isActive}" class="badge bg-secondary">비활성</span>
+                    </td>
+                    <td>
+                        <a th:href="@{/admin/carousel/{id}/edit(id=${item.id})}" class="btn btn-sm btn-outline-primary">수정</a>
+                        <form th:action="@{/admin/carousel/{id}/delete(id=${item.id})}" method="post" style="display:inline;" onsubmit="return confirm('정말 삭제하시겠습니까?');">
+                            <button type="submit" class="btn btn-sm btn-outline-danger">삭제</button>
+                        </form>
+                    </td>
+                </tr>
+                <tr th:if="${#lists.isEmpty(items)}">
+                    <td colspan="5" class="text-center">등록된 캐러셀 아이템이 없습니다.</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+</body>
+</html>
