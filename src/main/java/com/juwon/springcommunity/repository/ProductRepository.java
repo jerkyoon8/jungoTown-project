@@ -34,7 +34,7 @@ public interface ProductRepository {
     void increaseWishlistCount(Long id);
 
     // 모든 상품 수 조회
-    long countAll(@Param("keyword") String keyword);
+    long countAll(Map<String, Object> params);
 
     // 페이징 처리하여 상품 조회
     List<Product> findWithPaging(Map<String, Object> params);

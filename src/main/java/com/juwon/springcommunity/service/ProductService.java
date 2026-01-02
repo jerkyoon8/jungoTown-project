@@ -26,12 +26,14 @@ public class ProductService {
     private final ProductImageRepository productImageRepository;
     private final UserService userService;
     private final FileStore fileStore;
+    private final ProductCategoryService productCategoryService;
 
-    public ProductService(ProductRepository productRepository, ProductImageRepository productImageRepository, UserService userService, FileStore fileStore) {
+    public ProductService(ProductRepository productRepository, ProductImageRepository productImageRepository, UserService userService, FileStore fileStore, ProductCategoryService productCategoryService) {
         this.productRepository = productRepository;
         this.productImageRepository = productImageRepository;
         this.userService = userService;
         this.fileStore = fileStore;
+        this.productCategoryService = productCategoryService;
     }
 
     // 상품과 이미지를 함께 저장합니다.
@@ -69,8 +71,8 @@ public class ProductService {
                 .collect(Collectors.toList());
     }
 
-    // 페이징 방식 상품 조회 ( 몇 개씩, 몇 페이지, 정렬 방법 , 검색 키워드 )
-    public Map<String, Object> findPaginated(int page, int size, String sort, String keyword) {
+    // 페이징 방식 상품 조회 ( 몇 개씩, 몇 페이지, 정렬 방법 , 검색 키워드, 카테고리 ID )
+    public Map<String, Object> findPaginated(int page, int size, String sort, String keyword, Long categoryId) {
 
 
         // 페이지 번호와 사이즈를 이용해 DB에서 가져올 시작 지점(offset) 계산
@@ -80,6 +82,13 @@ public class ProductService {
         params.put("size", size);
         params.put("sort", sort);
         params.put("keyword", keyword);
+
+        // 카테고리 필터링: 선택된 카테고리 및 하위 카테고리 포함
+        if (categoryId != null) {
+            List<Long> categoryIds = productCategoryService.getCategoryAndChildIds(categoryId);
+            params.put("categoryIds", categoryIds);
+        }
+
         List<Product> products = productRepository.findWithPaging(params);
 
         // 조회된 상품들의 작성자 정보(닉네임 등)를 가져오기 위해 ID 수집
@@ -99,7 +108,7 @@ public class ProductService {
 
 
         // HTML 최대 페이지 표시를 위한 totalPage 생성
-        long totalProducts = productRepository.countAll(keyword);
+        long totalProducts = productRepository.countAll(params);
         int totalPages = (int) Math.ceil((double) totalProducts / size);
 
         // productResponseDto, currentPage, totalPages 정보를 담은 MAP 생성

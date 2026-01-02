@@ -48,4 +48,26 @@ public class ProductCategoryService {
 
         return rootCategories;
     }
+
+    /**
+     * 특정 카테고리 ID와 그 하위 카테고리 ID들의 목록을 반환합니다.
+     * @param categoryId 기준 카테고리 ID
+     * @return 카테고리 ID 목록 (본인 + 자식들)
+     */
+    public List<Long> getCategoryAndChildIds(Long categoryId) {
+        List<ProductCategory> allCategories = productCategoryRepository.findAll();
+        List<Long> ids = new ArrayList<>();
+        
+        // 본인 추가
+        ids.add(categoryId);
+        
+        // 자식 추가 (1단계만 고려. 다중 계층일 경우 재귀 필요하지만 현재 구조상 2단계로 가정)
+        for (ProductCategory category : allCategories) {
+            if (categoryId.equals(category.getParentId())) {
+                ids.add(category.getId());
+            }
+        }
+        
+        return ids;
+    }
 }

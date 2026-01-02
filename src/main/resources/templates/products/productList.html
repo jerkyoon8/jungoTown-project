@@ -13,9 +13,9 @@
     <h1>상품 목록</h1>
     <div class="controls-container">
         <div class="sort-container">
-            <a th:href="@{/products(sort='latest', keyword=${keyword})}" class="sort-button" th:classappend="${sort == 'latest'} ? 'active'">최신순</a>
-            <a th:href="@{/products(sort='views', keyword=${keyword})}" class="sort-button" th:classappend="${sort == 'views'} ? 'active'">조회순</a>
-            <a th:href="@{/products(sort='wishlistCount', keyword=${keyword})}" class="sort-button" th:classappend="${sort == 'wishlistCount'} ? 'active'">찜하기순</a>
+            <a th:href="@{/products(sort='latest', keyword=${keyword}, categoryId=${categoryId})}" class="sort-button" th:classappend="${sort == 'latest'} ? 'active'">최신순</a>
+            <a th:href="@{/products(sort='views', keyword=${keyword}, categoryId=${categoryId})}" class="sort-button" th:classappend="${sort == 'views'} ? 'active'">조회순</a>
+            <a th:href="@{/products(sort='wishlistCount', keyword=${keyword}, categoryId=${categoryId})}" class="sort-button" th:classappend="${sort == 'wishlistCount'} ? 'active'">찜하기순</a>
         </div>
         <div class="button-container" sec:authorize="isAuthenticated()">
             <a th:href="@{/products/new}" class="button">상품 등록</a>
@@ -43,17 +43,17 @@
         <ul class="pagination">
             <!-- Previous Button -->
             <li class="page-item" th:classappend="${currentPage == 1} ? 'disabled'">
-                <a class="page-link" th:href="@{/products(page=${currentPage - 1}, sort=${sort}, keyword=${keyword})}">이전</a>
+                <a class="page-link" th:href="@{/products(page=${currentPage - 1}, sort=${sort}, keyword=${keyword}, categoryId=${categoryId})}">이전</a>
             </li>
 
             <!-- Page Numbers -->
             <li class="page-item" th:each="i : ${#numbers.sequence(1, totalPages)}" th:classappend="${i == currentPage} ? 'active'">
-                <a class="page-link" th:href="@{/products(page=${i}, sort=${sort}, keyword=${keyword})}" th:text="${i}">1</a>
+                <a class="page-link" th:href="@{/products(page=${i}, sort=${sort}, keyword=${keyword}, categoryId=${categoryId})}" th:text="${i}">1</a>
             </li>
 
             <!-- Next Button -->
             <li class="page-item" th:classappend="${currentPage == totalPages} ? 'disabled'">
-                <a class="page-link" th:href="@{/products(page=${currentPage + 1}, sort=${sort}, keyword=${keyword})}">다음</a>
+                <a class="page-link" th:href="@{/products(page=${currentPage + 1}, sort=${sort}, keyword=${keyword}, categoryId=${categoryId})}">다음</a>
             </li>
         </ul>
     </div>

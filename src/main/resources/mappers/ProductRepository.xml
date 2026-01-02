@@ -101,6 +101,12 @@
         <if test="keyword != null and keyword != ''">
             AND title LIKE CONCAT('%', #{keyword}, '%')
         </if>
+        <if test="categoryIds != null and !categoryIds.isEmpty()">
+            AND category_id IN
+            <foreach item="catId" collection="categoryIds" open="(" separator="," close=")">
+                #{catId}
+            </foreach>
+        </if>
     </select>
 
     <!-- 페이징 처리 상품 조회 -->
@@ -112,6 +118,12 @@
             p.is_deleted = 0
             <if test="keyword != null and keyword != ''">
                 AND p.title LIKE CONCAT('%', #{keyword}, '%')
+            </if>
+            <if test="categoryIds != null and !categoryIds.isEmpty()">
+                AND p.category_id IN
+                <foreach item="catId" collection="categoryIds" open="(" separator="," close=")">
+                    #{catId}
+                </foreach>
             </if>
         </where>
         <choose>
