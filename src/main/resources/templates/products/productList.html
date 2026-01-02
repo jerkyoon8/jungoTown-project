@@ -32,7 +32,7 @@
                 <div class="product-info">
                     <h3 th:text="${product.title}">상품 제목</h3>
                     <p class="price" th:text="${#numbers.formatInteger(product.price, 0, 'COMMA') + '원'}">가격</p>
-                    <p class="date" th:text="${#temporals.format(product.createdAt, 'yyyy-MM-dd HH:mm')}">게시일</p>
+                    <p class="date" th:text="${@timeTrace.calculateTime(product.createdAt)}">게시일</p>
                 </div>
             </div>
         </a>

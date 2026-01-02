@@ -27,7 +27,7 @@
             <div class="price" th:text="${#numbers.formatInteger(product.price, 0, 'COMMA') + '원'}">34,000원</div>
 
             <div class="product-meta">
-                <span th:text="${#temporals.format(product.createdAt, 'yyyy-MM-dd')}"></span> |
+                <span th:text="${@timeTrace.calculateTime(product.createdAt)}"></span> |
                 <span>조회 <th:block th:text="${product.views}"></th:block></span> |
                 <span>찜 <th:block id="wishlist-count" th:text="${product.wishlistCount}"></th:block></span>
             </div>
