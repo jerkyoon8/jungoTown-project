@@ -60,14 +60,33 @@ public class ProductController {
                                @RequestParam(defaultValue = "20") int size,
                                @RequestParam(defaultValue = "latest") String sort,
                                @RequestParam(value = "keyword", required = false) String keyword,
-                               @RequestParam(value = "categoryId", required = false) Long categoryId) {
-        Map<String, Object> response = productService.findPaginated(page, size, sort, keyword, categoryId);
+                               @RequestParam(value = "categoryId", required = false) Long categoryId,
+                               @RequestParam(value = "minPrice", required = false) Integer minPrice,
+                               @RequestParam(value = "maxPrice", required = false) Integer maxPrice) {
+        
+        Map<String, Object> response = productService.findPaginated(page, size, sort, keyword, categoryId, minPrice, maxPrice);
         model.addAttribute("products", response.get("products"));
         model.addAttribute("currentPage", response.get("currentPage"));
         model.addAttribute("totalPages", response.get("totalPages"));
         model.addAttribute("sort", sort); // 현재 정렬 기준을 모델에 추가
         model.addAttribute("keyword", keyword);
         model.addAttribute("categoryId", categoryId); // 현재 카테고리 ID를 모델에 추가
+        model.addAttribute("minPrice", minPrice);
+        model.addAttribute("maxPrice", maxPrice);
+
+        // 모든 카테고리 정보 추가
+        model.addAttribute("allCategories", productCategoryService.getAllCategories());
+
+        if (categoryId != null) {
+            ProductCategory currentCategory = productCategoryService.getCategoryById(categoryId);
+            model.addAttribute("currentCategory", currentCategory);
+            
+            // 부모 카테고리가 있다면 조회하여 추가
+            if (currentCategory != null && currentCategory.getParentId() != null && currentCategory.getParentId() != 0) {
+                ProductCategory parentCategory = productCategoryService.getCategoryById(currentCategory.getParentId());
+                model.addAttribute("parentCategory", parentCategory);
+            }
+        }
 
         return "products/productList"; // resources/templates/products/list.html 을 렌더링
     }

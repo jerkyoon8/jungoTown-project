@@ -71,8 +71,8 @@ public class ProductService {
                 .collect(Collectors.toList());
     }
 
-    // 페이징 방식 상품 조회 ( 몇 개씩, 몇 페이지, 정렬 방법 , 검색 키워드, 카테고리 ID )
-    public Map<String, Object> findPaginated(int page, int size, String sort, String keyword, Long categoryId) {
+    // 페이징 방식 상품 조회 ( 몇 개씩, 몇 페이지, 정렬 방법 , 검색 키워드, 카테고리 ID, 최소가격, 최대가격 )
+    public Map<String, Object> findPaginated(int page, int size, String sort, String keyword, Long categoryId, Integer minPrice, Integer maxPrice) {
 
 
         // 페이지 번호와 사이즈를 이용해 DB에서 가져올 시작 지점(offset) 계산
@@ -82,6 +82,8 @@ public class ProductService {
         params.put("size", size);
         params.put("sort", sort);
         params.put("keyword", keyword);
+        params.put("minPrice", minPrice);
+        params.put("maxPrice", maxPrice);
 
         // 카테고리 필터링: 선택된 카테고리 및 하위 카테고리 포함
         if (categoryId != null) {

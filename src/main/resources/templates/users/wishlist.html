@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/default_layout}">
+
+<th:block layout:fragment="css">
+    <link rel="stylesheet" th:href="@{/css/mypage.css}">
+</th:block>
+
+<div layout:fragment="content">
+    <div class="my-page-layout">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-section">
+                <h3>거래 정보</h3>
+                <ul class="sidebar-menu">
+                    <li><a href="#">판매내역</a></li>
+                    <li><a href="#">구매내역</a></li>
+                    <li><a href="#">택배</a></li>
+                    <li><a th:href="@{/wishes}" class="active" style="font-weight: bold; color: #ff5058;">찜한 상품</a></li>
+                    <li><a href="#">안심결제 정산내역</a></li>
+                </ul>
+            </div>
+            <div class="sidebar-section">
+                <h3>내 정보</h3>
+                <ul class="sidebar-menu">
+                    <li><a href="#">계좌 관리</a></li>
+                    <li><a href="#">배송지 관리</a></li>
+                    <li><a href="#">거래 후기</a></li>
+                    <li><a href="#">탈퇴하기</a></li>
+                </ul>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <section class="main-content">
+            <div class="profile-section">
+                <div class="profile-icon"></div>
+                <div class="profile-info">
+                    <span class="nickname" th:text="${user.nickname}">사용자</span>
+                </div>
+            </div>
+
+            <div class="product-section">
+                <div class="product-content">
+                    <div class="product-content-header" style="margin-bottom: 20px;">
+                        <span class="product-count" th:text="'찜한 상품 ' + ${wishList.size()} + '개'">찜한 상품 0개</span>
+                    </div>
+
+                    <div th:if="${wishList.isEmpty()}" class="product-list-empty" style="text-align: center; padding: 50px; color: #888;">
+                        찜한 상품이 없습니다.
+                    </div>
+
+                    <div th:unless="${wishList.isEmpty()}" class="wishlist-grid" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px;">
+                        <div th:each="item : ${wishList}" class="card h-100 shadow-sm">
+                            <a th:href="@{/products/{id}(id=${item.id})}" style="text-decoration: none; color: inherit;">
+                                <img th:src="@{${item.thumbnailUrl}}" class="card-img-top" alt="Product Image" style="height: 180px; object-fit: cover; width: 100%;">
+                                <div class="card-body">
+                                    <h5 class="card-title text-truncate" th:text="${item.title}" style="font-size: 16px; margin-bottom: 10px;">상품 제목</h5>
+                                    <p class="card-text font-weight-bold" th:text="${#numbers.formatInteger(item.price, 0, 'COMMA') + '원'}" style="font-size: 18px;">가격</p>
+                                </div>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+</div>
+</html>

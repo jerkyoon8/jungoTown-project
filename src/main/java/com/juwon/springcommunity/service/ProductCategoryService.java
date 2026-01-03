@@ -70,4 +70,8 @@ public class ProductCategoryService {
         
         return ids;
     }
+
+    public ProductCategory getCategoryById(Long id) {
+        return productCategoryRepository.findById(id);
+    }
 }

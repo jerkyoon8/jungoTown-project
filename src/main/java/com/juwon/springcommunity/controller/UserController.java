@@ -4,6 +4,8 @@ import com.juwon.springcommunity.dto.UserCreateRequestDto;
 import com.juwon.springcommunity.dto.UserResponseDto;
 import com.juwon.springcommunity.dto.UserUpdateRequestDto;
 import com.juwon.springcommunity.security.oauth.SessionUser;
+import com.juwon.springcommunity.dto.WishListResponseDto;
+import com.juwon.springcommunity.service.ProductWishListService;
 import com.juwon.springcommunity.service.UserService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -24,9 +26,11 @@ import java.util.Map;
 public class UserController {
 
     private final UserService userService;
+    private final ProductWishListService productWishListService;
 
-    public UserController(UserService userService) {
+    public UserController(UserService userService, ProductWishListService productWishListService) {
         this.userService = userService;
+        this.productWishListService = productWishListService;
     }
 
     // 닉네임 중복 확인
@@ -46,22 +50,38 @@ public class UserController {
         return "users/createUserForm";
     }
 
-    // 사용자 생성을 처리한다
+    // 사용자 생성을 처리한다 (AJAX/JSON 요청)
     @PostMapping("/users")
-    public String createUser(@Validated @ModelAttribute("userCreateRequestDto") UserCreateRequestDto dto, BindingResult bindingResult) {
+    @ResponseBody
+    public ResponseEntity<?> createUser(@Validated @RequestBody UserCreateRequestDto dto, BindingResult bindingResult) {
+        // 유효성 검사 실패 시
         if (bindingResult.hasErrors()) {
-            return "users/createUserForm";
+            Map<String, String> errors = new HashMap<>();
+            bindingResult.getFieldErrors().forEach(error -> 
+                errors.put(error.getField(), error.getDefaultMessage())
+            );
+            return ResponseEntity.badRequest().body(errors);
         }
 
         try {
             userService.createUser(dto);
         } catch (IllegalArgumentException e) {
-            // 이메일 중복 또는 비밀번호 불일치 등 에러 처리
-            bindingResult.reject("signupFailed", e.getMessage());
-            return "users/createUserForm";
+            Map<String, String> errors = new HashMap<>();
+            // 서비스에서 던지는 예외 메시지 분석 (이메일 중복 등)
+            if (e.getMessage().contains("이메일")) {
+                errors.put("email", e.getMessage());
+            } else if (e.getMessage().contains("비밀번호")) {
+                errors.put("passwordConfirm", e.getMessage());
+            } else {
+                errors.put("global", e.getMessage());
+            }
+            return ResponseEntity.badRequest().body(errors);
         }
 
-        return "redirect:/";
+        // 성공 시 리디렉션 URL 전달
+        Map<String, String> response = new HashMap<>();
+        response.put("redirectUrl", "/");
+        return ResponseEntity.ok(response);
     }
 
     // 전체 사용자 목록을 보여준다
@@ -154,5 +174,24 @@ public class UserController {
         model.addAttribute("user", user);
 
         return "users/myPage";
+    }
+
+    // 찜한 상품 목록 페이지
+    @GetMapping("/wishes")
+    public String wishList(Principal principal, Model model) {
+        if (principal == null) {
+            return "redirect:/users/login";
+        }
+        String email = principal.getName();
+        if (principal instanceof OAuth2AuthenticationToken) {
+            email = ((OAuth2AuthenticationToken) principal).getPrincipal().getAttribute("email");
+        }
+        UserResponseDto user = userService.findUserDtoByEmail(email);
+        List<WishListResponseDto> wishList = productWishListService.getWishList(user.getId());
+
+        model.addAttribute("user", user);
+        model.addAttribute("wishList", wishList);
+
+        return "users/wishlist";
     }
 }

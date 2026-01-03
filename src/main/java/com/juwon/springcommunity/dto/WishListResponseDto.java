@@ -21,9 +21,9 @@ public class WishListResponseDto {
         
         // 첫 번째 이미지를 썸네일로 사용, 없으면 placeholder 사용
         if (images != null && !images.isEmpty()) {
-            this.thumbnailUrl = "/image/" + images.get(0).getStoredFileName();
+            this.thumbnailUrl = "/images/" + images.get(0).getStoredFileName();
         } else {
-            this.thumbnailUrl = "/image/placeholder.png";
+            this.thumbnailUrl = "/images/placeholder.png";
         }
     }
 }

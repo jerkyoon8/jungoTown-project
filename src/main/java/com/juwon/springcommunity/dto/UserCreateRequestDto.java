@@ -24,4 +24,10 @@ public class UserCreateRequestDto {
     @NotBlank(message = "닉네임은 필수입니다.")
     @Size(min = 2, max = 20, message = "닉네임은 2자 이상 20자 이하이어야 합니다.")
     private String nickname;
+
+    @NotBlank(message = "생년월일은 필수입니다.")
+    private String birthdate;
+
+    @NotBlank(message = "성별은 필수입니다.")
+    private String gender;
 }

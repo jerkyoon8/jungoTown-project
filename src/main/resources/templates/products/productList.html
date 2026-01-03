@@ -11,51 +11,88 @@
 </head>
 <main layout:fragment="content">
     <h1>상품 목록</h1>
-    <div class="controls-container">
-        <div class="sort-container">
-            <a th:href="@{/products(sort='latest', keyword=${keyword}, categoryId=${categoryId})}" class="sort-button" th:classappend="${sort == 'latest'} ? 'active'">최신순</a>
-            <a th:href="@{/products(sort='views', keyword=${keyword}, categoryId=${categoryId})}" class="sort-button" th:classappend="${sort == 'views'} ? 'active'">조회순</a>
-            <a th:href="@{/products(sort='wishlistCount', keyword=${keyword}, categoryId=${categoryId})}" class="sort-button" th:classappend="${sort == 'wishlistCount'} ? 'active'">찜하기순</a>
-        </div>
-        <div class="button-container" sec:authorize="isAuthenticated()">
-            <a th:href="@{/products/new}" class="button">상품 등록</a>
-        </div>
+
+    <!-- Category Title (Breadcrumb style) -->
+    <div class="category-header" th:if="${currentCategory != null}">
+        <h2>
+            <span th:if="${parentCategory != null}">
+                <a th:href="@{/products(categoryId=${parentCategory.id}, keyword=${keyword}, sort=${sort}, minPrice=${minPrice}, maxPrice=${maxPrice})}" 
+                   th:text="${parentCategory.name}" class="parent-category-link">Parent</a>
+                <span class="separator">&gt;</span>
+            </span>
+            <span th:text="${currentCategory.name}">Current Category</span>
+        </h2>
     </div>
 
-    <div class="product-grid">
-        <!--/* 상품 카드 반복 */-->
-        <a th:each="product : ${products}" th:href="@{/products/{id}(id=${product.id})}" class="product-card-link">
-            <div class="product-card">
-                <img th:if="${!#lists.isEmpty(product.storedFileNames)}" th:src="@{/images/{filename}(filename=${product.storedFileNames[0]})}" alt="상품 이미지">
-                <img th:unless="${!#lists.isEmpty(product.storedFileNames)}" th:src="@{/image/placeholder.png}" alt="이미지 없음">
+    <!-- Filter & Sort Controls -->
+    <div class="controls-container">
+        <!-- Price Filter -->
+        <form method="get" th:action="@{/products}" class="price-filter-form">
+            <input type="hidden" name="categoryId" th:value="${categoryId}"/>
+            <input type="hidden" name="keyword" th:value="${keyword}"/>
+            <input type="hidden" name="sort" th:value="${sort}"/>
+            <div class="price-input-group">
+                <input type="number" name="minPrice" placeholder="최소 가격" th:value="${minPrice}" min="0">
+                <span>~</span>
+                <input type="number" name="maxPrice" placeholder="최대 가격" th:value="${maxPrice}" min="0">
+                <button type="submit" class="filter-button">적용</button>
+            </div>
+        </form>
 
-                <div class="product-info">
-                    <h3 th:text="${product.title}">상품 제목</h3>
-                    <p class="price" th:text="${#numbers.formatInteger(product.price, 0, 'COMMA') + '원'}">가격</p>
-                    <p class="date" th:text="${@timeTrace.calculateTime(product.createdAt)}">게시일</p>
+        <div class="sort-container">
+                    <a th:href="@{/products(sort='latest', keyword=${keyword}, categoryId=${categoryId}, minPrice=${minPrice}, maxPrice=${maxPrice})}" class="sort-button" th:classappend="${sort == 'latest'} ? 'active'">최신순</a>
+                    <a th:href="@{/products(sort='views', keyword=${keyword}, categoryId=${categoryId}, minPrice=${minPrice}, maxPrice=${maxPrice})}" class="sort-button" th:classappend="${sort == 'views'} ? 'active'">조회순</a>
+                    <a th:href="@{/products(sort='wishlistCount', keyword=${keyword}, categoryId=${categoryId}, minPrice=${minPrice}, maxPrice=${maxPrice})}" class="sort-button" th:classappend="${sort == 'wishlistCount'} ? 'active'">찜하기순</a>
+                </div>
+                <div class="button-container" sec:authorize="isAuthenticated()">
+                    <a th:href="@{/products/new}" class="button">상품 등록</a>
                 </div>
             </div>
-        </a>
-    </div>
 
-    <!-- Pagination -->
-    <div class="pagination-container" th:if="${totalPages > 1}">
-        <ul class="pagination">
-            <!-- Previous Button -->
-            <li class="page-item" th:classappend="${currentPage == 1} ? 'disabled'">
-                <a class="page-link" th:href="@{/products(page=${currentPage - 1}, sort=${sort}, keyword=${keyword}, categoryId=${categoryId})}">이전</a>
-            </li>
+            <div class="product-grid">
+                <!--/* 상품 카드 반복 */-->
+                <a th:each="product : ${products}" th:href="@{/products/{id}(id=${product.id})}" class="product-card-link">
+                    <div class="product-card">
+                        <img th:if="${!#lists.isEmpty(product.storedFileNames)}" th:src="@{/images/{filename}(filename=${product.storedFileNames[0]})}" alt="상품 이미지">
+                        <img th:unless="${!#lists.isEmpty(product.storedFileNames)}" th:src="@{/image/placeholder.png}" alt="이미지 없음">
 
-            <!-- Page Numbers -->
-            <li class="page-item" th:each="i : ${#numbers.sequence(1, totalPages)}" th:classappend="${i == currentPage} ? 'active'">
-                <a class="page-link" th:href="@{/products(page=${i}, sort=${sort}, keyword=${keyword}, categoryId=${categoryId})}" th:text="${i}">1</a>
-            </li>
+                        <div class="product-info">
+                            <h3 th:text="${product.title}">상품 제목</h3>
+                            <p class="price" th:text="${#numbers.formatInteger(product.price, 0, 'COMMA') + '원'}">가격</p>
+                            <p class="date" th:text="${@timeTrace.calculateTime(product.createdAt)}">게시일</p>
+                        </div>
+                    </div>
+                </a>
+            </div>
 
-            <!-- Next Button -->
-            <li class="page-item" th:classappend="${currentPage == totalPages} ? 'disabled'">
-                <a class="page-link" th:href="@{/products(page=${currentPage + 1}, sort=${sort}, keyword=${keyword}, categoryId=${categoryId})}">다음</a>
-            </li>
-        </ul>
-    </div>
-</main>
+            <!-- Pagination -->
+            <div class="pagination-container" th:if="${totalPages > 1}">
+                <ul class="pagination">
+                    <!-- Previous Button -->
+                    <li class="page-item" th:classappend="${currentPage == 1} ? 'disabled'">
+                        <a class="page-link" th:href="@{/products(page=${currentPage - 1}, sort=${sort}, keyword=${keyword}, categoryId=${categoryId}, minPrice=${minPrice}, maxPrice=${maxPrice})}">이전</a>
+                    </li>
+
+                    <!-- Page Numbers -->
+                    <li class="page-item" th:each="i : ${#numbers.sequence(1, totalPages)}" th:classappend="${i == currentPage} ? 'active'">
+                        <a class="page-link" th:href="@{/products(page=${i}, sort=${sort}, keyword=${keyword}, categoryId=${categoryId}, minPrice=${minPrice}, maxPrice=${maxPrice})}" th:text="${i}">1</a>
+                    </li>
+
+                                <!-- Next Button -->
+
+                                <li class="page-item" th:classappend="${currentPage == totalPages} ? 'disabled'">
+
+                                    <a class="page-link" th:href="@{/products(page=${currentPage + 1}, sort=${sort}, keyword=${keyword}, categoryId=${categoryId}, minPrice=${minPrice}, maxPrice=${maxPrice})}">다음</a>
+
+                                </li>
+
+                            </ul>
+
+                        </div>
+
+                    </main>
+
+                    </html>
+
+                    
 </html>

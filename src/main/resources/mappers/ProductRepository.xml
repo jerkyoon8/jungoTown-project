@@ -107,6 +107,12 @@
                 #{catId}
             </foreach>
         </if>
+        <if test="minPrice != null">
+            AND price &gt;= #{minPrice}
+        </if>
+        <if test="maxPrice != null">
+            AND price &lt;= #{maxPrice}
+        </if>
     </select>
 
     <!-- 페이징 처리 상품 조회 -->
@@ -124,6 +130,12 @@
                 <foreach item="catId" collection="categoryIds" open="(" separator="," close=")">
                     #{catId}
                 </foreach>
+            </if>
+            <if test="minPrice != null">
+                AND p.price &gt;= #{minPrice}
+            </if>
+            <if test="maxPrice != null">
+                AND p.price &lt;= #{maxPrice}
             </if>
         </where>
         <choose>
