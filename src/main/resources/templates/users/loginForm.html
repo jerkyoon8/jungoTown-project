@@ -3,113 +3,401 @@
 <head>
     <meta charset="UTF-8">
     <title>로그인</title>
+    <!-- Vue.js 3 CDN -->
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <!-- Pretendard Font -->
+    <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.8/dist/web/static/pretendard.css" />
     <style>
+        /* 초기화 & 폰트 */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
         body {
-            font-family: -apple-system, BlinkMacSystemFont, "Malgun Gothic", "맑은 고딕", helvetica, "Apple SD Gothic Neo", sans-serif;
-            background-color: #f5f6f7;
+            font-family: "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont, system-ui, Roboto, "Helvetica Neue", "Segoe UI", "Apple SD Gothic Neo", "Noto Sans KR", "Malgun Gothic", "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", sans-serif;
+            background-color: #ffffff;
             display: flex;
             justify-content: center;
             align-items: center;
-            height: 100vh;
-            margin: 0;
+            min-height: 100vh;
+            color: #1e2022;
         }
-        .container {
-            width: 460px;
-            padding: 20px 28px 30px;
-            background-color: white;
-            border: 1px solid #dadada;
-            border-radius: 8px;
-        }
-        .header {
+        
+        /* 컨테이너 */
+        .login-wrapper {
+            width: 100%;
+            max-width: 400px; /* 이미지 비율에 맞춰 좁게 */
+            padding: 20px;
             text-align: center;
-            margin-bottom: 20px;
         }
-        .logo {
-            font-size: 40px;
-            font-weight: 900;
-            color: #03c75a;
-            text-decoration: none;
-            letter-spacing: -2px;
+        
+        /* 타이틀 영역 */
+        .header-area {
+            margin-bottom: 40px;
         }
-        .form-group {
+        .title-text {
+            font-size: 32px;
+            font-weight: 500;
+            color: #1e2022;
+            margin-bottom: 16px;
+        }
+        .desc-text {
+            font-size: 14px;
+            color: #7b858e;
+            line-height: 1.5;
+            word-break: keep-all;
+        }
+
+        /* 폼 영역 */
+        .input-group {
             margin-bottom: 12px;
+            text-align: left;
         }
-        input[type="text"],
-        input[type="password"] {
+        
+        .input-control {
             width: 100%;
             height: 50px;
-            padding: 0 15px;
+            padding: 0 16px;
             font-size: 15px;
-            border: 1px solid #dadada;
-            border-radius: 6px;
-            box-sizing: border-box;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            background-color: #fff;
+            color: #1e2022;
+            outline: none;
+            transition: border-color 0.2s;
+            font-family: inherit;
         }
-        input::placeholder {
-            color: #aaa;
+        .input-control:focus {
+            border-color: #5383e8; /* OP.GG 파란색 계열 */
         }
-        .button-wrapper {
+        .input-control::placeholder {
+            color: #b2b2b2;
+        }
+
+        /* 버튼 */
+        .btn-submit {
+            width: 100%;
+            height: 52px;
+            background-color: #5383e8;
+            color: white;
+            font-size: 16px;
+            font-weight: 700;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            margin-top: 8px;
+            font-family: inherit;
+        }
+        .btn-submit:disabled {
+            background-color: #c5cbd0;
+            cursor: not-allowed;
+        }
+        .btn-submit:hover:not(:disabled) {
+            background-color: #4a74d0;
+        }
+
+        /* 일회용 코드 로그인 등 보조 링크 */
+        .sub-action {
             margin-top: 20px;
+            font-size: 14px;
         }
-        .submit-btn {
-            width: 100%;
-            height: 52px;
-            background-color: #03c75a;
-            color: white;
-            font-size: 18px;
-            font-weight: bold;
-            border: none;
-            border-radius: 6px;
-            cursor: pointer;
-        }
-        .google-btn {
-            display: block;
-            margin-top: 10px;
-            width: 100%;
-            height: 52px;
-            background-color: #dc3545;
-            color: white;
-            font-size: 18px;
-            font-weight: bold;
-            border: none;
-            border-radius: 6px;
-            cursor: pointer;
-            text-align: center;
-            line-height: 52px;
+        .link-blue {
+            color: #5383e8;
             text-decoration: none;
+            cursor: pointer;
         }
-        .error-message {
-            color: #ff0000;
+        .link-blue:hover {
+            text-decoration: underline;
+        }
+
+        /* 에러 메시지 */
+        .error-text {
+            color: #f04452; /* 붉은색 */
             font-size: 13px;
-            text-align: center;
-            margin-bottom: 15px;
+            margin-top: 6px;
+            display: block;
+            text-align: left;
         }
+
+        /* 구분선 OR */
+        .divider {
+            display: flex;
+            align-items: center;
+            margin: 30px 0;
+            color: #c5cbd0;
+            font-size: 12px;
+            font-weight: 500;
+        }
+        .divider::before, .divider::after {
+            content: "";
+            flex: 1;
+            height: 1px;
+            background-color: #eaeced;
+        }
+        .divider span {
+            margin: 0 15px;
+            color: #7b858e;
+        }
+
+        /* 소셜 로그인 */
+        .social-area {
+            display: flex;
+            justify-content: center;
+            gap: 16px;
+            margin-bottom: 40px;
+        }
+        .social-btn {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            transition: opacity 0.2s;
+            text-decoration: none;
+            border: 1px solid transparent; /* 기본 테두리 없음 */
+        }
+        .social-btn:hover {
+            opacity: 0.9;
+        }
+        .social-btn svg {
+            width: 24px;
+            height: 24px;
+        }
+
+        /* 브랜드별 컬러 */
+        .social-btn.naver {
+            background-color: #03C75A;
+        }
+        .social-btn.kakao {
+            background-color: #FEE500;
+        }
+        .social-btn.kakao svg {
+            width: 26px; /* 카카오 로고 시각적 보정 */
+            height: 26px;
+        }
+        .social-btn.google {
+            background-color: #FFFFFF;
+            border: 1px solid #eaeced; /* 구글은 흰색이라 테두리 필요 */
+        }
+        .social-btn.apple {
+            background-color: #000000;
+        }
+        
+        /* 하단 회원가입 링크 */
+        .footer-link {
+            font-size: 14px;
+            color: #1e2022;
+        }
+
+        /* 2단계: 사용자 표시 영역 */
+        .user-display-area {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: #f5f6f7;
+            padding: 12px 16px;
+            border-radius: 4px;
+            margin-bottom: 12px;
+        }
+        .user-email {
+            font-size: 14px;
+            font-weight: 500;
+            color: #1e2022;
+        }
+        .btn-change {
+            font-size: 12px;
+            color: #7b858e;
+            background: none;
+            border: 1px solid #c5cbd0;
+            padding: 4px 8px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .btn-change:hover {
+            background-color: #fff;
+        }
+
     </style>
 </head>
 <body>
 
-<div class="container">
-    <div class="header">
-        <a href="/" class="logo">미진</a>
+<div id="app" class="login-wrapper">
+    <!-- 헤더 -->
+    <div class="header-area">
+        <h1 class="title-text">로그인</h1>
+        <p class="desc-text" v-if="step === 1">
+            미진장터에 오신걸 환영합니다.
+        </p>
+        <p class="desc-text" v-if="step === 2">
+            비밀번호를 입력해 주세요.
+        </p>
     </div>
 
-    <!-- 로그인 실패 시 에러 메시지 표시 -->
-    <div th:if="${param.error}" class="error-message">
-        <p>이메일 또는 비밀번호가 올바르지 않습니다.</p>
+    <!-- STEP 1: 이메일 입력 -->
+    <div v-if="step === 1">
+        <form @submit.prevent="checkEmail">
+            <div class="input-group">
+                <input type="email" 
+                       v-model="email" 
+                       class="input-control" 
+                       placeholder="이메일 주소" 
+                       required 
+                       autofocus>
+                <span v-if="emailError" class="error-text">{{ emailError }}</span>
+            </div>
+            
+            <button type="submit" class="btn-submit">이메일로 시작하기</button>
+        </form>
+
+        <div class="sub-action">
+             <!-- 기능은 없지만 디자인 유지를 위해 배치 -->
+            <a href="#" class="link-blue">일회용 코드로 로그인하기</a>
+        </div>
     </div>
 
-    <form th:action="@{/users/login}" method="post">
-        <div class="form-group">
-            <input type="email" id="email" name="email" placeholder="이메일" required autofocus>
-        </div>
-        <div class="form-group">
-            <input type="password" id="password" name="password" placeholder="비밀번호" required>
-        </div>
-        <div class="button-wrapper">
-            <button type="submit" class="submit-btn">로그인</button>
-            <a href="/oauth2/authorization/google" class="google-btn">Google로 로그인</a>
-        </div>
-    </form>
+    <!-- STEP 2: 비밀번호 입력 -->
+    <div v-if="step === 2">
+        <form action="/users/login" method="post">
+            <input type="hidden" name="email" :value="email">
+            
+            <div class="user-display-area">
+                <span class="user-email">{{ email }}</span>
+                <button type="button" class="btn-change" @click="goBack">변경</button>
+            </div>
+
+            <div class="input-group">
+                <input type="password" 
+                       name="password" 
+                       v-model="password" 
+                       class="input-control" 
+                       placeholder="비밀번호" 
+                       required 
+                       autofocus>
+                
+                <!-- 서버 에러 메시지 -->
+                <div th:if="${param.error}" class="error-text">
+                    비밀번호가 일치하지 않습니다.
+                </div>
+                <span v-if="passwordError" class="error-text">{{ passwordError }}</span>
+            </div>
+
+            <button type="submit" class="btn-submit">로그인</button>
+        </form>
+    </div>
+
+    <!-- 구분선 (항상 표시) -->
+    <div class="divider">
+        <span>OR</span>
+    </div>
+
+    <!-- 소셜 로그인 (항상 표시) -->
+    <div class="social-area">
+        <!-- 네이버 -->
+        <a href="/oauth2/authorization/naver" class="social-btn naver" title="네이버 로그인">
+            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M16.2403 16.2527H7.75971V7.75195H16.2403V16.2527Z" fill="white"/>
+                <path fill-rule="evenodd" clip-rule="evenodd" d="M11.9961 0C18.6146 0 24.0016 5.37877 24.0016 12C24.0016 18.6212 18.6146 24 11.9961 24C5.37759 24 -0.00936127 18.6212 -0.00936127 12C-0.00936127 5.37877 5.37759 0 11.9961 0ZM6.80932 5.56468V18.4355H10.4571V10.741L13.8864 15.6309C14.5029 16.5117 15.0131 17.2798 15.4243 17.9254H17.2001V5.56468H13.6702V13.0428L10.3809 8.35626C9.72252 7.42085 9.15574 6.64333 8.68603 6.01524H6.80932V5.56468Z" fill="#03C75A"/>
+                <path d="M6.80933 5.56468H8.68604C9.15575 6.64333 9.72252 7.42085 10.3809 8.35626L13.6702 13.0428V5.56468H17.2001V17.9254H15.4243C15.0131 17.2798 14.5029 16.5117 13.8864 15.6309L10.4571 10.741V18.4355H6.80933V5.56468Z" fill="white"/>
+            </svg>
+        </a>
+
+        <!-- 카카오 -->
+        <a href="/oauth2/authorization/kakao" class="social-btn kakao" title="카카오 로그인">
+            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path fill-rule="evenodd" clip-rule="evenodd" d="M12 4C7.58172 4 4 6.90998 4 10.5C4 12.6393 5.38571 14.542 7.50974 15.7533L6.44286 19.6429L10.7417 16.8227C11.1517 16.9388 11.5714 17 12 17C16.4183 17 20 14.09 20 10.5C20 6.90998 16.4183 4 12 4Z" fill="#3C1E1E"/>
+            </svg>
+        </a>
+
+        <!-- 구글 -->
+        <a href="/oauth2/authorization/google" class="social-btn google" title="구글 로그인">
+            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path fill-rule="evenodd" clip-rule="evenodd" d="M20.64 12.2045C20.64 11.5664 20.5855 10.9523 20.4764 10.3636H12V13.8375H16.8436C16.635 14.9625 16.0009 15.9095 15.0477 16.5477V18.8011H17.9564C19.6582 17.2343 20.64 14.9284 20.64 12.2045Z" fill="#4285F4"/>
+                <path fill-rule="evenodd" clip-rule="evenodd" d="M12 21.0001C14.4327 21.0001 16.4727 20.1942 17.9645 18.8012L15.0545 16.5478C14.2473 17.0878 13.2136 17.4083 12 17.4083C9.65455 17.4083 7.66909 15.8237 6.96 13.691H3.95182V16.0255C5.44091 18.9833 8.49545 21.0001 12 21.0001Z" fill="#34A853"/>
+                <path fill-rule="evenodd" clip-rule="evenodd" d="M6.95996 13.6908C6.77996 13.1508 6.68178 12.5794 6.68178 11.9999C6.68178 11.4204 6.77996 10.849 6.95996 10.309V7.97449H3.95178C3.34087 9.18949 3 10.564 3 11.9999C3 13.4358 3.34087 14.8104 3.95178 16.0254L6.95996 13.6908Z" fill="#FBBC05"/>
+                <path fill-rule="evenodd" clip-rule="evenodd" d="M12 6.59182C13.3227 6.59182 14.5064 7.04727 15.4418 7.93909L18.0191 5.36182C16.4673 3.91636 14.4273 3 12 3C8.49545 3 5.44091 5.01682 3.95182 7.97455L6.96 10.3091C7.66909 8.17636 9.65455 6.59182 12 6.59182Z" fill="#EA4335"/>
+            </svg>
+        </a>
+
+        <!-- 애플 -->
+        <a href="/oauth2/authorization/apple" class="social-btn apple" title="애플 로그인">
+            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M17.8427 13.4862C17.8209 10.8242 19.9822 9.55403 20.0886 9.49258C18.969 7.85403 17.2435 7.62536 16.643 7.60098C15.1765 7.45262 13.7831 8.47145 13.061 8.47145C12.3364 8.47145 11.1645 7.61633 9.99863 7.63666C8.48729 7.65922 7.09848 8.51433 6.32766 9.85465C4.77353 12.5539 5.95551 16.5594 7.46979 18.7495C8.21046 19.8219 9.09101 21.0454 10.2825 21.0048C11.4326 20.9573 11.8722 20.2641 13.2954 20.2641C14.7163 20.2641 15.1154 21.0048 16.3233 20.9822C17.5676 20.9371 18.3378 19.8648 19.062 18.8059C19.9042 17.58 20.2589 16.3901 20.2747 16.3314C20.2363 16.3156 17.8923 15.4192 17.8427 13.4862ZM13.8824 5.71965C14.5126 4.9566 14.9354 3.89547 14.818 2.84277C13.9171 2.87891 12.8288 3.44336 12.1834 4.19836C11.6038 4.86851 11.0963 5.95004 11.2318 6.98863C12.2343 7.0677 13.2519 6.47125 13.8824 5.71965Z" fill="white"/>
+            </svg>
+        </a>
+    </div>
+
+    <!-- 하단 회원가입 링크 -->
+    <div class="footer-link">
+        아직 회원이 아니신가요? <a href="/users/new" class="link-blue">회원가입</a>
+    </div>
+
 </div>
+
+<script>
+    const { createApp } = Vue;
+
+    createApp({
+        data() {
+            return {
+                step: 1,
+                email: '',
+                password: '',
+                emailError: '',
+                passwordError: ''
+            }
+        },
+        mounted() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const hasError = urlParams.has('error');
+            const savedEmail = sessionStorage.getItem('loginEmail');
+
+            // 에러가 있고 저장된 이메일이 있다면 자동으로 2단계로 이동
+            if (hasError && savedEmail) {
+                this.email = savedEmail;
+                this.step = 2;
+            }
+        },
+        methods: {
+            checkEmail() {
+                if (!this.email) {
+                    this.emailError = '이메일을 입력해주세요.';
+                    return;
+                }
+                if (!/\S+@\S+\.\S+/.test(this.email)) {
+                    this.emailError = '유효한 이메일 주소를 입력해주세요.';
+                    return;
+                }
+
+                // API 호출: 이메일 존재 여부 확인
+                fetch(`/api/users/check-email?email=${this.email}`)
+                    .then(res => res.json())
+                    .then(data => {
+                        if (data.exists) {
+                            sessionStorage.setItem('loginEmail', this.email);
+                            this.step = 2;
+                            this.emailError = '';
+                        } else {
+                            this.emailError = '등록되지 않은 이메일입니다.';
+                        }
+                    })
+                    .catch(err => {
+                        console.error(err);
+                        this.emailError = '오류가 발생했습니다. 다시 시도해주세요.';
+                    });
+            },
+            goBack() {
+                sessionStorage.removeItem('loginEmail');
+                this.step = 1;
+                this.password = '';
+                this.emailError = '';
+            }
+        }
+    }).mount('#app');
+</script>
 
 </body>
 </html>

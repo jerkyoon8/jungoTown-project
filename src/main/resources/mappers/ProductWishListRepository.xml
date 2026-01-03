@@ -15,6 +15,11 @@
         VALUES (#{userId}, #{productId})
     </insert>
 
+    <delete id="delete">
+        DELETE FROM product_wishlist
+        WHERE user_id = #{userId} AND product_id = #{productId}
+    </delete>
+
     <select id="findWishListByUserId" resultType="com.juwon.springcommunity.domain.Product">
         SELECT p.*
         FROM product p

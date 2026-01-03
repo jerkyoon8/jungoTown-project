@@ -76,6 +76,12 @@
     border: 1px solid #ccc;
     background: #fff;
     font-size: 20px;
+    cursor: pointer; /* 커서 포인터 추가 */
+}
+
+.wish-btn.wished {
+    color: red;
+    border-color: red;
 }
 
 .seller-info {

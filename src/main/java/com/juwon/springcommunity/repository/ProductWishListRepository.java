@@ -25,6 +25,13 @@ public interface ProductWishListRepository {
     void save(@Param("userId") Long userId, @Param("productId") Long productId);
 
     /**
+     * 찜하기를 취소(삭제)합니다.
+     * @param userId 사용자 ID
+     * @param productId 상품 ID
+     */
+    void delete(@Param("userId") Long userId, @Param("productId") Long productId);
+
+    /**
      * 사용자가 찜한 상품 목록을 조회합니다.
      * @param userId 사용자 ID
      * @return 찜한 상품 리스트

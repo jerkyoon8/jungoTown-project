@@ -28,16 +28,18 @@
 
             <div class="product-meta">
                 <span th:text="${@timeTrace.calculateTime(product.createdAt)}"></span> |
-                <span>조회 <th:block th:text="${product.views}"></th:block></span> |
-                <span>찜 <th:block id="wishlist-count" th:text="${product.wishlistCount}"></th:block></span>
+                <span>조회 <span th:text="${product.views}"></span></span> |
+                <span>찜 <span id="wishlist-count" th:text="${product.wishlistCount}"></span></span>
             </div>
 
             <div class="product-actions">
                 <form id="wishlistForm" th:action="@{/wishlist/{id}(id=${product.id})}" method="post" style="display: contents;">
-                    <button type="button" class="wish-btn like-button">♡</button>
+                    <button type="button" class="wish-btn like-button"
+                            th:classappend="${isWished} ? 'wished' : ''"
+                            th:text="${isWished} ? '❤️' : '♡'">♡</button>
                 </form>
-                <a th:if="${!isOwner}" th:href="@{/chat/room/{id}(id=${product.id})}" class="action-btn">채팅하기</a>
-                <a href="#" class="action-btn purchase-btn">구매하기</a>
+                <a th:if="${canChat}" href="javascript:void(0)" th:onclick="'openChatRoom(' + ${product.id} + ')'" class="action-btn">채팅하기</a>
+                <a href="#" class="action-btn purchase-btn" onclick="alert('준비 중입니다.'); return false;">구매하기</a>
             </div>
 
             <div class="seller-info">
@@ -79,7 +81,7 @@
 
 <th:block layout:fragment="script">
     <script>
-        // 찜하기 기능 (기존 스크립트 재사용)
+        // 찜하기 기능
         document.addEventListener('DOMContentLoaded', function() {
             const wishlistButton = document.querySelector('.like-button');
             const wishlistForm = document.getElementById('wishlistForm');
@@ -95,24 +97,31 @@
                             // CSRF 토큰이 필요하다면 여기에 추가
                         }
                     })
-                    .then(response => response.json())
+                    .then(response => {
+                        if (!response.ok) {
+                             if (response.status === 401) throw new Error('로그인이 필요합니다.');
+                             return response.json().then(err => { throw new Error(err.message || '오류가 발생했습니다.'); });
+                        }
+                        return response.json();
+                    })
                     .then(data => {
-                        alert(data.message);
                         const countElement = document.getElementById('wishlist-count');
                         const wishBtn = document.querySelector('.like-button');
-                        if (countElement) {
-                           // 성공 시 카운트 업데이트 로직 (예: data.wishlistCount)
+                        
+                        if (data.wishlistCount !== undefined) {
                            countElement.textContent = data.wishlistCount;
-                           if(data.wished) {
-                               wishBtn.textContent = '❤️'; // 찜 추가됨
-                           } else {
-                               wishBtn.textContent = '♡'; // 찜 취소됨
-                           }
+                        }
+                        
+                        if (data.wished) {
+                           wishBtn.textContent = '❤️';
+                           wishBtn.classList.add('wished');
+                        } else {
+                           wishBtn.textContent = '♡';
+                           wishBtn.classList.remove('wished');
                         }
                     })
                     .catch(error => {
                         console.error('Error:', error);
-                        // 로그인하지 않은 사용자의 경우 등 서버에서 보내는 에러 메시지를 alert
                         alert(error.message || '오류가 발생했습니다. 로그인 후 이용해주세요.');
                     });
                 });

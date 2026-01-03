@@ -6,7 +6,7 @@
 
     <resultMap id="chatRoomResultMap" type="com.juwon.springcommunity.domain.ChatRoom">
         <id property="id" column="id"/>
-
+        <result property="name" column="product_title"/>
         <result property="createdAt" column="created_at"/>
 
         <association property="product" javaType="com.juwon.springcommunity.domain.Product">

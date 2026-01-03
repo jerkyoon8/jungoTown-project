@@ -1,18 +1,18 @@
 package com.juwon.springcommunity.controller;
 
 import com.juwon.springcommunity.domain.User;
+import com.juwon.springcommunity.dto.ProductResponseDto;
 import com.juwon.springcommunity.dto.WishListResponseDto;
+import com.juwon.springcommunity.service.ProductService;
 import com.juwon.springcommunity.service.ProductWishListService;
 import com.juwon.springcommunity.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.security.Principal;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -23,10 +23,11 @@ public class ProductWishListController {
 
     private final ProductWishListService productWishListService;
     private final UserService userService;
+    private final ProductService productService;
 
-    // 상품의 찜하기를 추가한다.
+    // 찜하기 토글 (추가/취소)
     @PostMapping("/wishlist/{productId}")
-    public ResponseEntity<Map<String, String>> addWishlist(@PathVariable Long productId, Principal principal) {
+    public ResponseEntity<Map<String, Object>> toggleWishlist(@PathVariable Long productId, Principal principal) {
         String username = principal.getName();
         if (principal instanceof OAuth2AuthenticationToken) {
             username = ((OAuth2AuthenticationToken) principal).getPrincipal().getAttribute("email");
@@ -35,17 +36,21 @@ public class ProductWishListController {
         Long userId = user.getId();
 
         try {
-            boolean isAdded = productWishListService.addWishlist(userId, productId);
+            boolean isWished = productWishListService.toggleWishlist(userId, productId);
+            
+            // 업데이트된 찜 개수 조회
+            ProductResponseDto product = productService.findProductById(productId);
+            int newWishlistCount = product.getWishlistCount();
 
-            if (isAdded) {
-                return ResponseEntity.ok(Map.of("message", "찜 목록에 추가되었습니다."));
-            } else {
-                // 중복된 경우 (400 Bad Request)
-                return ResponseEntity.badRequest().body(Map.of("message", "이미 찜한 상품입니다."));
-            }
+            Map<String, Object> response = new HashMap<>();
+            response.put("wished", isWished);
+            response.put("wishlistCount", newWishlistCount);
+            response.put("message", isWished ? "찜 목록에 추가되었습니다." : "찜 목록에서 삭제되었습니다.");
+
+            return ResponseEntity.ok(response);
+
         } catch (IllegalArgumentException e) {
-            // 서비스에서 상품이 존재하지 않을 경우 던진 예외를 처리합니다.
-            return ResponseEntity.notFound().build(); // 404 Not Found
+            return ResponseEntity.notFound().build();
         }
     }
 

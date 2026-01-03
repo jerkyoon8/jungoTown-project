@@ -16,6 +16,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.SessionAttribute;
 
@@ -66,11 +67,19 @@ public class ChatController {
     }
 
     @GetMapping("/chat/room/{productId}")
-    // 방을 생성함.
+    // 방을 생성함. (기존: 리다이렉트 방식 - 유지하되 잘 안 쓰임)
     public String createChatRoom(@PathVariable Long productId, @SessionAttribute("user") SessionUser sessionUser) {
         Long chatRoomId = chatRoomService.getOrCreateChatRoom(productId, sessionUser.getId());
 
         return "redirect:/chat/" + chatRoomId;
+    }
+    
+    // 오버레이 채팅용: 방 생성 후 JSON 반환
+    @PostMapping("/chat/room/{productId}/create-api")
+    @ResponseBody
+    public ChatRoom createChatRoomApi(@PathVariable Long productId, @SessionAttribute("user") SessionUser sessionUser) {
+        Long chatRoomId = chatRoomService.getOrCreateChatRoom(productId, sessionUser.getId());
+        return chatRoomService.findRoomById(chatRoomId);
     }
 
     @GetMapping("/chat/{roomId}")

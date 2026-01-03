@@ -56,3 +56,8 @@ src/main/resources/application-secret.properties
 *.sql
 # Test folder
 src/main/resources/static/test/
+
+# 참조용 이미지 제외
+src/main/resources/static/image/create_user.png
+src/main/resources/static/image/wishlist.png
+src/main/resources/static/image/user_login_view_*.png

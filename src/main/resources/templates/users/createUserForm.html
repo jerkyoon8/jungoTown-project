@@ -251,7 +251,7 @@
             </div>
 
             <!-- Email Auth Code (Placeholder for future feature) -->
-            <div class="input-box" v-if="isAuthCodeSent">
+            <div class="input-box">
                 <div class="input-row">
                     <input type="text" v-model="form.authCode" class="form-control" placeholder="인증번호 입력" :disabled="isAuthVerified">
                     <button type="button" class="btn-check" @click="verifyAuthCode" :disabled="isAuthVerified">확인</button>

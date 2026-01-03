@@ -93,6 +93,13 @@
         WHERE id = #{id}
     </update>
 
+    <!-- 찜하기 감소 -->
+    <update id="decreaseWishlistCount">
+        UPDATE product
+        SET wishlist_count = wishlist_count - 1
+        WHERE id = #{id} AND wishlist_count > 0
+    </update>
+
     <!-- 모든 상품 수 조회 -->
     <select id="countAll" resultType="long">
         SELECT count(*)

@@ -24,38 +24,34 @@ public class ProductWishListService {
     private final ProductImageRepository productImageRepository;
 
 
-    // 찜하기를 추가한다.
+    // 찜하기 토글 (추가 또는 취소)
     @Transactional
-    public boolean addWishlist(Long userId, Long productId) {
-
-        /*
-        * 위시 리스트의 경우 
-        * 1. 상품 존재 검사
-        * 2. 찜하기 존재 검사
-        * 3.
-        * 
-        * */
-        
-        
-        // 상품이 존재하는지 검사. 없으면 IllegalArgumentException 발생
-        Optional<Product> byId = productRepository.findById(productId);
-            byId.orElseThrow(() -> new IllegalArgumentException("해당 상품을 찾을 수 없습니다. id: " + productId));
-
-        log.info("product ={},",byId.get());
-
+    public boolean toggleWishlist(Long userId, Long productId) {
+        // 상품 존재 검사
+        productRepository.findById(productId)
+                .orElseThrow(() -> new IllegalArgumentException("해당 상품을 찾을 수 없습니다. id: " + productId));
 
         // 1. 찜하기가 이미 존재하는지 확인
         int count = productWishListRepository.checkWishList(userId, productId);
 
-        // 2. 존재하지 않으면 새로 추가하고 true 반환
-        if (count == 0) {
+        // 2. 이미 존재하면 삭제하고 false 반환 (찜 취소)
+        if (count > 0) {
+            productWishListRepository.delete(userId, productId);
+            productRepository.decreaseWishlistCount(productId);
+            return false;
+        } 
+        
+        // 3. 존재하지 않으면 추가하고 true 반환 (찜 하기)
+        else {
             productWishListRepository.save(userId, productId);
-            productRepository.increaseWishlistCount(productId); // 찜하기 개수 1 증가
-            return true; // 새로 추가됨
+            productRepository.increaseWishlistCount(productId);
+            return true;
         }
+    }
 
-        // 3. 이미 존재하면 false 반환
-        return false;
+    // 찜 여부 확인
+    public boolean isWishlisted(Long userId, Long productId) {
+        return productWishListRepository.checkWishList(userId, productId) > 0;
     }
 
     // 찜 목록 조회

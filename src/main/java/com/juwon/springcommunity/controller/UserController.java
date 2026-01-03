@@ -43,6 +43,16 @@ public class UserController {
         return ResponseEntity.ok(response);
     }
 
+    // 이메일 존재 여부 확인 API
+    @GetMapping("/api/users/check-email")
+    @ResponseBody
+    public ResponseEntity<Map<String, Boolean>> checkEmailExists(@RequestParam String email) {
+        boolean exists = userService.isEmailDuplicate(email);
+        Map<String, Boolean> response = new HashMap<>();
+        response.put("exists", exists);
+        return ResponseEntity.ok(response);
+    }
+
     // 사용자 생성 폼을 보여준다
     @GetMapping("/users/new")
     public String createUserForm(Model model) {

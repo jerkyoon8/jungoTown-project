@@ -33,6 +33,9 @@ public interface ProductRepository {
     // 찜하기 증가
     void increaseWishlistCount(Long id);
 
+    // 찜하기 감소
+    void decreaseWishlistCount(Long id);
+
     // 모든 상품 수 조회
     long countAll(Map<String, Object> params);
 

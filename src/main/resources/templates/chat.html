@@ -18,39 +18,55 @@
                 flex-grow: 1;
                 padding: 20px;
                 overflow-y: auto;
-                background-color: #f9f9f9;
-            }
-            .message {
-                margin-bottom: 15px;
-                line-height: 1.6;
-            }
-            .message .sender {
-                font-weight: bold;
-                color: #0056b3;
-            }
-            .message .content {
-                background-color: #fff;
-                padding: 10px 15px;
-                border-radius: 15px;
-                display: inline-block;
-                max-width: 80%;
-            }
-            /* 내가 보낸 메시지 스타일 */
-            .message.sent {
+                background-color: #f0f2f5; /* 배경색 변경 */
                 display: flex;
                 flex-direction: column;
-                align-items: flex-end;
+            }
+            .message {
+                margin-bottom: 12px;
+                max-width: 70%;
+                display: flex;
+                flex-direction: column;
+            }
+            .message .sender {
+                font-size: 12px;
+                color: #65676b;
+                margin-bottom: 4px;
+                padding: 0 5px;
+            }
+            .message .content {
+                padding: 10px 14px;
+                border-radius: 18px;
+                font-size: 15px;
+                line-height: 1.4;
+                position: relative;
+                word-wrap: break-word;
+            }
+
+            /* 내가 보낸 메시지 스타일 */
+            .message.sent {
+                align-self: flex-end;
+            }
+            .message.sent .sender {
+                display: none; /* 내 메시지는 닉네임 숨김 (옵션) */
             }
             .message.sent .content {
-                background-color: #dcf8c6;
+                background-color: #0084ff;
+                color: white;
+                border-bottom-right-radius: 4px;
             }
 
             /* 받은 메시지 스타일 */
             .message.received {
-                display: flex;
-                flex-direction: column;
-                align-items: flex-start;
+                align-self: flex-start;
             }
+            .message.received .content {
+                background-color: white;
+                color: #050505;
+                border-bottom-left-radius: 4px;
+                box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+            }
+
             #form {
                 display: flex;
                 padding: 10px;
@@ -86,7 +102,7 @@
         <div id="messages">
             <!-- 서버에서 받은 초기 메시지들을 여기서 렌더링 -->
             <th:block th:each="message : ${messages}">
-                <div class="message" th:classappend="${message.sender == session.user.name} ? 'sent' : 'received'" th:attr="data-message-id=${message.id}">
+                <div class="message" th:classappend="${message.sender == session.user.nickname} ? 'sent' : 'received'" th:attr="data-message-id=${message.id}">
                     <div class="sender" th:text="${message.sender}"></div>
                     <div class="content" th:text="${message.message}"></div>
                 </div>
@@ -107,7 +123,7 @@
     // --- (1) 서버에서 전달받은 데이터 ---
     const chatRoom = /*[[${chatRoom}]]*/ null;
     const initialMessages = /*[[${messages}]]*/ [];
-    const currentUsername = /*[[${session.user.name}]]*/ 'user';
+    const currentUsername = /*[[${session.user.nickname}]]*/ 'user';
 
     // --- (2) 채팅에 필요한 주요 변수 ---
     const chatRoomId = chatRoom ? chatRoom.id : 'default';

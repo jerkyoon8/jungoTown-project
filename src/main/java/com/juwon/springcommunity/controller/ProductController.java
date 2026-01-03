@@ -25,6 +25,7 @@ import java.util.Map;
 
 
 import com.juwon.springcommunity.service.RecentProductService;
+import com.juwon.springcommunity.service.ProductWishListService;
 
 @Controller
 @RequestMapping("/products")
@@ -36,13 +37,15 @@ public class ProductController {
     private final RecentProductService recentProductService;
     private final com.juwon.springcommunity.service.ProductCategoryService productCategoryService;
     private final com.fasterxml.jackson.databind.ObjectMapper objectMapper;
+    private final ProductWishListService productWishListService;
 
-    public ProductController(ProductService productService, UserService userService, RecentProductService recentProductService, com.juwon.springcommunity.service.ProductCategoryService productCategoryService, com.fasterxml.jackson.databind.ObjectMapper objectMapper) {
+    public ProductController(ProductService productService, UserService userService, RecentProductService recentProductService, com.juwon.springcommunity.service.ProductCategoryService productCategoryService, com.fasterxml.jackson.databind.ObjectMapper objectMapper, ProductWishListService productWishListService) {
         this.productService = productService;
         this.userService = userService;
         this.recentProductService = recentProductService;
         this.productCategoryService = productCategoryService;
         this.objectMapper = objectMapper;
+        this.productWishListService = productWishListService;
     }
 
     private String getCurrentUserEmail(Principal principal) {
@@ -137,6 +140,8 @@ public class ProductController {
 
         // === 최근 본 상품 기록 로직 추가 시작 ===
         String userIdentifier;
+        boolean isWished = false; // 찜 여부 초기값
+
         if (principal != null) {
             // 로그인 사용자: User ID 사용
             String email = principal.getName();
@@ -145,24 +150,36 @@ public class ProductController {
             }
             User user = userService.findUserByEmail(email);
             userIdentifier = "user:" + user.getId();
+            
+            // 찜 여부 확인
+            isWished = productWishListService.isWishlisted(user.getId(), id);
         } else {
             // 비로그인 사용자: Session ID 사용
             userIdentifier = "session:" + session.getId();
         }
         recentProductService.addRecentProduct(userIdentifier, id);
+        model.addAttribute("isWished", isWished);
         // === 최근 본 상품 기록 로직 추가 끝 ===
 
         // 현재 보고 있는 상품이 로그인한 사용자가 작성한 것인지 확인 (수정/삭제 버튼 노출 여부 결정)
         boolean isOwner = false;
+        boolean canChat = false; // 채팅 가능 여부 추가
+
         if (principal != null) {
             String currentUserEmail = getCurrentUserEmail(principal);
             User currentUser = userService.findUserByEmail(currentUserEmail);
             String ownerEmail = userService.findEmailById(product.getUserId());
             
-            // 작성자 본인이거나 관리자 권한이 있는 경우 true
+            // 작성자 본인이거나 관리자 권한이 있는 경우 true (수정/삭제 권한)
             isOwner = (ownerEmail != null && ownerEmail.equals(currentUserEmail)) || currentUser.getRole() == Role.ADMIN;
+            
+            // 작성자 본인이 아닐 경우에만 채팅 가능 (관리자라도 남의 글엔 채팅 가능)
+            if (ownerEmail != null && !ownerEmail.equals(currentUserEmail)) {
+                canChat = true;
+            }
         }
         model.addAttribute("isOwner", isOwner);
+        model.addAttribute("canChat", canChat);
 
         return "products/productDetail";
     }
@@ -222,19 +239,5 @@ public class ProductController {
 
         productService.deleteProduct(id);
         return "redirect:/products"; // 목록 페이지로 리다이렉트
-    }
-
-    // 찜하기
-    @PostMapping("/{id}/wishlist")
-    @ResponseBody
-    public ResponseEntity<Map<String, Object>> increaseWishlistCount(@PathVariable Long id) {
-        productService.increaseWishlistCount(id);
-        ProductResponseDto updatedProduct = productService.findProductById(id);
-        int newWishlistCount = updatedProduct.getWishlistCount();
-
-        Map<String, Object> response = new HashMap<>();
-        response.put("success", true);
-        response.put("newWishlistCount", newWishlistCount);
-        return ResponseEntity.ok(response);
     }
 }
