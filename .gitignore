@@ -40,6 +40,14 @@ docs/
 # Gemini Progress Log
 gemini_progress_log.txt
 
+# Crawler related
+crawler.py
+test_crawl.py
+debug_crawl.py
+insert_products.sql
+db_importer.py
+helper_sql.py
+
 # 설정 파일 (보안)
 src/main/resources/application.properties
 

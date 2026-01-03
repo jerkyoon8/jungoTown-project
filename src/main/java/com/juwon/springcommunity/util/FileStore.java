@@ -17,9 +17,20 @@ public class FileStore {
     @Value("${file.dir}")
     private String fileDir;
 
-    // 파일명을 받아 전체 저장 경로를 반환합니다.
+    // 파일명을 받아 전체 저장 경로를 반환합니다. (상위 호환을 위해 유지)
     public String getFullPath(String filename) {
         return fileDir + "/post/" + filename;
+    }
+
+    // 상대 경로를 포함한 전체 경로를 반환합니다.
+    public String getFullPath(String relativePath, String filename) {
+        return fileDir + "/post/" + relativePath + filename;
+    }
+
+    // 카테고리별 상대 경로를 생성합니다 (예: 703/)
+    public String getRelativePath(Long categoryId) {
+        if (categoryId == null) return "default/";
+        return categoryId + "/";
     }
 
     // 캐러셀 이미지 파일명을 받아 전체 저장 경로를 반환합니다.
@@ -28,27 +39,35 @@ public class FileStore {
     }
 
     // 여러 개의 파일을 받아 저장하고, 저장된 파일 정보 리스트를 반환합니다.
-    public List<ProductImage> storeFiles(List<MultipartFile> multipartFiles, Long postId) throws IOException {
+    public List<ProductImage> storeFiles(List<MultipartFile> multipartFiles, Long postId, Long categoryId) throws IOException {
         List<ProductImage> storeFileResult = new ArrayList<>();
         for (MultipartFile multipartFile : multipartFiles) {
             if (!multipartFile.isEmpty()) {
-                storeFileResult.add(storeFile(multipartFile, postId));
+                storeFileResult.add(storeFile(multipartFile, postId, categoryId));
             }
         }
         return storeFileResult;
     }
 
     // 단일 파일을 서버에 저장하고, 저장된 파일 정보를 반환합니다.
-    public ProductImage storeFile(MultipartFile multipartFile, Long postId) throws IOException {
+    public ProductImage storeFile(MultipartFile multipartFile, Long postId, Long categoryId) throws IOException {
         if (multipartFile.isEmpty()) {
             return null;
         }
 
         String originalFilename = multipartFile.getOriginalFilename();
         String storeFileName = createStoreFileName(originalFilename);
-        multipartFile.transferTo(new File(getFullPath(storeFileName)));
+        String relativePath = getRelativePath(categoryId);
+        
+        // 폴더 생성
+        File folder = new File(fileDir + "/post/" + relativePath);
+        if (!folder.exists()) {
+            folder.mkdirs();
+        }
 
-        return new ProductImage(null, postId, originalFilename, storeFileName, getFullPath(storeFileName), multipartFile.getSize(), null, null);
+        multipartFile.transferTo(new File(getFullPath(relativePath, storeFileName)));
+
+        return new ProductImage(null, postId, originalFilename, relativePath + storeFileName, getFullPath(relativePath, storeFileName), multipartFile.getSize(), null, null);
     }
 
     // 캐러셀 이미지를 저장하고 저장된 파일명을 반환합니다.

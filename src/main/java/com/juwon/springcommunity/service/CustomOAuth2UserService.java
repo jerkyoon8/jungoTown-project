@@ -51,17 +51,36 @@ public class CustomOAuth2UserService implements OAuth2UserService<OAuth2UserRequ
 
     private User saveOrUpdate(OAuthAttributes attributes) {
         User user = userRepository.findByEmail(attributes.getEmail())
-                // 사용자가 존재하면 이름(nickname) 업데이트
-                .map(entity -> entity) // 별도 업데이트 로직은 필요 시 추가
-                // 사용자가 없으면 OAuthAttributes의 toEntity()를 이용해 User 엔티티 생성
-                .orElse(attributes.toEntity());
+                .orElseGet(() -> {
+                    User newUser = attributes.toEntity();
+                    // 닉네임 중복 체크 및 유니크한 닉네임 생성
+                    String nickname = newUser.getNickname();
+                    if (userRepository.existsByNickname(nickname)) {
+                        nickname = generateUniqueNickname(nickname);
+                        newUser.setNickname(nickname);
+                    }
+                    return newUser;
+                });
 
         // Mybatis는 save 메소드가 따로 없으며, insert/update 쿼리에서 id가 없으면 insert, 있으면 update를 수행.
-        // 여기서는 신규 유저인 경우에만 저장이 필요.
         if (user.getId() == null) {
             userRepository.save(user); // 신규 사용자 저장
         }
         
         return user;
+    }
+
+    private String generateUniqueNickname(String baseNickname) {
+        String uniqueNickname = baseNickname;
+        int suffix = 1;
+        while (userRepository.existsByNickname(uniqueNickname)) {
+            uniqueNickname = baseNickname + suffix++;
+            // 무한 루프 방지 및 길이 제한 고려 (필요시)
+            if (suffix > 999) {
+                uniqueNickname = baseNickname + System.currentTimeMillis() % 1000;
+                break;
+            }
+        }
+        return uniqueNickname;
     }
 }

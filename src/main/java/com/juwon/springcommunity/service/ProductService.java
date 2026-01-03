@@ -45,7 +45,7 @@ public class ProductService {
         productRepository.save(product);
 
         //  이미지 파일을 저장하고 DB 에 저장
-        List<ProductImage> images = fileStore.storeFiles(createDto.getImageFiles(), product.getId());
+        List<ProductImage> images = fileStore.storeFiles(createDto.getImageFiles(), product.getId(), product.getCategoryId());
         if (!images.isEmpty()) {
             productImageRepository.saveAll(images);
         }
@@ -173,7 +173,7 @@ public class ProductService {
         productImageRepository.deleteByProductId(id);
 
         // 새 이미지 파일 저장.
-        List<ProductImage> storedImages = fileStore.storeFiles(requestDto.getImageFiles(), id);
+        List<ProductImage> storedImages = fileStore.storeFiles(requestDto.getImageFiles(), id, requestDto.getCategoryId());
         if (!storedImages.isEmpty()) {
             productImageRepository.saveAll(storedImages);
         }
