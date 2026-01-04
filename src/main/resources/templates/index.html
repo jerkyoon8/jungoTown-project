@@ -179,6 +179,47 @@
     </div>
     <!-- 캐러셀 끝 -->
 
+    <!-- 인기 상품 섹션 (추가) -->
+    <div th:if="${popularProducts != null and not #lists.isEmpty(popularProducts)}" class="container my-5">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h4 class="mb-0 fw-bold">지금 핫한 상품 🔥</h4>
+            <!-- 더보기 링크는 전체 상품 목록으로 이동 (추후 인기 상품 더보기 페이지 필요 시 연결) -->
+            <a th:href="@{/products}" class="text-decoration-none text-muted" style="font-size: 0.9rem;">더보기 &gt;</a>
+        </div>
+        
+        <div class="popular-products-container" style="display: flex; overflow-x: auto; gap: 1rem; padding-bottom: 1rem;">
+            <div th:each="product : ${popularProducts}" class="product-item-card border shadow-sm">
+                <a th:href="@{/products/{id}(id=${product.id})}" class="text-decoration-none text-dark">
+                    <div class="product-img-container">
+                        <img th:if="${!#lists.isEmpty(product.storedFileNames)}" 
+                             th:src="@{/images/{filename}(filename=${product.storedFileNames[0]})}" 
+                             alt="상품 이미지">
+                        <img th:unless="${!#lists.isEmpty(product.storedFileNames)}" 
+                             th:src="@{/image/placeholder.png}" 
+                             alt="이미지 없음">
+                        
+                        <!-- 조회수 뱃지 (기능상 필요하므로 유지) -->
+                        <div style="position: absolute; bottom: 8px; right: 8px; background: rgba(0,0,0,0.6); color: #fff; padding: 2px 8px; border-radius: 12px; font-size: 0.75rem;">
+                            👀 <span th:text="${product.views}">0</span>
+                        </div>
+                    </div>
+                    
+                    <div class="product-card-body">
+                        <div class="product-card-title" th:text="${product.title}">상품 제목</div>
+                        <div class="product-card-price" th:text="${#numbers.formatInteger(product.price, 0, 'COMMA')} + '원'">10,000원</div>
+                        <div class="product-card-region" th:text="${product.dealRegion}">서울 강남구</div>
+                    </div>
+                </a>
+            </div>
+        </div>
+        
+        <style>
+            .popular-products-container::-webkit-scrollbar { height: 6px; }
+            .popular-products-container::-webkit-scrollbar-thumb { background: #e0e0e0; border-radius: 3px; }
+            .popular-products-container::-webkit-scrollbar-track { background: transparent; }
+        </style>
+    </div>
+
     <!-- 구분선 -->
     <hr class="section-divider" style="border-top: 1px solid #eee; margin: 40px 0;"/>
 

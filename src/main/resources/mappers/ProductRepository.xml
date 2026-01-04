@@ -179,4 +179,14 @@
         ORDER BY p.id DESC
     </select>
 
+    <!-- 인기 상품 조회 (조회수 높은 순) -->
+    <select id="findTopByOrderByViewsDesc" resultMap="productResultMap">
+        SELECT <include refid="productColumns"/>
+        FROM product p
+        LEFT JOIN product_category c ON p.category_id = c.id
+        WHERE p.is_deleted = 0
+        ORDER BY p.views DESC
+        LIMIT #{limit}
+    </select>
+
 </mapper>

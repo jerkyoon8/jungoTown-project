@@ -47,4 +47,7 @@ public interface ProductRepository {
 
     // 삭제된 상품 조회
     List<Product> findAllDeleted();
+
+    // 조회수 높은 상품 조회
+    List<Product> findTopByOrderByViewsDesc(@Param("limit") int limit);
 }

@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.juwon.springcommunity.repository.OrderRepository">
+
+    <insert id="save" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO `orders` (user_id, product_id, order_uid, price, status)
+        VALUES (#{userId}, #{productId}, #{orderUid}, #{price}, #{status})
+    </insert>
+
+    <select id="findById" resultType="com.juwon.springcommunity.domain.Order">
+        SELECT id, user_id, product_id, order_uid, price, status, created_at, updated_at
+        FROM `orders`
+        WHERE id = #{id}
+    </select>
+
+    <select id="findByOrderUid" resultType="com.juwon.springcommunity.domain.Order">
+        SELECT id, user_id, product_id, order_uid, price, status, created_at, updated_at
+        FROM `orders`
+        WHERE order_uid = #{orderUid}
+    </select>
+
+    <update id="update">
+        UPDATE `orders`
+        SET status = #{status}
+        WHERE id = #{id}
+    </update>
+
+</mapper>

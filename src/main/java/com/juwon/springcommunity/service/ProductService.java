@@ -210,6 +210,22 @@ public class ProductService {
     }
 
 
+    // 인기 상품 조회 (조회수 높은 순)
+    public List<ProductResponseDto> getPopularProducts(int limit) {
+        List<Product> products = productRepository.findTopByOrderByViewsDesc(limit);
+        Set<Long> userIds = products.stream().map(Product::getUserId).collect(Collectors.toSet());
+        Map<Long, User> userMap = findUsersMapByIds(userIds);
+
+        return products.stream()
+                .map(product -> {
+                    User author = userMap.get(product.getUserId());
+                    String nickname = (author != null) ? author.getNickname() : "알 수 없음";
+                    List<ProductImage> images = productImageRepository.findByProductId(product.getId());
+                    return ProductResponseDto.of(product, nickname, images);
+                })
+                .collect(Collectors.toList());
+    }
+
     //사용자 ID 목록으로 사용자 정보를 조회합니다.
     private Map<Long, User> findUsersMapByIds(Set<Long> userIds) {
         return userService.findUserMapByIds(userIds);

@@ -25,6 +25,7 @@ public class HomeController {
     private final UserService userService;
     private final com.juwon.springcommunity.service.ProductCategoryService productCategoryService;
     private final com.juwon.springcommunity.service.CarouselService carouselService;
+    private final com.juwon.springcommunity.service.ProductService productService;
 
     // index 페이지를 연결
     @GetMapping("/")
@@ -59,6 +60,11 @@ public class HomeController {
         List<com.juwon.springcommunity.domain.CarouselItem> carouselItems = carouselService.findActiveItems();
         model.addAttribute("carouselItems", carouselItems);
         // === 캐러셀 데이터 조회 로직 끝 ===
+
+        // === (추가) 인기 상품 조회 로직 시작 ===
+        List<com.juwon.springcommunity.dto.ProductResponseDto> popularProducts = productService.getPopularProducts(8);
+        model.addAttribute("popularProducts", popularProducts);
+        // === 인기 상품 조회 로직 끝 ===
 
 
         return "index";

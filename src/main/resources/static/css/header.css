@@ -119,6 +119,7 @@
     padding: 0;
     display: flex;
     gap: 20px; /* 메뉴간 간격 */
+    align-items: center; /* 수직 중앙 정렬 추가 */
 }
 
 .header-nav ul li a {
@@ -395,15 +396,15 @@
 /* === Category Dropdown (Split Layout) === */
 .category-dropdown-container {
     position: relative;
-    height: 100%;
+    /* height: 100%; 제거 - 자식 높이에 맞춤 */
 }
 
 .category-trigger {
     display: flex;
     align-items: center;
-    height: 100%;
+    /* height: 100%; 제거 */
     cursor: pointer;
-    padding: 0 10px; /* 클릭/호버 영역 확보 */
+    padding: 8px 10px; /* 상하 패딩을 다른 메뉴와 맞춤 (8px) */
 }
 
 .category-dropdown {

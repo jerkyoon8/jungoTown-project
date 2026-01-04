@@ -39,7 +39,7 @@
                             th:text="${isWished} ? '❤️' : '♡'">♡</button>
                 </form>
                 <a th:if="${canChat}" href="javascript:void(0)" th:onclick="'openChatRoom(' + ${product.id} + ')'" class="action-btn">채팅하기</a>
-                <a href="#" class="action-btn purchase-btn" onclick="alert('준비 중입니다.'); return false;">구매하기</a>
+                <button type="button" class="action-btn purchase-btn" onclick="requestPay()">구매하기</button>
             </div>
 
             <div class="seller-info">
@@ -80,7 +80,93 @@
 </main>
 
 <th:block layout:fragment="script">
-    <script>
+    <!-- 포트원 V2 결제 라이브러리 -->
+    <script src="https://cdn.portone.io/v2/browser-sdk.js"></script>
+    
+    <script th:inline="javascript">
+        // UUID 생성 함수 (구형 브라우저 호환성 고려)
+        function generateUUID() {
+            if (typeof crypto !== 'undefined' && crypto.randomUUID) {
+                return crypto.randomUUID();
+            }
+            return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+                var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
+                return v.toString(16);
+            });
+        }
+
+        async function requestPay() {
+            // 1. 주문 생성 요청
+            const productId = [[${product.id}]];
+            const productName = [[${product.title}]];
+            const productPrice = [[${product.price}]];
+            const storeId = "store-16915d01-5081-4b4b-9ef7-468bc8f0d4fa"; // V2 Store ID
+            const channelKey = "channel-key-d8393037-a807-4135-b601-0eb00f30d496"; // 실제 카카오페이 테스트 채널 키
+
+            // 주문 생성 API 호출
+            try {
+                const orderRes = await fetch('/api/orders?productId=' + productId, { method: 'POST' });
+                if (orderRes.status === 401) {
+                    alert('로그인이 필요합니다.');
+                    location.href = '/login';
+                    return;
+                }
+                if (!orderRes.ok) throw new Error('주문 생성 실패');
+                
+                const merchantUid = await orderRes.text(); // 주문 ID (DB PK)
+                const paymentId = 'payment-' + generateUUID(); // 결제 고유 ID (V2 필수)
+
+                // 2. 포트원 결제 요청 (V2)
+                const response = await PortOne.requestPayment({
+                    storeId: storeId,
+                    channelKey: channelKey, // *필수*: 콘솔에서 발급받은 채널 키
+                    paymentId: paymentId,
+                    orderName: productName,
+                    totalAmount: productPrice,
+                    currency: "CURRENCY_KRW",
+                    payMethod: "EASY_PAY", // 카카오페이 등 간편결제
+                    customer: {
+                        // fullName: "홍길동",
+                        // phoneNumber: "010-1234-5678",
+                        // email: "test@test.com"
+                    },
+                    customData: {
+                        orderId: merchantUid
+                    }
+                });
+
+                // 3. 결제 응답 처리
+                if (response.code != null) {
+                    // 결제 실패 (code가 있으면 에러)
+                    alert("결제 실패: " + response.message);
+                    return;
+                }
+
+                // 4. 결제 성공 시 서버 검증
+                // response.paymentId가 존재하면 성공으로 간주하고 서버 검증 시도
+                const validationRes = await fetch("/api/payments/validation", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        payment_uid: paymentId, // V2 paymentId
+                        order_uid: merchantUid  // 주문 번호
+                    })
+                });
+
+                if (!validationRes.ok) {
+                    const errorText = await validationRes.text();
+                    throw new Error(errorText);
+                }
+
+                alert("결제가 완료되었습니다!");
+                location.reload();
+
+            } catch (error) {
+                console.error(error);
+                alert("처리 중 오류가 발생했습니다: " + error.message);
+            }
+        }
+        
         // 찜하기 기능
         document.addEventListener('DOMContentLoaded', function() {
             const wishlistButton = document.querySelector('.like-button');
