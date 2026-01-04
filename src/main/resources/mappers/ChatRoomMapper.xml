@@ -8,10 +8,14 @@
         <id property="id" column="id"/>
         <result property="name" column="product_title"/>
         <result property="createdAt" column="created_at"/>
+        <result property="productThumbnailUrl" column="product_thumbnail_url"/>
+        <result property="lastMessage" column="last_message"/>
+        <result property="lastMessageTime" column="last_message_time"/>
 
         <association property="product" javaType="com.juwon.springcommunity.domain.Product">
             <id property="id" column="product_id"/>
             <result property="title" column="product_title"/>
+            <result property="price" column="product_price"/>
         </association>
 
         <association property="buyer" javaType="com.juwon.springcommunity.domain.User">
@@ -39,12 +43,16 @@
             cr.created_at,
             p.id as product_id,
             p.title as product_title,
+            p.price as product_price,
             buyer.id as buyer_id,
             buyer.email as buyer_email,
             buyer.nickname as buyer_nickname,
             seller.id as seller_id,
             seller.email as seller_email,
-            seller.nickname as seller_nickname
+            seller.nickname as seller_nickname,
+            (SELECT CONCAT('/images/', stored_file_name) FROM product_image WHERE product_id = p.id ORDER BY id ASC LIMIT 1) as product_thumbnail_url,
+            (SELECT message FROM chat_message WHERE room_id = cr.id ORDER BY id DESC LIMIT 1) as last_message,
+            COALESCE((SELECT created_at FROM chat_message WHERE room_id = cr.id ORDER BY id DESC LIMIT 1), cr.created_at) as last_message_time
         FROM chat_room cr
         JOIN product p ON cr.product_id = p.id
         JOIN user buyer ON cr.buyer_id = buyer.id
@@ -58,12 +66,16 @@
             cr.created_at,
             p.id as product_id,
             p.title as product_title,
+            p.price as product_price,
             buyer.id as buyer_id,
             buyer.email as buyer_email,
             buyer.nickname as buyer_nickname,
             seller.id as seller_id,
             seller.email as seller_email,
-            seller.nickname as seller_nickname
+            seller.nickname as seller_nickname,
+            (SELECT CONCAT('/images/', stored_file_name) FROM product_image WHERE product_id = p.id ORDER BY id ASC LIMIT 1) as product_thumbnail_url,
+            (SELECT message FROM chat_message WHERE room_id = cr.id ORDER BY id DESC LIMIT 1) as last_message,
+            COALESCE((SELECT created_at FROM chat_message WHERE room_id = cr.id ORDER BY id DESC LIMIT 1), cr.created_at) as last_message_time
         FROM chat_room cr
         JOIN product p ON cr.product_id = p.id
         JOIN user buyer ON cr.buyer_id = buyer.id
@@ -77,17 +89,22 @@
             cr.created_at,
             p.id as product_id,
             p.title as product_title,
+            p.price as product_price,
             buyer.id as buyer_id,
             buyer.email as buyer_email,
             buyer.nickname as buyer_nickname,
             seller.id as seller_id,
             seller.email as seller_email,
-            seller.nickname as seller_nickname
+            seller.nickname as seller_nickname,
+            (SELECT CONCAT('/images/', stored_file_name) FROM product_image WHERE product_id = p.id ORDER BY id ASC LIMIT 1) as product_thumbnail_url,
+            (SELECT message FROM chat_message WHERE room_id = cr.id ORDER BY id DESC LIMIT 1) as last_message,
+            COALESCE((SELECT created_at FROM chat_message WHERE room_id = cr.id ORDER BY id DESC LIMIT 1), cr.created_at) as last_message_time
         FROM chat_room cr
         JOIN product p ON cr.product_id = p.id
         JOIN user buyer ON cr.buyer_id = buyer.id
         JOIN user seller ON cr.seller_id = seller.id
         WHERE cr.buyer_id = #{userId} OR cr.seller_id = #{userId}
+        ORDER BY last_message_time DESC
     </select>
 
 </mapper>

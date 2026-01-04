@@ -14,11 +14,19 @@
 
     <!-- Toastify CSS -->
     <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
+    
+    <!-- Pretendard Font -->
+    <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.8/dist/web/static/pretendard.css" />
 
     <th:block layout:fragment="css"></th:block>
 
     <style>
-        /* 오버레이 채팅 스타일 */
+        /* 폰트 적용 */
+        body {
+            font-family: "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont, sans-serif;
+        }
+
+        /* 오버레이 딤 처리 */
         #chat-overlay-dim {
             position: fixed;
             top: 0;
@@ -36,29 +44,47 @@
             visibility: visible;
         }
 
+        /* 채팅 오버레이 메인 */
         #chat-overlay {
             position: fixed;
             top: 0;
-            right: -400px;
-            width: 380px;
+            right: -680px; /* 너비보다 약간 더 숨김 */
+            width: 650px; /* 너비 확장 */
             height: 100%;
             background-color: white;
             z-index: 9999;
-            transition: right 0.3s ease-in-out;
-            box-shadow: -2px 0 5px rgba(0,0,0,0.1);
+            transition: right 0.3s cubic-bezier(0.25, 1, 0.5, 1); /* 부드러운 애니메이션 */
+            box-shadow: -4px 0 15px rgba(0,0,0,0.1);
             display: flex;
             flex-direction: column;
+            font-family: "Pretendard Variable", Pretendard, sans-serif;
         }
         #chat-overlay.active {
             right: 0;
         }
 
-        /* 채팅방 리스트 영역 */
+        /* --- 1. 채팅방 목록 (List View) 스타일 --- */
         #chat-room-list-view {
             height: 100%;
             display: flex;
             flex-direction: column;
         }
+        
+        .list-header {
+            padding: 20px 24px; /* 여백 조금 더 크게 */
+            border-bottom: 1px solid #f0f0f0;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: #fff;
+        }
+        .list-header h3 {
+            font-size: 22px;
+            font-weight: 700;
+            color: #212124;
+            margin: 0;
+        }
+
         #chat-room-list {
             flex-grow: 1;
             overflow-y: auto;
@@ -66,120 +92,349 @@
             list-style: none;
             margin: 0;
         }
+        
+        /* 리스트 아이템 레이아웃: [프로필] [텍스트영역] [상품썸네일] */
         .chat-room-item {
-            padding: 15px;
-            border-bottom: 1px solid #f0f0f0;
+            padding: 16px 24px;
+            border-bottom: 1px solid #f5f5f5;
             cursor: pointer;
-            transition: background 0.2s;
+            transition: background 0.1s;
+            display: flex;
+            align-items: flex-start; /* 상단 정렬 */
+            background-color: #fff;
         }
         .chat-room-item:hover {
             background-color: #f9f9f9;
         }
-        .chat-room-item .title {
-            font-weight: bold;
-            font-size: 15px;
-            margin-bottom: 5px;
+
+        /* 1. 프로필 (좌측) */
+        .chat-room-profile {
+            width: 44px;
+            height: 44px;
+            background-color: #e9ecef; /* 회색 배경 */
+            border-radius: 50%; /* 원형 */
+            margin-right: 16px;
+            flex-shrink: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+        }
+        .chat-room-profile img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .default-profile-icon {
+            color: #adb5bd;
+            font-size: 20px;
         }
 
-        /* 채팅방 상세 영역 */
+        /* 2. 텍스트 영역 (중앙) */
+        .chat-room-info {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            min-width: 0; /* 말줄임표 처리를 위해 필수 */
+            margin-right: 12px;
+            padding-top: 2px; /* 시각적 중앙 보정 */
+        }
+        .chat-room-header-row {
+            display: flex;
+            align-items: center;
+            margin-bottom: 4px;
+        }
+        .chat-room-partner {
+            font-size: 15px;
+            font-weight: 600;
+            color: #212124;
+            margin-right: 6px;
+        }
+        .chat-room-time {
+            font-size: 12px;
+            color: #868e96;
+            display: flex;
+            align-items: center;
+        }
+        .chat-room-time::before {
+            content: "";
+            display: block;
+            width: 2px;
+            height: 2px;
+            background-color: #868e96;
+            border-radius: 50%;
+            margin-right: 6px;
+        }
+        .chat-room-last-msg {
+            font-size: 14px;
+            color: #495057;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            line-height: 1.4;
+        }
+
+        /* 3. 상품 썸네일 (우측) */
+        .chat-room-product-thumb {
+            width: 44px;
+            height: 44px;
+            border-radius: 8px; /* 둥근 사각형 */
+            background-color: #f1f3f5;
+            flex-shrink: 0;
+            overflow: hidden;
+            border: 1px solid #f0f0f0;
+        }
+        .chat-room-product-thumb img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+
+        /* --- 2. 채팅방 상세 (Detail View) 스타일 --- */
         #chat-room-detail-view {
             height: 100%;
-            display: none;
+            display: none; /* JS로 토글 */
             flex-direction: column;
             background-color: #fff;
         }
         #chat-room-detail-view.active {
             display: flex;
         }
-        
-        .overlay-header {
-            padding: 15px;
-            border-bottom: 1px solid #eee;
+
+        /* 헤더 */
+        .chat-header {
+            padding: 12px 16px;
+            border-bottom: 1px solid #f0f0f0;
             display: flex;
             align-items: center;
             justify-content: space-between;
             background: #fff;
+            flex-shrink: 0;
         }
-        .back-btn {
-            cursor: pointer;
-            border: none;
+        .header-left {
+            display: flex;
+            align-items: center;
+        }
+        .btn-back {
             background: none;
-            font-size: 20px;
-            margin-right: 10px;
+            border: none;
+            padding: 8px;
+            cursor: pointer;
+            margin-right: 8px;
+            display: flex;
+            align-items: center;
+        }
+        .user-profile-info {
+            display: flex;
+            flex-direction: column;
+            align-items: center; /* 중앙 정렬 */
+            text-align: center;
+            flex-grow: 1;
+            margin-right: 40px; /* 뒤로가기 버튼 너비만큼 보정 */
+        }
+        .chat-partner-name {
+            font-size: 16px;
+            font-weight: 700;
+            color: #212124;
+        }
+        .chat-status-text {
+            font-size: 11px;
+            color: #868e96;
+            margin-top: 2px;
+        }
+        
+        /* 상품 정보 바 */
+        .product-info-bar {
+            padding: 12px 16px;
+            border-bottom: 1px solid #f0f0f0;
+            display: flex;
+            align-items: center;
+            background: #fff;
+            flex-shrink: 0;
+        }
+        .product-thumb {
+            width: 40px;
+            height: 40px;
+            border-radius: 6px;
+            background-color: #eee;
+            margin-right: 12px;
+            object-fit: cover;
+        }
+        .product-details {
+            flex-grow: 1;
+        }
+        .product-price {
+            font-size: 14px;
+            font-weight: 700;
+            color: #212124;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .shipping-tag {
+            font-size: 11px;
+            color: #868e96;
+            font-weight: 400;
+        }
+        .product-title-text {
+            font-size: 12px;
+            color: #495057;
+            margin-top: 2px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 250px;
         }
 
+        /* 메시지 영역 */
         #overlay-messages {
             flex-grow: 1;
-            padding: 15px;
+            padding: 20px 16px;
             overflow-y: auto;
-            background-color: #f0f2f5;
+            background-color: #f5f6f7; /* 배경색 변경 */
             display: flex;
             flex-direction: column;
         }
-        
-        #overlay-chat-form {
-            padding: 10px;
-            border-top: 1px solid #eee;
-            display: flex;
+
+        /* 날짜 구분선 */
+        .date-divider {
+            text-align: center;
+            margin: 20px 0;
+            position: relative;
         }
-        #overlay-message-input {
-            flex-grow: 1;
-            border: 1px solid #ddd;
-            border-radius: 20px;
-            padding: 8px 15px;
-            margin-right: 10px;
-        }
-        #overlay-send-btn {
-            background-color: #0084ff;
-            color: white;
-            border: none;
-            border-radius: 20px;
-            padding: 8px 15px;
-            cursor: pointer;
+        .date-divider span {
+            background-color: rgba(0,0,0,0.05); /* 연한 회색 캡슐 */
+            padding: 6px 14px;
+            border-radius: 12px;
+            font-size: 11px;
+            color: #666;
         }
 
-        /* 메시지 스타일 */
+        /* 메시지 버블 공통 */
         .overlay-message {
             margin-bottom: 10px;
             max-width: 80%;
             display: flex;
             flex-direction: column;
+            position: relative;
         }
+        .message-row {
+            display: flex;
+            align-items: flex-end;
+            gap: 6px;
+        }
+
+        /* 내 메시지 (오른쪽, 검은색) */
         .overlay-message.sent {
             align-self: flex-end;
+            align-items: flex-end;
+        }
+        .overlay-message.sent .message-row {
+            flex-direction: row-reverse;
         }
         .overlay-message.sent .content {
-            background-color: #0084ff;
-            color: white;
-            border-radius: 15px 15px 0 15px;
-            padding: 8px 12px;
+            background-color: #2c2c2c; /* 다크 그레이 */
+            color: #fff;
+            border-radius: 18px 2px 18px 18px; /* 오른쪽 위 각지게 */
+            padding: 10px 14px;
             font-size: 14px;
+            line-height: 1.5;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.1);
         }
+        
+        /* 상대방 메시지 (왼쪽, 흰색) */
         .overlay-message.received {
             align-self: flex-start;
+            align-items: flex-start;
         }
         .overlay-message.received .content {
-            background-color: white;
-            color: black;
-            border: 1px solid #eee;
-            border-radius: 15px 15px 15px 0;
-            padding: 8px 12px;
+            background-color: #fff;
+            color: #212124;
+            border-radius: 2px 18px 18px 18px; /* 왼쪽 위 각지게 */
+            padding: 10px 14px;
             font-size: 14px;
+            line-height: 1.5;
+            border: 1px solid #eaeaea;
         }
-        .overlay-message .sender {
+
+        .msg-time {
+            font-size: 10px;
+            color: #999;
+            margin-bottom: 2px;
+            min-width: 50px;
+        }
+        .sent .msg-time { text-align: right; }
+        .received .msg-time { text-align: left; }
+
+        /* 하단 입력 영역 */
+        .chat-input-area {
+            background: #fff;
+            border-top: 1px solid #f0f0f0;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* 앱 설치 배너 */
+        .app-banner {
+            background-color: #03c75a; /* 네이버 그린 계열 or 요청 색상 */
+            color: white;
+            padding: 8px 16px;
+            font-size: 12px;
+            font-weight: 500;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .app-link {
+            color: white;
+            text-decoration: underline;
             font-size: 11px;
-            color: #888;
-            margin-bottom: 3px;
-            margin-left: 5px;
+            cursor: pointer;
         }
-        .overlay-message.sent .sender { display: none; }
+
+        /* 실제 입력 폼 */
+        .input-form-wrapper {
+            padding: 12px 16px 20px; /* 하단 여백 좀 더 */
+        }
+        .input-container {
+            background-color: #f5f6f7;
+            border-radius: 20px;
+            padding: 8px 12px;
+            display: flex;
+            align-items: center;
+        }
+        #overlay-message-input {
+            border: none;
+            background: transparent;
+            flex-grow: 1;
+            padding: 5px;
+            font-size: 14px;
+            outline: none;
+        }
+        #overlay-send-btn {
+            background: none;
+            border: none;
+            color: #b2b2b2;
+            font-size: 20px;
+            cursor: pointer;
+            padding: 0 5px;
+            transition: color 0.2s;
+        }
+        #overlay-send-btn:hover {
+            color: #2c2c2c;
+        }
+        #overlay-send-btn.active {
+            color: #ff3f3f; /* 활성화 시 색상 (예: 빨강) */
+        }
     </style>
 </head>
 <body>
     <!-- 공통 헤더 -->
     <header th:replace="~{fragments/header :: headerFragment}"></header>
 
-    <!-- 메인 컨텐츠 (개별로 적용. 비어있음) -->
+    <!-- 메인 컨텐츠 -->
     <main layout:fragment="content" class="container">
     </main>
 
@@ -189,29 +444,81 @@
     <!-- 채팅 오버레이 -->
     <div id="chat-overlay-dim" onclick="toggleChatOverlay()"></div>
     <div id="chat-overlay">
-        <!-- 리스트 뷰 -->
+        
+        <!-- [VIEW 1] 채팅방 리스트 -->
         <div id="chat-room-list-view">
-            <div class="overlay-header">
-                <h3>채팅 목록</h3>
-                <button onclick="toggleChatOverlay()" style="border:none; background:none; cursor:pointer;">✕</button>
+            <div class="list-header">
+                <h3>채팅</h3>
+                <button onclick="toggleChatOverlay()" style="border:none; background:none; cursor:pointer;">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
             </div>
-            <ul id="chat-room-list"></ul>
+            <ul id="chat-room-list">
+                <!-- 리스트 아이템이 여기에 동적 추가됨 -->
+            </ul>
         </div>
 
-        <!-- 상세 뷰 -->
+        <!-- [VIEW 2] 채팅방 상세 -->
         <div id="chat-room-detail-view">
-            <div class="overlay-header">
-                <div style="display:flex; align-items:center;">
-                    <button class="back-btn" onclick="backToRoomList()">←</button>
-                    <h3 id="overlay-room-title">상품명</h3>
+            <!-- 1. 헤더 -->
+            <div class="chat-header">
+                <button class="btn-back" onclick="backToRoomList()">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M15 19L8 12L15 5" stroke="#1E1E1E" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                </button>
+                <div class="user-profile-info">
+                    <div class="chat-partner-name" id="overlay-partner-name">상대방 이름</div>
+                    <div class="chat-status-text">보통 1시간 이내 응답</div>
                 </div>
-                <button onclick="toggleChatOverlay()" style="border:none; background:none; cursor:pointer;">✕</button>
+                <!-- 우측 메뉴 (모양만) -->
+                <div style="width: 24px;">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <circle cx="12" cy="5" r="2" fill="#1E1E1E"/>
+                        <circle cx="12" cy="12" r="2" fill="#1E1E1E"/>
+                        <circle cx="12" cy="19" r="2" fill="#1E1E1E"/>
+                    </svg>
+                </div>
             </div>
-            <div id="overlay-messages"></div>
-            <form id="overlay-chat-form" onsubmit="sendOverlayMessage(event)">
-                <input type="text" id="overlay-message-input" placeholder="메시지 입력..." autocomplete="off">
-                <button type="submit" id="overlay-send-btn">전송</button>
-            </form>
+
+            <!-- 2. 상품 정보 바 -->
+            <div class="product-info-bar" id="product-info-bar" style="display:none;">
+                <img src="" alt="상품" class="product-thumb" id="overlay-product-img">
+                <div class="product-details">
+                    <div class="product-price">
+                        <span id="overlay-product-price">0원</span>
+                        <span class="shipping-tag">배송비 별도</span>
+                    </div>
+                    <div class="product-title-text" id="overlay-product-title">상품명</div>
+                </div>
+                <!-- 안심결제 버튼 제거됨 -->
+            </div>
+
+            <!-- 3. 메시지 영역 -->
+            <div id="overlay-messages">
+                <div class="date-divider">
+                    <span id="today-date-display">2026년 1월 14일</span>
+                </div>
+            </div>
+
+            <!-- 4. 하단 입력 영역 -->
+            <div class="chat-input-area">
+                <!-- 앱 설치 배너 -->
+                <div class="app-banner">
+                    <span>앱에서는 채팅 응답이 더 빠르고 편리합니다.</span>
+                    <span class="app-link">앱 다운로드</span>
+                </div>
+
+                <!-- 입력 폼 -->
+                <div class="input-form-wrapper">
+                    <form onsubmit="sendOverlayMessage(event)" class="input-container">
+                        <input type="text" id="overlay-message-input" placeholder="메시지를 입력해주세요" autocomplete="off">
+                        <button type="submit" id="overlay-send-btn">➤</button>
+                    </form>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -221,22 +528,37 @@
     <!-- Toastify JS -->
     <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
 
-    <!-- SockJS와 STOMP 클라이언트 라이브러리 -->
+    <!-- SockJS와 STOMP 클라이언트 -->
     <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/stompjs@2.3.3/lib/stomp.min.js"></script>
 
-    <!-- 전역 웹소켓 연결 및 알림 로직 (로그인한 사용자에게만 적용) -->
+    <!-- 알림 로직 포함 -->
     <div th:if="${#authorization.expression('isAuthenticated()')}" th:replace="~{fragments/notifications :: notificationLogicFragment}"></div>
 
     <script th:inline="javascript">
         /*<![CDATA[*/
-        // 세션 사용자 정보 (전역 변수)
+        // 세션 사용자 정보
         const sessionUserNickname = /*[[${session.user != null ? session.user.nickname : ''}]]*/ '';
+        
         let currentOverlayRoomId = null;
         let overlayStompClient = null;
         let overlaySubscription = null;
+
+        // 오늘 날짜 표시
+        function updateDateDisplay() {
+            const now = new Date();
+            const options = { year: 'numeric', month: 'long', day: 'numeric' };
+            const dateStr = now.toLocaleDateString('ko-KR', options);
+            const dateEl = document.getElementById('today-date-display');
+            if(dateEl) dateEl.innerText = dateStr;
+        }
+
+        // 숫자 콤마 포맷
+        function formatNumber(num) {
+            return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+        }
     
-        // 오버레이 열기/닫기
+        // 오버레이 토글
         function toggleChatOverlay() {
             const overlay = document.getElementById('chat-overlay');
             const dim = document.getElementById('chat-overlay-dim');
@@ -247,7 +569,6 @@
                 dim.classList.remove('active');
                 if(overlayStompClient) overlayStompClient.disconnect();
             } else {
-                // 열 때 로그인 체크
                 if (!sessionUserNickname) {
                     alert('로그인이 필요합니다.');
                     location.href = '/users/login';
@@ -255,22 +576,38 @@
                 }
                 overlay.classList.add('active');
                 dim.classList.add('active');
-                loadChatRooms(); // 목록 불러오기
-                backToRoomList(); // 리스트 뷰로 초기화
-                connectOverlaySocket(); // 소켓 미리 연결
+                loadChatRooms();
+                backToRoomList();
+                connectOverlaySocket();
+                updateDateDisplay();
             }
         }
     
-        // 소켓 연결
         function connectOverlaySocket() {
             const socket = new SockJS('/ws-stomp');
             overlayStompClient = Stomp.over(socket);
-            overlayStompClient.debug = null; // 로그 끄기
-            overlayStompClient.connect({}, function (frame) {
-                // 연결 성공
-            });
+            overlayStompClient.debug = null; 
+            overlayStompClient.connect({}, function (frame) {});
         }
     
+        // 시간 포맷 (방금 전, 1시간 전 등)
+        function formatTimeAgo(dateString) {
+            if (!dateString) return '';
+            const date = new Date(dateString);
+            const now = new Date();
+            const diffMs = now - date;
+            const diffSec = Math.floor(diffMs / 1000);
+            const diffMin = Math.floor(diffSec / 60);
+            const diffHour = Math.floor(diffMin / 60);
+            const diffDay = Math.floor(diffHour / 24);
+
+            if (diffSec < 60) return '방금 전';
+            if (diffMin < 60) return `${diffMin}분 전`;
+            if (diffHour < 24) return `${diffHour}시간 전`;
+            if (diffDay < 7) return `${diffDay}일 전`;
+            return date.toLocaleDateString('ko-KR', { month: 'long', day: 'numeric' });
+        }
+
         // 채팅방 목록 로드
         function loadChatRooms() {
             fetch('/api/chat/rooms')
@@ -278,25 +615,109 @@
                 .then(rooms => {
                     const list = document.getElementById('chat-room-list');
                     list.innerHTML = '';
+                    if(!rooms || rooms.length === 0) {
+                        list.innerHTML = '<li style="padding:40px 20px; text-align:center; color:#999;">진행 중인 대화가 없습니다.</li>';
+                        return;
+                    }
                     rooms.forEach(room => {
                         const li = document.createElement('li');
                         li.className = 'chat-room-item';
-                        li.innerHTML = `<div class="title">${room.name}</div>`;
-                        li.onclick = () => enterOverlayChatRoom(room.id, room.name);
+                        
+                        // 1. 상대방 이름 찾기
+                        let partnerName = "알 수 없음";
+                        if(room.buyer && room.buyer.nickname === sessionUserNickname) {
+                             partnerName = room.seller ? room.seller.nickname : "판매자";
+                        } else if (room.seller && room.seller.nickname === sessionUserNickname) {
+                             partnerName = room.buyer ? room.buyer.nickname : "구매자";
+                        }
+                        
+                        // 2. 시간 및 메시지
+                        // room.lastMessageTime이 있으면 쓰고, 없으면 createdAt 사용
+                        const msgTime = room.lastMessageTime ? room.lastMessageTime : room.createdAt;
+                        const timeAgo = formatTimeAgo(msgTime); 
+                        
+                        // 메시지가 없으면 기본 문구 표시
+                        const lastMsg = room.lastMessage ? room.lastMessage : "대화를 시작해보세요!";
+
+                        // 3. 상품 이미지
+                        // API에서 가져온 productThumbnailUrl 사용. 없으면 placeholder
+                        const productThumbUrl = room.productThumbnailUrl ? room.productThumbnailUrl : '/image/placeholder.png';
+
+                        li.innerHTML = `
+                            <!-- 프로필 (좌측) -->
+                            <div class="chat-room-profile">
+                                <img src="/image/default_profile_image.png" alt="프로필">
+                            </div>
+                            
+                            <!-- 텍스트 정보 (중앙) -->
+                            <div class="chat-room-info">
+                                <div class="chat-room-header-row">
+                                    <span class="chat-room-partner">${partnerName}</span>
+                                    <span class="chat-room-time">${timeAgo}</span>
+                                </div>
+                                <div class="chat-room-last-msg">${lastMsg}</div>
+                            </div>
+                            
+                            <!-- 상품 썸네일 (우측) -->
+                            <div class="chat-room-product-thumb">
+                                <img src="${productThumbUrl}" alt="상품" onerror="this.src='/image/placeholder.png'">
+                            </div>
+                        `;
+                        li.onclick = () => enterOverlayChatRoom(room.id, room.name); // room.name을 title로 넘김
                         list.appendChild(li);
                     });
                 });
         }
     
-        // 채팅방 입장 (상세 뷰)
-        function enterOverlayChatRoom(roomId, roomName) {
+        // 채팅방 입장
+        function enterOverlayChatRoom(roomId) {
             currentOverlayRoomId = roomId;
             document.getElementById('chat-room-list-view').style.display = 'none';
             document.getElementById('chat-room-detail-view').classList.add('active');
-            document.getElementById('overlay-room-title').textContent = roomName;
-            document.getElementById('overlay-messages').innerHTML = ''; // 초기화
-    
-            // 메시지 로드
+            
+            // 초기화
+            document.getElementById('overlay-messages').innerHTML = `
+                <div class="date-divider"><span id="today-date-display"></span></div>
+            `;
+            updateDateDisplay();
+
+            // 1. 방 정보(상품 정보 등) 가져오기
+            fetch(`/api/chat/room/${roomId}`)
+                .then(res => res.json())
+                .then(room => {
+                    // 상품 정보 바 업데이트
+                    if(room.product) {
+                        document.getElementById('product-info-bar').style.display = 'flex';
+                        document.getElementById('overlay-product-title').innerText = room.product.title;
+                        document.getElementById('overlay-product-price').innerText = formatNumber(room.product.price) + '원';
+                        
+                        // 썸네일: ChatRoom 객체에 직접 매핑된 URL 사용
+                        const thumbUrl = room.productThumbnailUrl ? room.productThumbnailUrl : '/image/placeholder.png';
+                        document.getElementById('overlay-product-img').src = thumbUrl;
+                        document.getElementById('overlay-product-img').onerror = function() { this.src='/image/placeholder.png'; };
+
+                        // 상품 정보 바 클릭 시 이동 이벤트
+                        document.getElementById('product-info-bar').onclick = function() {
+                            window.location.href = '/products/' + room.product.id;
+                        };
+                        document.getElementById('product-info-bar').style.cursor = 'pointer';
+
+                    } else {
+                        document.getElementById('product-info-bar').style.display = 'none';
+                    }
+
+                    // 상대방 이름 설정 (내가 buyer면 seller, seller면 buyer)
+                    // 현재 sessionUserNickname과 비교
+                    let partnerName = "알 수 없음";
+                    if(room.buyer && room.buyer.nickname === sessionUserNickname) {
+                         partnerName = room.seller ? room.seller.nickname : "판매자";
+                    } else if (room.seller && room.seller.nickname === sessionUserNickname) {
+                         partnerName = room.buyer ? room.buyer.nickname : "구매자";
+                    }
+                    document.getElementById('overlay-partner-name').innerText = partnerName;
+                });
+
+            // 2. 메시지 로드
             fetch(`/api/chat/messages/${roomId}`)
                 .then(res => res.json())
                 .then(messages => {
@@ -304,11 +725,10 @@
                     scrollToBottom();
                 });
     
-            // 구독 설정
+            // 3. 소켓 구독
             if (overlayStompClient && overlayStompClient.connected) {
                 subscribeToOverlayRoom(roomId);
             } else {
-                // 소켓이 아직 연결 안 됐으면 연결 후 구독
                  const socket = new SockJS('/ws-stomp');
                  overlayStompClient = Stomp.over(socket);
                  overlayStompClient.debug = null;
@@ -326,7 +746,6 @@
             });
         }
     
-        // 뒤로 가기 (리스트 뷰로)
         function backToRoomList() {
             if (overlaySubscription) overlaySubscription.unsubscribe();
             currentOverlayRoomId = null;
@@ -334,7 +753,6 @@
             document.getElementById('chat-room-list-view').style.display = 'flex';
         }
     
-        // 메시지 전송
         function sendOverlayMessage(e) {
             e.preventDefault();
             const input = document.getElementById('overlay-message-input');
@@ -350,16 +768,31 @@
             }
         }
     
-        // 메시지 표시
         function showOverlayMessage(msg) {
             const container = document.getElementById('overlay-messages');
             const div = document.createElement('div');
             const isMe = msg.sender === sessionUserNickname;
-            
+
+            // 시간 파싱 (예: LocalDateTime '2026-01-14T10:00:00') -> '오전 10:00'
+            let timeStr = "";
+            if(msg.createdAt) {
+                const date = new Date(msg.createdAt);
+                timeStr = date.toLocaleTimeString('ko-KR', { hour: 'numeric', minute: '2-digit' });
+            } else {
+                timeStr = new Date().toLocaleTimeString('ko-KR', { hour: 'numeric', minute: '2-digit' });
+            }
+
             div.className = `overlay-message ${isMe ? 'sent' : 'received'}`;
+            
+            // 구조: [시간] [말풍선] (sent)  /  [말풍선] [시간] (received)
+            // CSS flex-direction: row-reverse (sent) 이용
+            
             div.innerHTML = `
                 <div class="sender">${msg.sender}</div>
-                <div class="content">${msg.message}</div>
+                <div class="message-row">
+                    <div class="content">${msg.message}</div>
+                    <span class="msg-time">${timeStr}</span>
+                </div>
             `;
             container.appendChild(div);
         }
@@ -369,21 +802,20 @@
             container.scrollTop = container.scrollHeight;
         }
     
-        // 상품 상세 -> 채팅하기 버튼용 함수 (외부 호출 가능)
+        // 외부 호출용
         window.openChatRoom = function(productId) {
-            // 방 생성/조회 API 호출 후 오버레이 열기
             fetch(`/chat/room/${productId}/create-api`, { method: 'POST' })
                 .then(res => {
-                    if (!res.ok) throw new Error('채팅방 생성 실패');
+                    if (!res.ok) throw new Error('Error');
                     return res.json();
                 })
                 .then(room => {
-                    toggleChatOverlay(); // 오버레이 열고
-                    enterOverlayChatRoom(room.id, room.name); // 해당 방으로 바로 진입
+                    toggleChatOverlay();
+                    enterOverlayChatRoom(room.id);
                 })
                 .catch(err => {
                     console.error(err);
-                    alert('로그인이 필요하거나 오류가 발생했습니다.');
+                    alert('로그인 후 이용 가능합니다.');
                 });
         };
         /*]]>*/

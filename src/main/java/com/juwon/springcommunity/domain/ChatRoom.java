@@ -17,6 +17,11 @@ public class ChatRoom {
     private User buyer;
     private User seller;
     private LocalDateTime createdAt;
+    
+    // 추가된 필드
+    private String productThumbnailUrl;
+    private String lastMessage;
+    private LocalDateTime lastMessageTime;
 
     public ChatRoom(Product product, User buyer, User seller) {
         this.product = product;
