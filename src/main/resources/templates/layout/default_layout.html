@@ -802,7 +802,7 @@
             container.scrollTop = container.scrollHeight;
         }
     
-        // 외부 호출용
+        // 외부 호출용 (상품 ID로 방 열기)
         window.openChatRoom = function(productId) {
             fetch(`/chat/room/${productId}/create-api`, { method: 'POST' })
                 .then(res => {
@@ -811,12 +811,18 @@
                 })
                 .then(room => {
                     toggleChatOverlay();
-                    enterOverlayChatRoom(room.id);
+                    enterOverlayChatRoom(room.id, room.name);
                 })
                 .catch(err => {
                     console.error(err);
                     alert('로그인 후 이용 가능합니다.');
                 });
+        };
+
+        // 외부 호출용 (채팅방 ID로 바로 열기 - 알림 클릭 등)
+        window.openChatRoomById = function(chatRoomId) {
+            toggleChatOverlay();
+            enterOverlayChatRoom(chatRoomId); // 이미 존재하는 방 ID로 바로 진입
         };
         /*]]>*/
     </script>

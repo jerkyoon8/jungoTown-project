@@ -59,9 +59,7 @@ public class ChatController {
         messagingTemplate.convertAndSend("/topic/chat/room/" + message.getRoomId(), message);
 
 
-        String receiver = chatRoomService.findReceiver(message.getRoomId(), user.getNickname()); 
-        // findReceiver가 String(닉네임)을 반환한다고 가정. 
-        // 만약 email을 반환한다면 로직 확인 필요. -> 기존 코드가 sender(String)를 썼으므로 닉네임일 확률 높음.
+        String receiver = chatRoomService.findReceiver(message.getRoomId(), user.getEmail());
         
         notificationService.notifyChatRoomMessage(message, receiver);
     }

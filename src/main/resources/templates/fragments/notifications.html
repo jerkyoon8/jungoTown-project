@@ -77,17 +77,28 @@
 
     function showNotification(notification) {
         Toastify({
-            text: notification.sender + "님으로부터 새 메시지가 도착했습니다. ",
+            text: notification.sender + "님: " + notification.messageContent,
             duration: 5000,
-            destination: notification.url,
-            newWindow: false,
             close: true,
-            gravity: "bottom",
+            gravity: "top", 
             position: "right",
             backgroundColor: "linear-gradient(to right, #00b09b, #96c93d)",
             stopOnFocus: true,
             onClick: function() {
-                window.location.href = notification.url;
+                // 오버레이 함수(ID기반)가 있으면 오버레이로 열기
+                if (typeof window.openChatRoomById === 'function' && notification.chatRoomId) {
+                    window.openChatRoomById(notification.chatRoomId);
+                }
+                // 기존 함수(상품ID기반) 호환성 유지 (혹시 모를 경우)
+                else if (typeof window.openChatRoom === 'function' && notification.chatRoomId) {
+                    // 주의: openChatRoom은 productId를 기대하므로 사용하면 안 되지만, 
+                    // 로직상 분리를 위해 여기서는 ById를 우선함.
+                    console.warn("openChatRoomById 함수가 없습니다.");
+                }
+                // 없으면 페이지 이동
+                else if (notification.redirectUrl) {
+                    window.location.href = notification.redirectUrl;
+                }
             }
         }).showToast();
     }
