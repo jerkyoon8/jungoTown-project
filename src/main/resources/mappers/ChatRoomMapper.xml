@@ -107,4 +107,8 @@
         ORDER BY last_message_time DESC
     </select>
 
+    <delete id="deleteById">
+        DELETE FROM chat_room WHERE id = #{id}
+    </delete>
+
 </mapper>

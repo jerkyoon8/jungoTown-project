@@ -31,4 +31,10 @@ public interface ChatMessageRepository {
      * @return 해당 채팅방의 이전 메시지 리스트
      */
     List<ChatMessage> findMessagesWithPaging(@Param("roomId") Long roomId, @Param("lastMessageId") Long lastMessageId, @Param("limit") int limit);
+
+    /**
+     * 특정 채팅방의 모든 메시지를 삭제합니다.
+     * @param roomId 삭제할 채팅방의 ID
+     */
+    void deleteByRoomId(Long roomId);
 }

@@ -14,6 +14,7 @@ import org.springframework.messaging.simp.SimpMessageSendingOperations;
 import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -115,5 +116,21 @@ public class ChatController {
     @ResponseBody
     public ChatRoom apiChatRoom(@PathVariable Long roomId) {
         return chatRoomService.findRoomById(roomId);
+    }
+
+    /**
+     * 채팅방 삭제 (방장/참여자 구분 없이 완전 삭제)
+     */
+    @PostMapping("/chat/room/{roomId}/delete")
+    public String deleteChatRoom(@PathVariable Long roomId) {
+        chatRoomService.deleteChatRoom(roomId);
+        return "redirect:/chat/rooms";
+    }
+
+    @DeleteMapping("/api/chat/room/{roomId}")
+    @ResponseBody
+    public String apiDeleteChatRoom(@PathVariable Long roomId) {
+        chatRoomService.deleteChatRoom(roomId);
+        return "success";
     }
 }

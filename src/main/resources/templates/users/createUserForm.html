@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
@@ -24,7 +24,7 @@
             border-radius: 8px;
             overflow: hidden;
         }
-        
+
         /* Header Title */
         .header-title {
             background-color: #004fff;
@@ -222,12 +222,20 @@
 
     <!-- Social Login -->
     <div class="social-section">
-        <div class="social-text">소셜로 간편하게 로그인하세요</div>
+        <div class="social-text">소셜로 간편하게 로그인하세요</div>   
         <div class="social-icons">
-            <a href="#" class="social-icon icon-naver"><span style="font-weight:900; font-size:16px;">N</span></a>
-            <a href="#" class="social-icon icon-kakao"><i class="fas fa-comment"></i></a>
-            <a href="/oauth2/authorization/google" class="social-icon icon-google"><img src="https://upload.wikimedia.org/wikipedia/commons/5/53/Google_%22G%22_Logo.svg" alt="G" style="width:20px;"></a>
-            <a href="#" class="social-icon icon-apple"><i class="fab fa-apple"></i></a>
+            <a href="/oauth2/authorization/naver" class="social-icon icon-naver"><span style="font-weight:900; font-size:16px;">N</span></a>
+            <a href="/oauth2/authorization/kakao" class="social-icon icon-kakao"><i class="fas fa-comment"></i></a>
+            <!-- Google Icon Fixed -->
+            <a href="/oauth2/authorization/google" class="social-icon icon-google">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="24px" height="24px">
+                    <path fill="#FFC107" d="M43.611,20.083H42V20H24v8h11.303c-1.649,4.657-6.08,8-11.303,8c-6.627,0-12-5.373-12-12c0-6.627,5.373-12,12-12c3.059,0,5.842,1.154,7.961,3.039l5.657-5.657C34.046,6.053,29.268,4,24,4C12.955,4,4,12.955,4,24c0,11.045,8.955,20,20,20c11.045,0,20-8.955,20-20C44,22.659,43.862,21.35,43.611,20.083z"/>
+                    <path fill="#FF3D00" d="M6.306,14.691l6.571,4.819C14.655,15.108,18.961,12,24,12c3.059,0,5.842,1.154,7.961,3.039l5.657-5.657C34.046,6.053,29.268,4,24,4C16.318,4,9.656,8.337,6.306,14.691z"/>
+                    <path fill="#4CAF50" d="M24,44c5.166,0,9.86-1.977,13.409-5.192l-6.19-5.238C29.211,35.091,26.715,36,24,36c-5.202,0-9.619-3.317-11.283-7.946l-6.522,5.025C9.505,39.556,16.227,44,24,44z"/>
+                    <path fill="#1976D2" d="M43.611,20.083H42V20H24v8h11.303c-0.792,2.237-2.231,4.166-4.087,5.571c0.001-0.001,0.002-0.001,0.003-0.002l6.19,5.238C36.971,39.205,44,34,44,24C44,22.659,43.862,21.35,43.611,20.083z"/>
+                </svg>
+            </a>
+            <a href="/oauth2/authorization/apple" class="social-icon icon-apple"><i class="fab fa-apple"></i></a>
         </div>
     </div>
 
@@ -238,11 +246,11 @@
             <!-- Email (ID) -->
             <div class="input-box">
                 <div class="input-row">
-                    <input type="email" 
-                           v-model="form.email" 
-                           class="form-control" 
-                           placeholder="아이디(이메일)" 
-                           required 
+                    <input type="email"
+                           v-model="form.email"
+                           class="form-control"
+                           placeholder="아이디(이메일)"
+                           required
                            @blur="validateField('email')">
                     <button type="button" class="btn-check" @click="sendAuthCode">인증번호 전송</button>
                 </div>
@@ -263,13 +271,13 @@
             <!-- Password -->
             <div class="input-box">
                 <div style="position: relative;">
-                    <input :type="passwordVisible ? 'text' : 'password'" 
-                           v-model="form.password" 
-                           class="form-control" 
-                           placeholder="비밀번호(8~16자의 영문, 숫자, 특수기호)" 
-                           required 
+                    <input :type="passwordVisible ? 'text' : 'password'"      
+                           v-model="form.password"
+                           class="form-control"
+                           placeholder="비밀번호(8~16자의 영문, 숫자, 특수기호)"
+                           required
                            @blur="validateField('password')">
-                    <i class="far fa-eye pw-toggle" 
+                    <i class="far fa-eye pw-toggle"
                        :class="{'fa-eye-slash': passwordVisible, 'fa-eye': !passwordVisible}"
                        @click="togglePasswordVisibility"></i>
                 </div>
@@ -279,11 +287,11 @@
              <!-- Password Confirm -->
              <div class="input-box">
                 <div style="position: relative;">
-                    <input type="password" 
-                           v-model="form.passwordConfirm" 
-                           class="form-control" 
-                           placeholder="비밀번호 확인" 
-                           required 
+                    <input type="password"
+                           v-model="form.passwordConfirm"
+                           class="form-control"
+                           placeholder="비밀번호 확인"
+                           required
                            @blur="validateField('passwordConfirm')">
                 </div>
                 <div v-if="errors.passwordConfirm" class="error-message">{{ errors.passwordConfirm }}</div>
@@ -292,11 +300,11 @@
             <!-- Name (Nickname) -->
             <div class="input-box">
                 <div style="position: relative;">
-                    <input type="text" 
-                           v-model="form.nickname" 
-                           class="form-control" 
-                           placeholder="닉네임" 
-                           required 
+                    <input type="text"
+                           v-model="form.nickname"
+                           class="form-control"
+                           placeholder="닉네임"
+                           required
                            @blur="validateField('nickname')">
                     <!-- 중복확인 버튼 -->
                     <button type="button" @click="checkNickname" style="position: absolute; right: 5px; top: 5px; height: 38px; border: none; background: transparent; color: #004fff; font-weight: bold; cursor: pointer;">중복확인</button>
@@ -308,10 +316,10 @@
             <!-- Birthdate & Gender -->
             <div class="input-box">
                 <div class="input-row">
-                    <input type="text" 
-                           v-model="form.birthdate" 
-                           class="form-control" 
-                           placeholder="생년월일(예: 20000101)" 
+                    <input type="text"
+                           v-model="form.birthdate"
+                           class="form-control"
+                           placeholder="생년월일(예: 20000101)"
                            style="flex: 2;"
                            @blur="validateField('birthdate')">
                     <div class="gender-group" style="flex: 1.5;">
@@ -329,11 +337,11 @@
                     <input type="checkbox" class="checkbox-custom" v-model="allTermsChecked" @change="toggleAllTerms">
                     필수 동의 항목 및 개인정보 수집 및 이용 동의(선택)에 모두 동의합니다.
                 </label>
-                
+
                 <div class="terms-item">
                     <label style="display:flex; align-items:center;">
                         <input type="checkbox" class="checkbox-custom" v-model="form.terms.age">
-                        <span style="color:#004fff;">[필수]</span>&nbsp;만 15세 이상입니다
+                        <span style="color:#004fff;">[필수]</span>&nbsp;만 15세 이상입니다.
                     </label>
                 </div>
                 <div class="terms-item">
@@ -424,8 +432,8 @@
                 if (field === 'email') {
                     this.errors.email = '';
                     if (!this.form.email) {
-                        this.errors.email = '이메일은 필수 정보입니다.';
-                    } else if (!/\S+@\S+\.\S+/.test(this.form.email)) {
+                        this.errors.email = '이메일은 필수 정보입니다.';   
+                    } else if (!/\S+@\S+\.\S+/.test(this.form.email)) {       
                         this.errors.email = '유효한 이메일 형식이 아닙니다.';
                     }
                 }
@@ -441,7 +449,7 @@
 
                 if (field === 'passwordConfirm') {
                     this.errors.passwordConfirm = '';
-                    if (this.form.password !== this.form.passwordConfirm) {
+                    if (this.form.password !== this.form.passwordConfirm) {   
                         this.errors.passwordConfirm = '비밀번호가 일치하지 않습니다.';
                     }
                 }
@@ -463,18 +471,18 @@
                 if (field === 'gender') {
                     this.errors.gender = '';
                     if (!this.form.gender) {
-                        this.errors.gender = '성별은 필수 정보입니다.';
+                        this.errors.gender = '성별은 필수 정보입니다.';     
                     }
                 }
             },
-            // 전체 검사 (Submit 시 호출) - 모든 에러를 한 번에 표시
+            // 전체 검사 (Submit 시 호출) - 모든 에러를 한 번에 표시      
             validateAll() {
                 let isValid = true;
                 const newErrors = {}; // 새로운 에러 객체 생성
 
                 // Email Verification Check
                 if (!this.isAuthVerified) {
-                    newErrors.authCode = '이메일 인증을 완료해주세요.';
+                    newErrors.authCode = '이메일 인증을 완료해주세요.';    
                     isValid = false;
                 }
 
@@ -489,7 +497,7 @@
 
                 // Password
                 if (!this.form.password) {
-                    newErrors.password = '비밀번호는 필수 정보입니다.';
+                    newErrors.password = '비밀번호는 필수 정보입니다.';   
                     isValid = false;
                 } else if (this.form.password.length < 8) {
                     newErrors.password = '비밀번호는 8자 이상이어야 합니다.';
@@ -497,20 +505,20 @@
                 }
 
                 // Password Confirm
-                if (this.form.password !== this.form.passwordConfirm) {
+                if (this.form.password !== this.form.passwordConfirm) {       
                     newErrors.passwordConfirm = '비밀번호가 일치하지 않습니다.';
                     isValid = false;
                 }
 
                 // Nickname
                 if (!this.form.nickname) {
-                    newErrors.nickname = '닉네임은 필수 정보입니다.';
+                    newErrors.nickname = '닉네임은 필수 정보입니다.';      
                     isValid = false;
                 }
 
                 // Birthdate
                 if (!this.form.birthdate) {
-                    newErrors.birthdate = '생년월일은 필수 정보입니다.';
+                    newErrors.birthdate = '생년월일은 필수 정보입니다.';   
                     isValid = false;
                 }
 
@@ -521,11 +529,11 @@
                 }
 
                 // Terms
-                if (!this.form.terms.age || !this.form.terms.service) {
+                if (!this.form.terms.age || !this.form.terms.service) {       
                     newErrors.terms = '필수 약관에 동의해주세요.';
                     isValid = false;
                 }
-                
+
                 // 화면 갱신을 위해 한 번에 할당
                 this.errors = newErrors;
 
@@ -533,11 +541,11 @@
             },
             checkNickname() {
                 if (!this.form.nickname) {
-                    this.errors.nickname = '닉네임을 입력해주세요.';
+                    this.errors.nickname = '닉네임을 입력해주세요.';     
                     return;
                 }
-                
-                fetch('/users/check-nickname?nickname=' + this.form.nickname)
+
+                fetch('/users/check-nickname?nickname=' + this.form.nickname) 
                     .then(res => res.json())
                     .then(data => {
                         if (data.isDuplicate) {
@@ -550,18 +558,18 @@
                     })
                     .catch(err => {
                         console.error(err);
-                        alert('중복 확인 중 오류가 발생했습니다.');
+                        alert('중복 확인 중 오류가 발생했습니다.');   
                     });
             },
             sendAuthCode() {
                 if (!this.form.email) {
-                    this.errors.email = '이메일을 입력해주세요.';
+                    this.errors.email = '이메일을 입력해주세요.';        
                     return;
                 }
-                
-                // 간단한 이메일 형식 검사
+
+                // 간단한 이메일 형식 검사                
                 if (!/\S+@\S+\.\S+/.test(this.form.email)) {
-                    this.errors.email = '유효한 이메일 형식이 아닙니다.';
+                    this.errors.email = '유효한 이메일 형식이 아닙니다.';   
                     return;
                 }
 
@@ -587,16 +595,16 @@
             },
             verifyAuthCode() {
                 if (!this.form.authCode) {
-                    this.errors.authCode = '인증번호를 입력해주세요.';
+                    this.errors.authCode = '인증번호를 입력해주세요.';  
                     return;
                 }
 
                 fetch('/api/email/verify', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ 
-                        email: this.form.email, 
-                        code: this.form.authCode 
+                    body: JSON.stringify({
+                        email: this.form.email,
+                        code: this.form.authCode
                     })
                 })
                 .then(res => {
@@ -616,7 +624,7 @@
                 });
             },
             submitForm() {
-                // 클라이언트 측 기본 유효성 검사
+                // 클라이언트 측 기본 유효성 검사                
                 if (!this.validateAll()) {
                     return;
                 }
@@ -641,17 +649,15 @@
                 .then(async response => {
                     if (response.ok) {
                         // 성공 (200 OK)
-                        const data = await response.json();
-                        if (data.redirectUrl) {
-                            window.location.href = data.redirectUrl;
-                        }
+                        // 로그인 페이지로 이동하며 success 파라미터 전달
+                        window.location.href = "/users/login?success";
                     } else if (response.status === 400) {
                         // 실패 (400 Bad Request - 유효성 검사 오류)
                         const errorData = await response.json();
                         // 서버에서 받은 에러를 화면에 표시
-                        this.errors = { ...this.errors, ...errorData };
-                        
-                        // 글로벌 에러(필드 지정 안 된 에러)가 있다면 알림
+                        this.errors = { ...this.errors, ...errorData };       
+
+                        // 글로벌 에러(필드 지정 없는 에러)가 있다면 알림 
                         if (errorData.global) {
                             alert(errorData.global);
                         }
@@ -662,7 +668,7 @@
                 })
                 .catch(error => {
                     console.error('Error:', error);
-                    alert('가입 처리 중 통신 오류가 발생했습니다.');
+                    alert('가입 처리 중 통신 오류가 발생했습니다.');    
                 });
             }
         }

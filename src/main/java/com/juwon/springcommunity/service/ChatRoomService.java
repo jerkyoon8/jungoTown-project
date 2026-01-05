@@ -3,6 +3,7 @@ package com.juwon.springcommunity.service;
 import com.juwon.springcommunity.domain.ChatRoom;
 import com.juwon.springcommunity.domain.Product;
 import com.juwon.springcommunity.domain.User;
+import com.juwon.springcommunity.repository.ChatMessageRepository;
 import com.juwon.springcommunity.repository.ChatRoomRepository;
 import com.juwon.springcommunity.repository.ProductRepository;
 import com.juwon.springcommunity.repository.UserRepository;
@@ -19,6 +20,7 @@ import java.util.Optional;
 public class ChatRoomService {
 
     private final ChatRoomRepository chatRoomRepository;
+    private final ChatMessageRepository chatMessageRepository;
     private final ProductRepository productRepository;
     private final UserRepository userRepository;
 
@@ -84,5 +86,17 @@ public class ChatRoomService {
     // 사용자 ID에 대한 채팅방 반환
     public List<ChatRoom> findAllRoomsByUserId(Long userId) {
         return chatRoomRepository.findAllByUserId(userId);
+    }
+
+    /**
+     * 채팅방과 해당 채팅방의 모든 메시지를 삭제합니다.
+     * @param roomId 삭제할 채팅방의 ID
+     */
+    @Transactional
+    public void deleteChatRoom(Long roomId) {
+        // 1. 메시지 먼저 삭제 (외래 키 제약 조건)
+        chatMessageRepository.deleteByRoomId(roomId);
+        // 2. 채팅방 삭제
+        chatRoomRepository.deleteById(roomId);
     }
 }

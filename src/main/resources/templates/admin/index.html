@@ -3,30 +3,114 @@
       xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
       layout:decorate="~{layout/default_layout}">
 <head>
-    <title>관리자 페이지</title>
+    <title>관리자 대시보드</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        .card-box { position: relative; color: #fff; padding: 20px 15px; margin-bottom: 20px; border-radius: 10px; }
+        .card-box .inner h3 { font-size: 2rem; font-weight: bold; margin: 0; }
+        .card-box .inner p { margin-bottom: 0; opacity: 0.8; }
+        .card-box .icon { position: absolute; right: 15px; top: 15px; font-size: 2.5rem; opacity: 0.3; }
+        .bg-primary-soft { background-color: #4e73df; }
+        .bg-success-soft { background-color: #1cc88a; }
+        .bg-warning-soft { background-color: #f6c23e; }
+        .bg-info-soft { background-color: #36b9cc; }
+        .live-dot { height: 10px; width: 10px; background-color: #00ff00; border-radius: 50%; display: inline-block; margin-right: 8px; box-shadow: 0 0 8px #00ff00; animation: blink 1.5s infinite; }
+        @keyframes blink { 0% { opacity: 1; } 50% { opacity: 0.4; } 100% { opacity: 1; } }
+    </style>
 </head>
 <body>
-<div layout:fragment="content" class="container mt-5">
+<div layout:fragment="content" class="container-fluid mt-4">
     <div class="row">
-        <div class="col-md-3">
-            <div class="list-group">
-                <a href="/admin" class="list-group-item list-group-item-action active">대시보드</a>
-                <a href="/admin/users" class="list-group-item list-group-item-action">회원 관리</a>
-                <a href="/admin/products/deleted" class="list-group-item list-group-item-action">삭제된 게시글</a>
-                <a href="/admin/carousel" class="list-group-item list-group-item-action">캐러셀 관리</a>
+        <div class="col-md-2">
+            <div class="list-group shadow-sm">
+                <a href="/admin" class="list-group-item list-group-item-action active border-0">대시보드</a>
+                <a href="/admin/users" class="list-group-item list-group-item-action border-0">회원 관리</a>
+                <a href="/admin/products/deleted" class="list-group-item list-group-item-action border-0">삭제된 게시글</a>
+                <a href="/admin/carousel" class="list-group-item list-group-item-action border-0">캐러셀 관리</a>
             </div>
         </div>
-        <div class="col-md-9">
-            <h2>관리자 대시보드</h2>
-            <p>관리자님 환영합니다.</p>
-            <div class="card">
-                <div class="card-body">
-                    <h5 class="card-title">시스템 현황</h5>
-                    <p class="card-text">현재 준비 중입니다.</p>
+        <div class="col-md-10">
+            <h3 class="fw-bold mb-4 text-secondary">Dashboard</h3>
+            
+            <div class="row">
+                <div class="col-xl-3 col-md-6">
+                    <div class="card-box bg-primary-soft shadow">
+                        <div class="inner">
+                            <h3><span class="live-dot"></span>1</h3>
+                            <p>현재 접속자</p>
+                        </div>
+                        <div class="icon"><i class="bi bi-person-fill"></i></div>
+                    </div>
+                </div>
+                <div class="col-xl-3 col-md-6">
+                    <div class="card-box bg-success-soft shadow">
+                        <div class="inner">
+                            <h3>11</h3>
+                            <p>일일 방문자</p>
+                        </div>
+                        <div class="icon"><i class="bi bi-eye-fill"></i></div>
+                    </div>
+                </div>
+                <div class="col-xl-3 col-md-6">
+                    <div class="card-box bg-warning-soft shadow">
+                        <div class="inner">
+                            <h3>2</h3>
+                            <p>신규 주문</p>
+                        </div>
+                        <div class="icon"><i class="bi bi-cart-fill"></i></div>
+                    </div>
+                </div>
+                <div class="col-xl-3 col-md-6">
+                    <div class="card-box bg-info-soft shadow">
+                        <div class="inner">
+                            <h3>13</h3>
+                            <p>총 가입 회원</p>
+                        </div>
+                        <div class="icon"><i class="bi bi-people-fill"></i></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row mt-3">
+                <div class="col-lg-8">
+                    <div class="card shadow-sm border-0">
+                        <div class="card-header bg-white py-3"><h6 class="m-0 font-weight-bold text-primary">최근 방문자 추이</h6></div>
+                        <div class="card-body"><canvas id="visitChart" height="100"></canvas></div>
+                    </div>
+                </div>
+                <div class="col-lg-4">
+                    <div class="card shadow-sm border-0">
+                        <div class="card-header bg-white py-3"><h6 class="m-0 font-weight-bold text-primary">최근 활동 로그</h6></div>
+                        <div class="card-body p-0">
+                            <ul class="list-group list-group-flush small">
+                                <li class="list-group-item py-3">새로운 회원이 가입했습니다. <span class="text-muted float-end">방금 전</span></li>
+                                <li class="list-group-item py-3">신규 주문이 접수되었습니다. <span class="text-muted float-end">2시간 전</span></li>
+                                <li class="list-group-item py-3">게시글 신고가 접수되었습니다. <span class="text-muted float-end">5시간 전</span></li>
+                            </ul>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 </div>
+<script layout:fragment="script">
+    const ctx = document.getElementById("visitChart").getContext("2d");
+    new Chart(ctx, {
+        type: "line",
+        data: {
+            labels: ["1월 11일", "1월 12일", "1월 13일", "1월 14일", "1월 15일", "1월 16일", "1월 17일"],
+            datasets: [{
+                label: "방문자 수",
+                data: [5, 8, 4, 12, 7, 15, 11],
+                borderColor: "#4e73df",
+                backgroundColor: "rgba(78, 115, 223, 0.05)",
+                fill: true,
+                tension: 0.3
+            }]
+        },
+        options: { plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, ticks: { stepSize: 5 } } } }
+    });
+</script>
 </body>
 </html>

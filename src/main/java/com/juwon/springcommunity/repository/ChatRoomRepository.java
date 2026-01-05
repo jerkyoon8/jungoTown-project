@@ -18,4 +18,7 @@ public interface ChatRoomRepository {
 
     // 로그인한 유저의 모든 채팅방을 가져오기.
     List<ChatRoom> findAllByUserId(Long userId);
+
+    // 채팅방 삭제
+    void deleteById(Long id);
 }

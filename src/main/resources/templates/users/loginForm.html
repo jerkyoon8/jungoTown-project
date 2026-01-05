@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="ko" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
@@ -6,7 +6,7 @@
     <!-- Vue.js 3 CDN -->
     <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
     <!-- Pretendard Font -->
-    <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.8/dist/web/static/pretendard.css" />
+    <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.8/dist/web/static/pretendard.css" />        
     <style>
         /* 초기화 & 폰트 */
         * {
@@ -23,16 +23,16 @@
             min-height: 100vh;
             color: #1e2022;
         }
-        
+
         /* 컨테이너 */
         .login-wrapper {
             width: 100%;
-            max-width: 400px; /* 이미지 비율에 맞춰 좁게 */
+            max-width: 400px; /* 이미지 비율에 맞춤 좋게 */
             padding: 20px;
             text-align: center;
         }
-        
-        /* 타이틀 영역 */
+
+        /* 헤더 영역 */
         .header-area {
             margin-bottom: 40px;
         }
@@ -49,12 +49,12 @@
             word-break: keep-all;
         }
 
-        /* 폼 영역 */
+        /* 입력영역 */
         .input-group {
             margin-bottom: 12px;
             text-align: left;
         }
-        
+
         .input-control {
             width: 100%;
             height: 50px;
@@ -98,7 +98,7 @@
             background-color: #4a74d0;
         }
 
-        /* 일회용 코드 로그인 등 보조 링크 */
+        /* 회원 코드 로그인 등 보조 링크 */
         .sub-action {
             margin-top: 20px;
             font-size: 14px;
@@ -181,12 +181,12 @@
         }
         .social-btn.google {
             background-color: #FFFFFF;
-            border: 1px solid #eaeced; /* 구글은 흰색이라 테두리 필요 */
+            border: 1px solid #eaeced; /* 구글은 흰색이라 테두리 필요 */   
         }
         .social-btn.apple {
             background-color: #000000;
         }
-        
+
         /* 하단 회원가입 링크 */
         .footer-link {
             font-size: 14px;
@@ -229,8 +229,14 @@
     <!-- 헤더 -->
     <div class="header-area">
         <h1 class="title-text">로그인</h1>
-        <p class="desc-text" v-if="step === 1">
-            미진장터에 오신걸 환영합니다.
+        
+        <!-- 회원가입 성공 메시지 -->
+        <div v-if="successMessage" style="background-color: #e5f6fd; color: #004fff; padding: 12px; border-radius: 4px; margin-bottom: 16px; font-size: 14px;">
+            {{ successMessage }}
+        </div>
+
+        <p class="desc-text" v-if="step === 1 && !successMessage">
+            중고타운에 오신걸 환영합니다.
         </p>
         <p class="desc-text" v-if="step === 2">
             비밀번호를 입력해 주세요.
@@ -241,21 +247,21 @@
     <div v-if="step === 1">
         <form @submit.prevent="checkEmail">
             <div class="input-group">
-                <input type="email" 
-                       v-model="email" 
-                       class="input-control" 
-                       placeholder="이메일 주소" 
-                       required 
+                <input type="email"
+                       v-model="email"
+                       class="input-control"
+                       placeholder="이메일 주소"
+                       required
                        autofocus>
                 <span v-if="emailError" class="error-text">{{ emailError }}</span>
             </div>
-            
+
             <button type="submit" class="btn-submit">이메일로 시작하기</button>
         </form>
 
         <div class="sub-action">
              <!-- 기능은 없지만 디자인 유지를 위해 배치 -->
-            <a href="#" class="link-blue">일회용 코드로 로그인하기</a>
+            <a href="#" class="link-blue">일회용 코드로 로그인하기</a>   
         </div>
     </div>
 
@@ -263,21 +269,21 @@
     <div v-if="step === 2">
         <form action="/users/login" method="post">
             <input type="hidden" name="email" :value="email">
-            
+
             <div class="user-display-area">
                 <span class="user-email">{{ email }}</span>
                 <button type="button" class="btn-change" @click="goBack">변경</button>
             </div>
 
             <div class="input-group">
-                <input type="password" 
-                       name="password" 
-                       v-model="password" 
-                       class="input-control" 
-                       placeholder="비밀번호" 
-                       required 
+                <input type="password"
+                       name="password"
+                       v-model="password"
+                       class="input-control"
+                       placeholder="비밀번호"
+                       required
                        autofocus>
-                
+
                 <!-- 서버 에러 메시지 -->
                 <div th:if="${param.error}" class="error-text">
                     비밀번호가 일치하지 않습니다.
@@ -314,11 +320,11 @@
 
         <!-- 구글 -->
         <a href="/oauth2/authorization/google" class="social-btn google" title="구글 로그인">
-            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path fill-rule="evenodd" clip-rule="evenodd" d="M20.64 12.2045C20.64 11.5664 20.5855 10.9523 20.4764 10.3636H12V13.8375H16.8436C16.635 14.9625 16.0009 15.9095 15.0477 16.5477V18.8011H17.9564C19.6582 17.2343 20.64 14.9284 20.64 12.2045Z" fill="#4285F4"/>
-                <path fill-rule="evenodd" clip-rule="evenodd" d="M12 21.0001C14.4327 21.0001 16.4727 20.1942 17.9645 18.8012L15.0545 16.5478C14.2473 17.0878 13.2136 17.4083 12 17.4083C9.65455 17.4083 7.66909 15.8237 6.96 13.691H3.95182V16.0255C5.44091 18.9833 8.49545 21.0001 12 21.0001Z" fill="#34A853"/>
-                <path fill-rule="evenodd" clip-rule="evenodd" d="M6.95996 13.6908C6.77996 13.1508 6.68178 12.5794 6.68178 11.9999C6.68178 11.4204 6.77996 10.849 6.95996 10.309V7.97449H3.95178C3.34087 9.18949 3 10.564 3 11.9999C3 13.4358 3.34087 14.8104 3.95178 16.0254L6.95996 13.6908Z" fill="#FBBC05"/>
-                <path fill-rule="evenodd" clip-rule="evenodd" d="M12 6.59182C13.3227 6.59182 14.5064 7.04727 15.4418 7.93909L18.0191 5.36182C16.4673 3.91636 14.4273 3 12 3C8.49545 3 5.44091 5.01682 3.95182 7.97455L6.96 10.3091C7.66909 8.17636 9.65455 6.59182 12 6.59182Z" fill="#EA4335"/>
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="24px" height="24px">
+                <path fill="#FFC107" d="M43.611,20.083H42V20H24v8h11.303c-1.649,4.657-6.08,8-11.303,8c-6.627,0-12-5.373-12-12c0-6.627,5.373-12,12-12c3.059,0,5.842,1.154,7.961,3.039l5.657-5.657C34.046,6.053,29.268,4,24,4C12.955,4,4,12.955,4,24c0,11.045,8.955,20,20,20c11.045,0,20-8.955,20-20C44,22.659,43.862,21.35,43.611,20.083z"/>
+                <path fill="#FF3D00" d="M6.306,14.691l6.571,4.819C14.655,15.108,18.961,12,24,12c3.059,0,5.842,1.154,7.961,3.039l5.657-5.657C34.046,6.053,29.268,4,24,4C16.318,4,9.656,8.337,6.306,14.691z"/>
+                <path fill="#4CAF50" d="M24,44c5.166,0,9.86-1.977,13.409-5.192l-6.19-5.238C29.211,35.091,26.715,36,24,36c-5.202,0-9.619-3.317-11.283-7.946l-6.522,5.025C9.505,39.556,16.227,44,24,44z"/>
+                <path fill="#1976D2" d="M43.611,20.083H42V20H24v8h11.303c-0.792,2.237-2.231,4.166-4.087,5.571c0.001-0.001,0.002-0.001,0.003-0.002l6.19,5.238C36.971,39.205,44,34,44,24C44,22.659,43.862,21.35,43.611,20.083z"/>
             </svg>
         </a>
 
@@ -332,7 +338,7 @@
 
     <!-- 하단 회원가입 링크 -->
     <div class="footer-link">
-        아직 회원이 아니신가요? <a href="/users/new" class="link-blue">회원가입</a>
+        아직 회원이 아니신가요? <a href="/users/new" class="link-blue">회원 가입</a>
     </div>
 
 </div>
@@ -344,16 +350,22 @@
         data() {
             return {
                 step: 1,
-                email: '',
-                password: '',
-                emailError: '',
-                passwordError: ''
+                email: "",
+                password: "",
+                emailError: "",
+                passwordError: "",
+                successMessage: ""
             }
         },
         mounted() {
-            const urlParams = new URLSearchParams(window.location.search);
-            const hasError = urlParams.has('error');
-            const savedEmail = sessionStorage.getItem('loginEmail');
+            const urlParams = new URLSearchParams(window.location.search);    
+            const hasError = urlParams.has("error");
+            const hasSuccess = urlParams.has("success");
+            const savedEmail = sessionStorage.getItem("loginEmail");
+
+            if (hasSuccess) {
+                this.successMessage = "회원가입이 완료되었습니다. 로그인해주세요.";
+            }
 
             // 에러가 있고 저장된 이메일이 있다면 자동으로 2단계로 이동
             if (hasError && savedEmail) {
@@ -364,11 +376,11 @@
         methods: {
             checkEmail() {
                 if (!this.email) {
-                    this.emailError = '이메일을 입력해주세요.';
+                    this.emailError = "이메일을 입력해주세요.";
                     return;
                 }
                 if (!/\S+@\S+\.\S+/.test(this.email)) {
-                    this.emailError = '유효한 이메일 주소를 입력해주세요.';
+                    this.emailError = "유효한 이메일 주소를 입력해주세요.";
                     return;
                 }
 
@@ -377,26 +389,26 @@
                     .then(res => res.json())
                     .then(data => {
                         if (data.exists) {
-                            sessionStorage.setItem('loginEmail', this.email);
+                            sessionStorage.setItem("loginEmail", this.email); 
                             this.step = 2;
-                            this.emailError = '';
+                            this.emailError = "";
                         } else {
-                            this.emailError = '등록되지 않은 이메일입니다.';
+                            this.emailError = "등록되지 않은 이메일입니다.";
                         }
                     })
                     .catch(err => {
                         console.error(err);
-                        this.emailError = '오류가 발생했습니다. 다시 시도해주세요.';
+                        this.emailError = "오류가 발생했습니다. 다시 시도해주세요.";
                     });
             },
             goBack() {
-                sessionStorage.removeItem('loginEmail');
+                sessionStorage.removeItem("loginEmail");
                 this.step = 1;
-                this.password = '';
-                this.emailError = '';
+                this.password = "";
+                this.emailError = "";
             }
         }
-    }).mount('#app');
+    }).mount("#app");
 </script>
 
 </body>
